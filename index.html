@@ -19,22 +19,19 @@
             }
         }
     </script>
-    <style>
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
-        }
-        .animate-pulse-slow {
-            animation: pulse 2s ease-in-out infinite;
-        }
-    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center font-serif bg-gradient-to-br from-[#0f0f23] via-[#1a1a3e] to-[#0f0f23] text-[#e8e8ed]">
-    <div class="text-center px-8 max-w-[500px]">
-        <div class="w-20 h-20 mx-auto mb-6 rounded-full border-[3px] border-indigo-500 flex items-center justify-center text-3xl animate-pulse-slow">🔧</div>
-        <h1 class="text-3xl font-bold mb-2 tracking-tight">Hello world</h1>
-        <div class="w-[60px] h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent mx-auto my-6 rounded-sm"></div>
-        <p class="text-base text-gray-400 leading-relaxed">Something great is on the way. Please check back soon.</p>
-    </div>
+<body class="min-h-screen flex flex-col font-serif bg-[#EAE8E1] text-[#1a1a1a]">
+    <header class="flex-1 flex items-center justify-center pt-16">
+        <p class="text-sm text-center">Come back soon.</p>
+    </header>
+    <main class="flex-[2] flex items-center justify-center px-8">
+        <h1 class="text-4xl md:text-5xl text-center font-medium leading-tight">
+            New site<br>
+            coming <span class="italic">soonish.</span>
+        </h1>
+    </main>
+    <footer class="flex-1 flex items-center justify-center pb-16">
+        <p class="text-sm text-center">But not too soon.</p>
+    </footer>
 </body>
 </html>
