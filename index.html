@@ -23,9 +23,19 @@
         body {
             font-feature-settings: "dlig" 1, "hlig" 1, "fina" 1;
         }
+        .page-border {
+            position: fixed;
+            top: 48px;
+            left: 48px;
+            right: 48px;
+            bottom: 48px;
+            border: 1px solid #C5C5BA;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-serif bg-[#EAE8E1] text-[#1a1a1a]">
+    <div class="page-border"></div>
     <header class="flex-1 flex items-center justify-center pt-16">
         <p class="text-sm text-center">Come back soon.</p>
     </header>
