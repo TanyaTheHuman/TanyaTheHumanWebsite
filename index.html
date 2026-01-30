@@ -33,15 +33,11 @@
         .border-row {
             display: flex;
             align-items: center;
+            justify-content: center;
             padding: 1rem 0;
         }
         .border-row.top { margin-top: -1px; }
         .border-row.bottom { margin-bottom: -1px; }
-        .border-line {
-            flex: 1;
-            height: 1px;
-            background: #C5C5BA;
-        }
         .border-text {
             font-size: 0.875rem;
             white-space: nowrap;
@@ -56,9 +52,7 @@
 <body class="min-h-screen font-serif bg-[#EAE8E1] text-[#1a1a1a]">
     <div class="frame">
         <header class="border-row top">
-            <div class="border-line"></div>
             <p class="border-text">Come back soon.</p>
-            <div class="border-line"></div>
         </header>
         <main class="flex-1 flex items-center justify-center px-8">
             <h1 class="text-center font-normal" style="font-size: 154px; line-height: 162px;">
@@ -67,9 +61,7 @@
             </h1>
         </main>
         <footer class="border-row bottom">
-            <div class="border-line"></div>
             <p class="border-text">But not too soon.</p>
-            <div class="border-line"></div>
         </footer>
     </div>
 </body>
