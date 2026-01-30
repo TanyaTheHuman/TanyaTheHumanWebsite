@@ -6,76 +6,35 @@
     <title>Coming Soon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['EB Garamond', 'Georgia', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
-            color: #e8e8ed;
-        }
-        
-        .container {
-            text-align: center;
-            padding: 2rem;
-            max-width: 500px;
-        }
-        
-        .icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            border: 3px solid #6366f1;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.8; transform: scale(1.05); }
         }
-        
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.02em;
-        }
-        
-        p {
-            font-size: 1rem;
-            color: #a1a1aa;
-            line-height: 1.6;
-        }
-        
-        .divider {
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #6366f1, transparent);
-            margin: 1.5rem auto;
-            border-radius: 2px;
+        .animate-pulse-slow {
+            animation: pulse 2s ease-in-out infinite;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="icon">🔧</div>
-        <h1>Hello world</h1>
-        <div class="divider"></div>
-        <p>Something great is on the way. Please check back soon.</p>
+<body class="min-h-screen flex items-center justify-center font-serif bg-gradient-to-br from-[#0f0f23] via-[#1a1a3e] to-[#0f0f23] text-[#e8e8ed]">
+    <div class="text-center px-8 max-w-[500px]">
+        <div class="w-20 h-20 mx-auto mb-6 rounded-full border-[3px] border-indigo-500 flex items-center justify-center text-3xl animate-pulse-slow">🔧</div>
+        <h1 class="text-3xl font-bold mb-2 tracking-tight">Hello world</h1>
+        <div class="w-[60px] h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent mx-auto my-6 rounded-sm"></div>
+        <p class="text-base text-gray-400 leading-relaxed">Something great is on the way. Please check back soon.</p>
     </div>
 </body>
 </html>
