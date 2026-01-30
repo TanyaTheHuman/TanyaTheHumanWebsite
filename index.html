@@ -36,8 +36,14 @@
             justify-content: center;
             padding: 1rem 0;
         }
-        .border-row.top { margin-top: -1px; }
-        .border-row.bottom { margin-bottom: -1px; }
+        .border-row.top {
+            margin-top: -1px;
+            padding-top: 0;
+        }
+        .border-row.bottom {
+            margin-bottom: -1px;
+            padding-bottom: 0;
+        }
         .border-text {
             font-size: 0.875rem;
             white-space: nowrap;
@@ -45,8 +51,12 @@
             background: #EAE8E1;
             position: relative;
         }
-        .border-row.top .border-text { top: -1px; }
-        .border-row.bottom .border-text { bottom: -1px; }
+        .border-row.top .border-text {
+            top: -9px;
+        }
+        .border-row.bottom .border-text {
+            bottom: -9px;
+        }
     </style>
 </head>
 <body class="min-h-screen font-serif bg-[#EAE8E1] text-[#1a1a1a]">
