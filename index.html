@@ -23,30 +23,63 @@
         body {
             font-feature-settings: "dlig" 1, "hlig" 1, "fina" 1;
         }
-        .page-border {
-            position: fixed;
-            top: 48px;
-            left: 48px;
-            right: 48px;
-            bottom: 48px;
-            border: 1px solid #C5C5BA;
-            pointer-events: none;
+        .frame {
+            margin: 48px;
+            min-height: calc(100vh - 96px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .frame::before,
+        .frame::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #C5C5BA;
+        }
+        .frame::before {
+            left: 0;
+        }
+        .frame::after {
+            right: 0;
+        }
+        .border-row {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+        .border-line {
+            flex: 1;
+            height: 1px;
+            background: #C5C5BA;
+        }
+        .border-text {
+            padding: 0 1rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-serif bg-[#EAE8E1] text-[#1a1a1a]">
-    <div class="page-border"></div>
-    <header class="flex-1 flex items-center justify-center pt-16">
-        <p class="text-sm text-center">Come back soon.</p>
-    </header>
-    <main class="flex-[2] flex items-center justify-center px-8">
-        <h1 class="text-center font-normal" style="font-size: 154px; line-height: 162px;">
-            New site<br>
-            coming <span class="italic">soonish.</span>
-        </h1>
-    </main>
-    <footer class="flex-1 flex items-center justify-center pb-16">
-        <p class="text-sm text-center">But not too soon.</p>
-    </footer>
+<body class="min-h-screen font-serif bg-[#EAE8E1] text-[#1a1a1a]">
+    <div class="frame">
+        <header class="border-row py-4">
+            <div class="border-line"></div>
+            <p class="border-text">Come back soon.</p>
+            <div class="border-line"></div>
+        </header>
+        <main class="flex-1 flex items-center justify-center px-8">
+            <h1 class="text-center font-normal" style="font-size: 154px; line-height: 162px;">
+                New site<br>
+                coming <span class="italic">soonish.</span>
+            </h1>
+        </main>
+        <footer class="border-row py-4">
+            <div class="border-line"></div>
+            <p class="border-text">But not too soon.</p>
+            <div class="border-line"></div>
+        </footer>
+    </div>
 </body>
 </html>
