@@ -57,6 +57,16 @@
         .border-row.bottom .border-text {
             bottom: -9px;
         }
+        .main-heading {
+            font-size: 154px;
+            line-height: 154px;
+        }
+        @media (max-width: 768px) {
+            .main-heading {
+                font-size: 64px;
+                line-height: 62px;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen font-serif bg-[#EAE8E1] text-[#1a1a1a]">
@@ -65,7 +75,7 @@
             <p class="border-text">Come back soon.</p>
         </header>
         <main class="flex-1 flex items-center justify-center px-8">
-            <h1 class="text-center font-normal" style="font-size: 154px; line-height: 154px;">
+            <h1 class="main-heading text-center font-normal">
                 New site<br>
                 coming <span class="italic">soonish.</span>
             </h1>
