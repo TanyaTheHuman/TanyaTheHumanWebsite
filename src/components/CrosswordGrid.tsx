@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
-import { getNextCell, getWordDirection } from "@/lib/crossword-navigation";
+import { getNextCell, getNextWordCell, getWordDirection } from "@/lib/crossword-navigation";
 import { CrosswordCell } from "./CrosswordCell";
 
 interface CrosswordGridProps {
@@ -45,6 +45,22 @@ export function CrosswordGrid({ data, selectedCell, direction, onSelectCell }: C
       if (!selectedCell || !gridRef.current) return;
       if (!gridRef.current.contains(document.activeElement)) return;
 
+      // Handle Tab key for jumping to next/previous word
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const nextCell = getNextWordCell(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+          e.shiftKey // reverse if Shift+Tab
+        );
+        if (nextCell) {
+          onSelectCell(nextCell.row, nextCell.col, direction);
+        }
+        return;
+      }
+
       const arrowDirection =
         e.key === "ArrowUp"
           ? "up"
@@ -60,8 +76,24 @@ export function CrosswordGrid({ data, selectedCell, direction, onSelectCell }: C
       e.preventDefault();
 
       // Determine word direction based on arrow key
-      const wordDirection = getWordDirection(arrowDirection);
+      const newWordDirection = getWordDirection(arrowDirection);
+      
+      // Check if direction is changing
+      if (newWordDirection !== direction) {
+        // Check if current cell has a word in the new direction
+        const cell = data.cells[selectedCell.row]?.[selectedCell.col];
+        const hasWordInNewDirection = newWordDirection === "across" 
+          ? cell?.acrossWordId !== undefined 
+          : cell?.downWordId !== undefined;
+        
+        if (hasWordInNewDirection) {
+          // Just change direction, don't move
+          onSelectCell(selectedCell.row, selectedCell.col, newWordDirection);
+          return;
+        }
+      }
 
+      // Same direction or no word in new direction - move to next cell
       const next = getNextCell(
         data,
         selectedCell.row,
@@ -69,13 +101,13 @@ export function CrosswordGrid({ data, selectedCell, direction, onSelectCell }: C
         arrowDirection
       );
       if (next) {
-        onSelectCell(next.row, next.col, wordDirection);
+        onSelectCell(next.row, next.col, newWordDirection);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [data, selectedCell, onSelectCell]);
+  }, [data, selectedCell, direction, onSelectCell]);
 
   const activeWordCells = useMemo(() => {
     if (!selectedCell) return new Set<string>();

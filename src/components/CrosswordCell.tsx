@@ -30,10 +30,12 @@ const GRAIN_CONFIG = {
   },
 };
 
-// Seeded pseudo-random function
+// Seeded pseudo-random function - round to avoid hydration mismatch between server/client
 function hash(n: number, seed: number): number {
   const x = Math.sin(n * seed) * 10000;
-  return x - Math.floor(x);
+  const result = x - Math.floor(x);
+  // Round to 8 decimal places to ensure consistent results between server and client
+  return Math.round(result * 100000000) / 100000000;
 }
 
 // Generate irregular blob path with sharp edges
@@ -103,7 +105,7 @@ function generateGrainParticles(cellId: number) {
     // Combine paths (hole cuts out from blob using fill-rule)
     const fullPath = holePath ? `${blobPath} ${holePath}` : blobPath;
     
-    // Opacity with wide variation
+    // Opacity with wide variation - round to 4 decimal places to avoid hydration mismatch
     const particleOpacity = isWhite 
       ? opacity.whiteMin + hash(uniqueId, 7.1) * (opacity.whiteMax - opacity.whiteMin)
       : opacity.darkMin + hash(uniqueId, 8.9) * (opacity.darkMax - opacity.darkMin);
@@ -112,7 +114,7 @@ function generateGrainParticles(cellId: number) {
       key: i,
       path: fullPath,
       fill: isWhite ? colors.light : colors.dark,
-      opacity: particleOpacity,
+      opacity: Math.round(particleOpacity * 10000) / 10000,
       hasHole: !!holePath,
     });
   }
