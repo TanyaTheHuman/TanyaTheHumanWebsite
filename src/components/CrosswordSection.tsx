@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
-import { getCrosswordData } from "@/lib/crossword-data";
+import { getCrosswordData, getWordContaining } from "@/lib/crossword-data";
 import { getFirstCell } from "@/lib/crossword-navigation";
 
 /* =============================================================================
@@ -81,6 +81,56 @@ export function CrosswordSection() {
     return { acrossId, downId, activeType: selection.direction };
   }, [data, selection]);
   
+  // Find the crossing word at the currently selected cell (only one)
+  const crossingWordIds = useMemo(() => {
+    const crossingAcross = new Set<number>();
+    const crossingDown = new Set<number>();
+    
+    if (!selection) return { crossingAcross, crossingDown };
+    
+    // Get the cell at the current selection
+    const gridCell = data.cells[selection.row]?.[selection.col];
+    if (!gridCell) return { crossingAcross, crossingDown };
+    
+    // Find the crossing word at this specific cell (opposite direction)
+    if (selection.direction === "across" && gridCell.downWordId !== undefined) {
+      crossingDown.add(gridCell.downWordId);
+    } else if (selection.direction === "down" && gridCell.acrossWordId !== undefined) {
+      crossingAcross.add(gridCell.acrossWordId);
+    }
+    
+    return { crossingAcross, crossingDown };
+  }, [data, selection]);
+  
+  // Refs for clue list items to enable scrolling
+  const acrossClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
+  const downClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
+  
+  // Scroll crossing clues into view when selection changes
+  useEffect(() => {
+    // Scroll crossing across clues into view
+    crossingWordIds.crossingAcross.forEach(wordId => {
+      const element = acrossClueRefs.current.get(wordId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+    
+    // Scroll crossing down clues into view
+    crossingWordIds.crossingDown.forEach(wordId => {
+      const element = downClueRefs.current.get(wordId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    });
+  }, [crossingWordIds]);
+  
+  // Get the currently selected word for the highlighted clue display
+  const selectedWord = useMemo(() => {
+    if (!selection) return null;
+    return getWordContaining(data, selection.row, selection.col, selection.direction);
+  }, [data, selection]);
+  
   // Sort words by clue number for display
   const sortedAcrossWords = useMemo(
     () => [...data.acrossWords].sort((a, b) => a.clueNumber - b.clueNumber),
@@ -147,6 +197,48 @@ export function CrosswordSection() {
         </div>
         */}
         
+        {/* Highlighted clue view above the grid */}
+        {selectedWord && (
+          <div 
+            className="bg-mustard-100 rounded"
+            style={{
+              display: "flex",
+              padding: "12px 16px",
+              alignItems: "flex-start",
+              gap: 16,
+              marginBottom: 16,
+            }}
+          >
+            <span style={{
+              color: "var(--stone-800, #292524)",
+              textAlign: "right",
+              fontFamily: '"EB Garamond", serif',
+              fontSize: 26,
+              fontStyle: "normal",
+              fontWeight: 700,
+              lineHeight: "normal",
+              letterSpacing: -0.52,
+              minWidth: 32,
+            }}>
+              {selectedWord.clueNumber}
+            </span>
+            <span style={{
+              color: "var(--stone-800, #292524)",
+              textAlign: "left",
+              fontFeatureSettings: "'dlig' on, 'hlig' on",
+              fontFamily: '"EB Garamond", serif',
+              fontSize: 20,
+              fontStyle: "normal",
+              fontWeight: 400,
+              lineHeight: "normal",
+              letterSpacing: -0.4,
+              marginTop: 4,
+            }}>
+              {selectedWord.clue}
+            </span>
+          </div>
+        )}
+        
         <CrosswordGrid 
           data={data} 
           selectedCell={selection ? { row: selection.row, col: selection.col } : null}
@@ -186,7 +278,7 @@ export function CrosswordSection() {
             className={`clue-list-container ${acrossScrolled ? "clue-list-scrolled" : ""}`}
             style={{ 
               maxWidth: 250,
-              maxHeight: 707, // Match crossword grid height
+              maxHeight: 783, // Match crossword grid (707px) + highlighted clue (~60px) + margin (16px)
               overflowY: "auto",
             }}
           >
@@ -195,7 +287,7 @@ export function CrosswordSection() {
               top: 0,
               backgroundColor: "var(--paper, #EAE8E1)",
               color: "var(--stone-800, #292524)",
-              fontFeatureSettings: "'dlig' on, 'hlig' on",
+              fontFeatureSettings: "'dlig' on, 'hlig' on, 'fina' on, 'kern' on, 'rlig' on, 'swsh' on, 'cswh' on",
               fontFamily: '"EB Garamond", serif',
               fontSize: 20,
               fontStyle: "italic",
@@ -212,12 +304,17 @@ export function CrosswordSection() {
             <ul>
               {sortedAcrossWords.map((word) => {
                 const isActive = activeWordIds.acrossId === word.id && activeWordIds.activeType === "across";
+                const isCrossing = crossingWordIds.crossingAcross.has(word.id);
                 const firstCell = word.cells[0];
                 const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
                 const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
                 return (
                   <li 
                     key={word.id}
+                    ref={(el) => {
+                      if (el) acrossClueRefs.current.set(word.id, el);
+                      else acrossClueRefs.current.delete(word.id);
+                    }}
                     className={isActive ? "bg-mustard-100 rounded" : ""}
                     style={{
                       display: "flex",
@@ -228,23 +325,26 @@ export function CrosswordSection() {
                     }}
                     onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "across")}
                   >
-                    <span style={{
-                      color: textColor,
-                      textAlign: "left",
-                      fontFeatureSettings: "'dlig' on, 'hlig' on",
-                      fontFamily: '"EB Garamond", serif',
-                      fontSize: 14,
-                      fontStyle: "normal",
-                      fontWeight: 700,
-                      lineHeight: "normal",
-                      letterSpacing: -0.28,
-                      minWidth: 20,
-                    }}>
+                    <span 
+                      className={isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}
+                      style={{
+                        color: textColor,
+                        textAlign: "left",
+                        fontFeatureSettings: "'dlig' on, 'hlig' on",
+                        fontFamily: '"EB Garamond", serif',
+                        fontSize: 14,
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: -0.28,
+                        minWidth: 20,
+                      }}
+                    >
                       {word.clueNumber}
                     </span>
                     <span style={{
                       color: textColor,
-                      textAlign: "justify",
+                      textAlign: "left",
                       fontFamily: '"EB Garamond", serif',
                       fontSize: 16,
                       fontStyle: "normal",
@@ -265,7 +365,7 @@ export function CrosswordSection() {
             className={`clue-list-container ${downScrolled ? "clue-list-scrolled" : ""}`}
             style={{ 
               maxWidth: 250,
-              maxHeight: 707, // Match crossword grid height
+              maxHeight: 783, // Match crossword grid (707px) + highlighted clue (~60px) + margin (16px)
               overflowY: "auto",
             }}
           >
@@ -274,7 +374,7 @@ export function CrosswordSection() {
               top: 0,
               backgroundColor: "var(--paper, #EAE8E1)",
               color: "var(--stone-800, #292524)",
-              fontFeatureSettings: "'dlig' on, 'hlig' on",
+              fontFeatureSettings: "'dlig' on, 'hlig' on, 'fina' on, 'kern' on, 'rlig' on, 'swsh' on, 'cswh' on",
               fontFamily: '"EB Garamond", serif',
               fontSize: 20,
               fontStyle: "italic",
@@ -291,12 +391,17 @@ export function CrosswordSection() {
             <ul>
               {sortedDownWords.map((word) => {
                 const isActive = activeWordIds.downId === word.id && activeWordIds.activeType === "down";
+                const isCrossing = crossingWordIds.crossingDown.has(word.id);
                 const firstCell = word.cells[0];
                 const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
                 const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
                 return (
                   <li 
                     key={word.id}
+                    ref={(el) => {
+                      if (el) downClueRefs.current.set(word.id, el);
+                      else downClueRefs.current.delete(word.id);
+                    }}
                     className={isActive ? "bg-mustard-100 rounded" : ""}
                     style={{
                       display: "flex",
@@ -307,23 +412,26 @@ export function CrosswordSection() {
                     }}
                     onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "down")}
                   >
-                    <span style={{
-                      color: textColor,
-                      textAlign: "left",
-                      fontFeatureSettings: "'dlig' on, 'hlig' on",
-                      fontFamily: '"EB Garamond", serif',
-                      fontSize: 14,
-                      fontStyle: "normal",
-                      fontWeight: 700,
-                      lineHeight: "normal",
-                      letterSpacing: -0.28,
-                      minWidth: 20,
-                    }}>
+                    <span 
+                      className={isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}
+                      style={{
+                        color: textColor,
+                        textAlign: "left",
+                        fontFeatureSettings: "'dlig' on, 'hlig' on",
+                        fontFamily: '"EB Garamond", serif',
+                        fontSize: 14,
+                        fontStyle: "normal",
+                        fontWeight: 700,
+                        lineHeight: "normal",
+                        letterSpacing: -0.28,
+                        minWidth: 20,
+                      }}
+                    >
                       {word.clueNumber}
                     </span>
                     <span style={{
                       color: textColor,
-                      textAlign: "justify",
+                      textAlign: "left",
                       fontFamily: '"EB Garamond", serif',
                       fontSize: 16,
                       fontStyle: "normal",

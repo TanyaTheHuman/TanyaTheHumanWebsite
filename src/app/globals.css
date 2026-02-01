@@ -22,7 +22,7 @@
 }
 
 body {
-  font-feature-settings: "dlig" 1, "hlig" 1, "fina" 1;
+  font-feature-settings: "dlig" 1, "hlig" 1, "fina" 1, "kern" 1, "rlig" 1;
 }
 
 .frame {
