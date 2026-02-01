@@ -24,6 +24,27 @@ export function CrosswordSection() {
     direction: "across" | "down";
   } | null>(() => firstCell ? { ...firstCell, direction: "across" } : null);
   
+  // Toggle for showing/hiding answers (dev only, default off)
+  const [showAnswers, setShowAnswers] = useState(false);
+  
+  // User input state: maps "row,col" to the letter entered by user
+  const [userInputs, setUserInputs] = useState<Record<string, string>>({});
+  
+  const handleInputLetter = useCallback((row: number, col: number, letter: string) => {
+    setUserInputs(prev => ({
+      ...prev,
+      [`${row},${col}`]: letter.toUpperCase()
+    }));
+  }, []);
+  
+  const handleClearCell = useCallback((row: number, col: number) => {
+    setUserInputs(prev => {
+      const next = { ...prev };
+      delete next[`${row},${col}`];
+      return next;
+    });
+  }, []);
+  
   const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
     setSelection({ row, col, direction });
   }, []);
@@ -60,7 +81,7 @@ export function CrosswordSection() {
 
   return (
     <section className="w-full flex justify-center px-8" style={{ paddingTop: 200, paddingBottom: 200 }}>
-      <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
+      <div className="flex flex-col gap-8 md:flex-row md:items-start" style={{ gap: 32 }}>
         <div className="shrink-0">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans" style={{ width: 300 }}>
@@ -112,42 +133,155 @@ export function CrosswordSection() {
           data={data} 
           selectedCell={selection ? { row: selection.row, col: selection.col } : null}
           direction={selection?.direction ?? "across"}
-          onSelectCell={handleSelectCell} 
+          showAnswers={showAnswers}
+          userInputs={userInputs}
+          onSelectCell={handleSelectCell}
+          onInputLetter={handleInputLetter}
+          onClearCell={handleClearCell}
         />
+        
+        {/* DEV ONLY: Show/Hide Answers Toggle - only visible in development mode */}
+        {process.env.NODE_ENV === 'development' && (
+          <label className="flex items-center gap-2 mt-4 cursor-pointer select-none">
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={showAnswers}
+                onChange={(e) => setShowAnswers(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
+              <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+            </div>
+            <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
+          </label>
+        )}
       </div>
 
-        <div className="flex flex-col gap-8 md:flex-row md:gap-12">
-          <div>
-            <h3 className="mb-2 font-serif text-sm font-medium text-ink">
+        <div className="flex flex-col md:flex-row" style={{ gap: 12 }}>
+          <div style={{ maxWidth: 250 }}>
+            <h3 style={{
+              color: "var(--stone-800, #292524)",
+              fontFeatureSettings: "'dlig' on, 'hlig' on",
+              fontFamily: '"EB Garamond", serif',
+              fontSize: 20,
+              fontStyle: "italic",
+              fontWeight: 500,
+              lineHeight: "normal",
+              letterSpacing: -0.4,
+              marginBottom: 8,
+            }}>
               Across
             </h3>
-            <ul className="space-y-1 font-serif text-sm text-ink">
+            <ul>
               {sortedAcrossWords.map((word) => {
                 const isActive = activeWordIds.acrossId === word.id && activeWordIds.activeType === "across";
+                const firstCell = word.cells[0];
+                const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
+                const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
                 return (
                   <li 
                     key={word.id}
-                    className={isActive ? "bg-mustard-100 -mx-2 px-2 py-0.5 rounded" : ""}
+                    className={isActive ? "bg-mustard-100 rounded" : ""}
+                    style={{
+                      display: "flex",
+                      padding: "8px 12px",
+                      alignItems: "flex-start",
+                      gap: 12,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "across")}
                   >
-                    <span className="font-medium">{word.clueNumber}.</span> {word.clue}
+                    <span style={{
+                      color: textColor,
+                      textAlign: "right",
+                      fontFeatureSettings: "'dlig' on, 'hlig' on",
+                      fontFamily: '"EB Garamond", serif',
+                      fontSize: 14,
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: -0.28,
+                      minWidth: 20,
+                    }}>
+                      {word.clueNumber}
+                    </span>
+                    <span style={{
+                      color: textColor,
+                      textAlign: "justify",
+                      fontFamily: '"EB Garamond", serif',
+                      fontSize: 16,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "normal",
+                      letterSpacing: -0.32,
+                    }}>
+                      {word.clue}
+                    </span>
                   </li>
                 );
               })}
             </ul>
           </div>
-          <div>
-            <h3 className="mb-2 font-serif text-sm font-medium text-ink">
+          <div style={{ maxWidth: 250 }}>
+            <h3 style={{
+              color: "var(--stone-800, #292524)",
+              fontFeatureSettings: "'dlig' on, 'hlig' on",
+              fontFamily: '"EB Garamond", serif',
+              fontSize: 20,
+              fontStyle: "italic",
+              fontWeight: 500,
+              lineHeight: "normal",
+              letterSpacing: -0.4,
+              marginBottom: 8,
+            }}>
               Down
             </h3>
-            <ul className="space-y-1 font-serif text-sm text-ink">
+            <ul>
               {sortedDownWords.map((word) => {
                 const isActive = activeWordIds.downId === word.id && activeWordIds.activeType === "down";
+                const firstCell = word.cells[0];
+                const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
+                const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
                 return (
                   <li 
                     key={word.id}
-                    className={isActive ? "bg-mustard-100 -mx-2 px-2 py-0.5 rounded" : ""}
+                    className={isActive ? "bg-mustard-100 rounded" : ""}
+                    style={{
+                      display: "flex",
+                      padding: "8px 12px",
+                      alignItems: "flex-start",
+                      gap: 12,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "down")}
                   >
-                    <span className="font-medium">{word.clueNumber}.</span> {word.clue}
+                    <span style={{
+                      color: textColor,
+                      textAlign: "right",
+                      fontFeatureSettings: "'dlig' on, 'hlig' on",
+                      fontFamily: '"EB Garamond", serif',
+                      fontSize: 14,
+                      fontStyle: "normal",
+                      fontWeight: 700,
+                      lineHeight: "normal",
+                      letterSpacing: -0.28,
+                      minWidth: 20,
+                    }}>
+                      {word.clueNumber}
+                    </span>
+                    <span style={{
+                      color: textColor,
+                      textAlign: "justify",
+                      fontFamily: '"EB Garamond", serif',
+                      fontSize: 16,
+                      fontStyle: "normal",
+                      fontWeight: 400,
+                      lineHeight: "normal",
+                      letterSpacing: -0.32,
+                    }}>
+                      {word.clue}
+                    </span>
                   </li>
                 );
               })}

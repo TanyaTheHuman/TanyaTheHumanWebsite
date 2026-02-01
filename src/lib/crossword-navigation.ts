@@ -4,7 +4,7 @@
  */
 
 import type { CrosswordData } from "./crossword-data";
-import { getCellAt } from "./crossword-data";
+import { getCellAt, getWordContaining } from "./crossword-data";
 
 export type Direction = "up" | "down" | "left" | "right";
 export type WordDirection = "across" | "down";
@@ -80,9 +80,89 @@ export function getFirstCell(data: CrosswordData): {
 }
 
 /**
- * Get the next word in the same direction that contains the same row/column.
- * For "across": jumps to next across word that contains the same column.
- * For "down": jumps to next down word that contains the same row.
+ * Get the next or previous cell within the same word.
+ * Returns null if at the end/beginning of the word.
+ * 
+ * @param reverse - If true, get previous cell instead of next
+ */
+export function getNextCellInWord(
+  data: CrosswordData,
+  currentRow: number,
+  currentCol: number,
+  wordDirection: WordDirection,
+  reverse: boolean = false
+): { row: number; col: number } | null {
+  const word = getWordContaining(data, currentRow, currentCol, wordDirection);
+  if (!word) return null;
+
+  // Find current cell index in the word
+  const currentIndex = word.cells.findIndex(
+    c => c.row === currentRow && c.col === currentCol
+  );
+  if (currentIndex === -1) return null;
+
+  // Get next/previous cell in word
+  const nextIndex = reverse ? currentIndex - 1 : currentIndex + 1;
+  
+  // Return null if we've reached the end/beginning of the word
+  if (nextIndex < 0 || nextIndex >= word.cells.length) {
+    return null;
+  }
+
+  const nextCell = word.cells[nextIndex];
+  return { row: nextCell.row, col: nextCell.col };
+}
+
+/**
+ * Find the first empty cell in the next word of the same direction.
+ * Used when the user completes a word and needs to jump to the next one.
+ * 
+ * @param userInputs - Record of user inputs keyed by "row,col"
+ * @returns The first empty cell in the next available word, or null if all words are filled
+ */
+export function getFirstEmptyCellInNextWord(
+  data: CrosswordData,
+  currentRow: number,
+  currentCol: number,
+  wordDirection: WordDirection,
+  userInputs: Record<string, string>
+): { row: number; col: number } | null {
+  const words = wordDirection === "across" ? data.acrossWords : data.downWords;
+  const currentWord = getWordContaining(data, currentRow, currentCol, wordDirection);
+  
+  if (!currentWord || words.length === 0) return null;
+
+  // Sort words by clue number to get the sequential order
+  const sortedWords = [...words].sort((a, b) => a.clueNumber - b.clueNumber);
+  
+  // Find current word index
+  const currentIndex = sortedWords.findIndex(w => w.id === currentWord.id);
+  if (currentIndex === -1) return null;
+
+  // Search through words starting from the next one
+  // We'll check all words (wrapping around) to find one with an empty cell
+  for (let i = 1; i <= sortedWords.length; i++) {
+    const nextIndex = (currentIndex + i) % sortedWords.length;
+    const nextWord = sortedWords[nextIndex];
+    
+    // Find the first empty cell in this word
+    for (const cell of nextWord.cells) {
+      const key = `${cell.row},${cell.col}`;
+      if (!userInputs[key]) {
+        return { row: cell.row, col: cell.col };
+      }
+    }
+  }
+
+  // All words are filled
+  return null;
+}
+
+/**
+ * Get the next word in the same direction, ordered by clue number.
+ * Tab goes to the next word sequentially, Shift+Tab goes to the previous.
+ * When reaching the end of across words, wraps to first down word (and vice versa).
+ * Returns the first cell of the next word and the new direction.
  * 
  * @param reverse - If true, go to previous word instead of next (Shift+Tab)
  */
@@ -92,7 +172,7 @@ export function getNextWordCell(
   currentCol: number,
   wordDirection: WordDirection,
   reverse: boolean = false
-): { row: number; col: number } | null {
+): { row: number; col: number; newDirection: WordDirection } | null {
   const cell = getCellAt(data, currentRow, currentCol);
   if (!cell || cell.type === "black") return null;
 
@@ -101,67 +181,39 @@ export function getNextWordCell(
   
   if (currentWordId === undefined || words.length === 0) return null;
 
-  // Filter words to only those that contain the target row/column
-  const eligibleWords = words.filter(word => {
-    if (wordDirection === "across") {
-      // For across: word must contain the current column
-      return word.cells.some(c => c.col === currentCol);
-    } else {
-      // For down: word must contain the current row
-      return word.cells.some(c => c.row === currentRow);
-    }
-  });
+  // Sort words by clue number
+  const sortedWords = [...words].sort((a, b) => a.clueNumber - b.clueNumber);
 
-  if (eligibleWords.length === 0) return null;
-
-  // Sort eligible words by their position
-  // For across: sort by row (top to bottom for words crossing this column)
-  // For down: sort by column (left to right for words crossing this row)
-  const sortedWords = [...eligibleWords].sort((a, b) => {
-    if (wordDirection === "across") {
-      // Sort by the row of the cell at the target column
-      const aCell = a.cells.find(c => c.col === currentCol);
-      const bCell = b.cells.find(c => c.col === currentCol);
-      return (aCell?.row ?? 0) - (bCell?.row ?? 0);
-    } else {
-      // Sort by the column of the cell at the target row
-      const aCell = a.cells.find(c => c.row === currentRow);
-      const bCell = b.cells.find(c => c.row === currentRow);
-      return (aCell?.col ?? 0) - (bCell?.col ?? 0);
-    }
-  });
-
-  // Find current word index in sorted list
+  // Find current word index
   const currentIndex = sortedWords.findIndex(w => w.id === currentWordId);
-  if (currentIndex === -1) {
-    // Current word doesn't cross this row/col, just return first eligible word
-    const firstWord = sortedWords[0];
-    if (wordDirection === "across") {
-      const targetCell = firstWord.cells.find(c => c.col === currentCol);
-      return targetCell ? { row: targetCell.row, col: targetCell.col } : null;
-    } else {
-      const targetCell = firstWord.cells.find(c => c.row === currentRow);
-      return targetCell ? { row: targetCell.row, col: targetCell.col } : null;
-    }
+  if (currentIndex === -1) return null;
+
+  // Check if we need to wrap to the other direction
+  const isAtEnd = !reverse && currentIndex === sortedWords.length - 1;
+  const isAtStart = reverse && currentIndex === 0;
+
+  if (isAtEnd || isAtStart) {
+    // Wrap to the other direction
+    const otherDirection: WordDirection = wordDirection === "across" ? "down" : "across";
+    const otherWords = otherDirection === "across" ? data.acrossWords : data.downWords;
+    const sortedOtherWords = [...otherWords].sort((a, b) => a.clueNumber - b.clueNumber);
+    
+    if (sortedOtherWords.length === 0) return null;
+    
+    // Get first word (for Tab at end) or last word (for Shift+Tab at start)
+    const targetWord = isAtEnd ? sortedOtherWords[0] : sortedOtherWords[sortedOtherWords.length - 1];
+    if (!targetWord || targetWord.cells.length === 0) return null;
+    
+    const targetCell = targetWord.cells[0];
+    return { row: targetCell.row, col: targetCell.col, newDirection: otherDirection };
   }
 
-  // Get next/previous word (with wrapping)
-  let nextIndex: number;
-  if (reverse) {
-    nextIndex = currentIndex === 0 ? sortedWords.length - 1 : currentIndex - 1;
-  } else {
-    nextIndex = (currentIndex + 1) % sortedWords.length;
-  }
-  
+  // Normal navigation within same direction
+  const nextIndex = reverse ? currentIndex - 1 : currentIndex + 1;
   const nextWord = sortedWords[nextIndex];
   if (!nextWord || nextWord.cells.length === 0) return null;
 
-  // Get the cell at the preserved row/column
-  if (wordDirection === "across") {
-    const targetCell = nextWord.cells.find(c => c.col === currentCol);
-    return targetCell ? { row: targetCell.row, col: targetCell.col } : null;
-  } else {
-    const targetCell = nextWord.cells.find(c => c.row === currentRow);
-    return targetCell ? { row: targetCell.row, col: targetCell.col } : null;
-  }
+  // Return the first cell of the next word
+  const firstCell = nextWord.cells[0];
+  return { row: firstCell.row, col: firstCell.col, newDirection: wordDirection };
 }

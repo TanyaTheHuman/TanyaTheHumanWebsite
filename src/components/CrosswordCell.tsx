@@ -127,9 +127,11 @@ interface CrosswordCellProps {
   col: number;
   cellType: CellType;
   letter?: string;
+  userInput?: string;
   number?: number;
   isSelected: boolean;
   isInActiveWord: boolean;
+  showAnswers: boolean;
   onSelect: (row: number, col: number) => void;
 }
 
@@ -138,9 +140,11 @@ export function CrosswordCell({
   col,
   cellType,
   letter,
+  userInput,
   number,
   isSelected,
   isInActiveWord,
+  showAnswers,
   onSelect,
 }: CrosswordCellProps) {
   if (cellType === "black") {
@@ -209,8 +213,14 @@ export function CrosswordCell({
           {number}
         </span>
       )}
-      <span style={{ fontSize: 14, lineHeight: "18px", position: "relative", zIndex: 1 }}>
-        {letter}
+      <span style={{ 
+        fontSize: 14, 
+        lineHeight: "18px", 
+        position: "relative", 
+        zIndex: 1,
+        fontWeight: 600
+      }}>
+        {showAnswers ? letter : userInput ?? ""}
       </span>
     </button>
   );
