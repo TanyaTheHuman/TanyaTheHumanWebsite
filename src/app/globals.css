@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-cream: #EAE8E1;
+  --color-ink: #1a1a1a;
+  --color-border: #C5C5BA;
+  --color-mustard-50: #EBE5D5;
+  --color-mustard-100: #EDE1BF;
+  --color-mustard-200: #F5E0A9;
+  --color-mustard-300: #F5D171;
+  --color-mustard-400: #E0BA55;
+  --color-mustard-500: #C09E46;
+  --color-mustard-600: #A38535;
+  --color-mustard-700: #826A2C;
+  --color-mustard-800: #63501E;
+  --color-mustard-900: #463813;
+  --color-mustard-950: #1E190B;
+}
+
+@theme inline {
+  --font-serif: var(--font-eb-garamond), Georgia, serif;
+}
+
+body {
+  font-feature-settings: "dlig" 1, "hlig" 1, "fina" 1;
+}
+
+.frame {
+  margin: 32px;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #C5C5BA;
+}
+
+.border-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.border-row.top {
+  margin-top: -1px;
+  padding-top: 0;
+}
+
+.border-row.bottom {
+  margin-bottom: -1px;
+  padding-bottom: 0;
+}
+
+.border-text {
+  font-size: 0.875rem;
+  white-space: nowrap;
+  padding: 0 1rem;
+  background: #EAE8E1;
+  position: relative;
+}
+
+.border-row.top .border-text {
+  top: -9px;
+}
+
+.border-row.bottom .border-text {
+  bottom: -9px;
+}
+
+.main-heading {
+  font-size: 64px;
+  line-height: 62px;
+}
+
+@media (min-width: 641px) {
+  .main-heading {
+    font-size: 154px;
+    line-height: 154px;
+  }
+}
