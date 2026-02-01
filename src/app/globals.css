@@ -77,3 +77,39 @@ body {
     line-height: 154px;
   }
 }
+
+/* Clue list sticky headers with scroll-aware border */
+.clue-list-header {
+  /* Shadow acts as border - only visible when content scrolls underneath */
+  box-shadow: 0 1px 0 0 transparent;
+  transition: box-shadow 0.15s ease;
+}
+
+/* Use a scroll-driven approach: the shadow becomes visible via the scrolling container */
+.clue-list-scrolled .clue-list-header {
+  box-shadow: 0 1px 0 0 var(--stone-800, #292524);
+}
+
+/* Hide scrollbars on clue lists while keeping scroll functionality */
+.clue-list-container {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  position: relative;
+}
+
+.clue-list-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Gradient fade at bottom of clue lists */
+.clue-list-container::after {
+  content: "";
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: block;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%);
+}

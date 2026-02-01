@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
 import { getCrosswordData } from "@/lib/crossword-data";
 import { getFirstCell } from "@/lib/crossword-navigation";
@@ -29,6 +29,24 @@ export function CrosswordSection() {
   
   // User input state: maps "row,col" to the letter entered by user
   const [userInputs, setUserInputs] = useState<Record<string, string>>({});
+  
+  // Scroll state for clue lists (to show border under sticky headers)
+  const [acrossScrolled, setAcrossScrolled] = useState(false);
+  const [downScrolled, setDownScrolled] = useState(false);
+  const acrossListRef = useRef<HTMLDivElement>(null);
+  const downListRef = useRef<HTMLDivElement>(null);
+  
+  const handleAcrossScroll = useCallback(() => {
+    if (acrossListRef.current) {
+      setAcrossScrolled(acrossListRef.current.scrollTop > 0);
+    }
+  }, []);
+  
+  const handleDownScroll = useCallback(() => {
+    if (downListRef.current) {
+      setDownScrolled(downListRef.current.scrollTop > 0);
+    }
+  }, []);
   
   const handleInputLetter = useCallback((row: number, col: number, letter: string) => {
     setUserInputs(prev => ({
@@ -158,9 +176,24 @@ export function CrosswordSection() {
         )}
       </div>
 
-        <div className="flex flex-col md:flex-row" style={{ gap: 12 }}>
-          <div style={{ maxWidth: 250 }}>
-            <h3 style={{
+        <div className="flex flex-col md:flex-row" style={{ 
+          gap: 24,
+          borderBottom: "1px solid var(--stone-800, #292524)",
+        }}>
+          <div 
+            ref={acrossListRef}
+            onScroll={handleAcrossScroll}
+            className={`clue-list-container ${acrossScrolled ? "clue-list-scrolled" : ""}`}
+            style={{ 
+              maxWidth: 250,
+              maxHeight: 707, // Match crossword grid height
+              overflowY: "auto",
+            }}
+          >
+            <h3 className="clue-list-header" style={{
+              position: "sticky",
+              top: 0,
+              backgroundColor: "var(--paper, #EAE8E1)",
               color: "var(--stone-800, #292524)",
               fontFeatureSettings: "'dlig' on, 'hlig' on",
               fontFamily: '"EB Garamond", serif',
@@ -169,7 +202,10 @@ export function CrosswordSection() {
               fontWeight: 500,
               lineHeight: "normal",
               letterSpacing: -0.4,
-              marginBottom: 8,
+              paddingBottom: 16,
+              paddingLeft: 6,
+              marginBottom: 0,
+              zIndex: 1,
             }}>
               Across
             </h3>
@@ -185,7 +221,7 @@ export function CrosswordSection() {
                     className={isActive ? "bg-mustard-100 rounded" : ""}
                     style={{
                       display: "flex",
-                      padding: "8px 12px",
+                      padding: "8px 6px",
                       alignItems: "flex-start",
                       gap: 12,
                       cursor: "pointer",
@@ -194,7 +230,7 @@ export function CrosswordSection() {
                   >
                     <span style={{
                       color: textColor,
-                      textAlign: "right",
+                      textAlign: "left",
                       fontFeatureSettings: "'dlig' on, 'hlig' on",
                       fontFamily: '"EB Garamond", serif',
                       fontSize: 14,
@@ -223,8 +259,20 @@ export function CrosswordSection() {
               })}
             </ul>
           </div>
-          <div style={{ maxWidth: 250 }}>
-            <h3 style={{
+          <div 
+            ref={downListRef}
+            onScroll={handleDownScroll}
+            className={`clue-list-container ${downScrolled ? "clue-list-scrolled" : ""}`}
+            style={{ 
+              maxWidth: 250,
+              maxHeight: 707, // Match crossword grid height
+              overflowY: "auto",
+            }}
+          >
+            <h3 className="clue-list-header" style={{
+              position: "sticky",
+              top: 0,
+              backgroundColor: "var(--paper, #EAE8E1)",
               color: "var(--stone-800, #292524)",
               fontFeatureSettings: "'dlig' on, 'hlig' on",
               fontFamily: '"EB Garamond", serif',
@@ -233,7 +281,10 @@ export function CrosswordSection() {
               fontWeight: 500,
               lineHeight: "normal",
               letterSpacing: -0.4,
-              marginBottom: 8,
+              paddingBottom: 16,
+              paddingLeft: 6,
+              marginBottom: 0,
+              zIndex: 1,
             }}>
               Down
             </h3>
@@ -249,7 +300,7 @@ export function CrosswordSection() {
                     className={isActive ? "bg-mustard-100 rounded" : ""}
                     style={{
                       display: "flex",
-                      padding: "8px 12px",
+                      padding: "8px 6px",
                       alignItems: "flex-start",
                       gap: 12,
                       cursor: "pointer",
@@ -258,7 +309,7 @@ export function CrosswordSection() {
                   >
                     <span style={{
                       color: textColor,
-                      textAlign: "right",
+                      textAlign: "left",
                       fontFeatureSettings: "'dlig' on, 'hlig' on",
                       fontFamily: '"EB Garamond", serif',
                       fontSize: 14,
