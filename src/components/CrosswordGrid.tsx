@@ -193,7 +193,19 @@ export function CrosswordGrid({
         arrowDirection
       );
       if (next) {
-        onSelectCell(next.row, next.col, newWordDirection);
+        // Check if destination cell has a word in the desired direction
+        const nextCell = data.cells[next.row]?.[next.col];
+        const hasAcross = nextCell?.acrossWordId !== undefined;
+        const hasDown = nextCell?.downWordId !== undefined;
+        
+        let effectiveDirection = newWordDirection;
+        if (newWordDirection === "across" && !hasAcross && hasDown) {
+          effectiveDirection = "down";
+        } else if (newWordDirection === "down" && !hasDown && hasAcross) {
+          effectiveDirection = "across";
+        }
+        
+        onSelectCell(next.row, next.col, effectiveDirection);
       }
     };
 
