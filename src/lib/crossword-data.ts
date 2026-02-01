@@ -10,6 +10,7 @@ export interface CrosswordCell {
   col: number;
   type: CellType;
   letter?: string;
+  number?: number;
   acrossWordId?: number;
   downWordId?: number;
 }
@@ -164,6 +165,31 @@ export function getCrosswordData(): CrosswordData {
   }
 
   const { acrossWords, downWords } = buildWordsFromGrid(cells);
+
+  // Assign clue numbers to cells that start words
+  // Scan left-to-right, top-to-bottom
+  let clueNumber = 1;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = cells[r][c];
+      if (cell.type !== "letter") continue;
+
+      // Check if this cell starts an across word
+      const startsAcross =
+        (c === 0 || cells[r][c - 1].type === "black") &&
+        (c < COLS - 1 && cells[r][c + 1].type === "letter");
+
+      // Check if this cell starts a down word
+      const startsDown =
+        (r === 0 || cells[r - 1][c].type === "black") &&
+        (r < ROWS - 1 && cells[r + 1][c].type === "letter");
+
+      if (startsAcross || startsDown) {
+        cell.number = clueNumber;
+        clueNumber++;
+      }
+    }
+  }
 
   return {
     rows: ROWS,

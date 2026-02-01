@@ -7,6 +7,7 @@ interface CrosswordCellProps {
   col: number;
   cellType: CellType;
   letter?: string;
+  number?: number;
   isSelected: boolean;
   isInActiveWord: boolean;
   onSelect: (row: number, col: number) => void;
@@ -17,6 +18,7 @@ export function CrosswordCell({
   col,
   cellType,
   letter,
+  number,
   isSelected,
   isInActiveWord,
   onSelect,
@@ -24,8 +26,19 @@ export function CrosswordCell({
   if (cellType === "black") {
     return (
       <div
-        className="h-8 w-8 shrink-0 bg-ink"
-        style={{ width: 32, height: 32 }}
+        className="shrink-0"
+        style={{ 
+          width: 31, 
+          height: 31,
+          backgroundColor: "#1a1a1a",
+          backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 2px,
+            rgba(87,83,78,0.25) 2px,
+            rgba(87,83,78,0.25) 3px
+          )`
+        }}
         aria-hidden
       />
     );
@@ -41,12 +54,22 @@ export function CrosswordCell({
     <button
       type="button"
       onClick={() => onSelect(row, col)}
-      className={`h-8 w-8 shrink-0 border border-border cursor-pointer flex items-center justify-center font-serif text-sm font-medium uppercase ${bgClass} focus:outline-none focus:ring-2 focus:ring-mustard-500 focus:ring-offset-1`}
-      style={{ width: 32, height: 32 }}
+      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase ${bgClass} focus:outline-none`}
+      style={{ width: 31, height: 31 }}
       tabIndex={-1}
-      aria-label={`Cell ${row + 1}, ${col + 1}${letter ? `, ${letter}` : ""}`}
+      aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
-      {letter}
+      {number && (
+        <span
+          className="absolute font-serif text-stone-600"
+          style={{ top: 1, left: 1, fontSize: 10, fontWeight: 600, lineHeight: 1 }}
+        >
+          {number}
+        </span>
+      )}
+      <span style={{ fontSize: 14, lineHeight: "18px" }}>
+        {letter}
+      </span>
     </button>
   );
 }

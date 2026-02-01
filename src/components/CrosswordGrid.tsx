@@ -106,12 +106,17 @@ export function CrosswordGrid() {
         <div
           ref={gridRef}
           tabIndex={0}
-          className="inline-flex flex-col border border-border bg-cream p-0 outline-none focus:ring-2 focus:ring-mustard-500 focus:ring-offset-2"
+          className="inline-flex flex-col p-0 outline-none"
+          style={{ 
+            border: "2px solid #292524",
+            backgroundColor: "#57534e",
+            gap: "1px"
+          }}
           role="grid"
           aria-label="Crossword grid. Use arrow keys to navigate."
         >
           {data.cells.map((rowCells, rowIndex) => (
-            <div key={rowIndex} className="flex">
+            <div key={rowIndex} className="flex" style={{ gap: "1px" }}>
               {rowCells.map((cell) => (
                 <CrosswordCell
                   key={`${cell.row}-${cell.col}`}
@@ -119,6 +124,7 @@ export function CrosswordGrid() {
                   col={cell.col}
                   cellType={cell.type}
                   letter={cell.letter}
+                  number={cell.number}
                   isSelected={
                     selectedCell?.row === cell.row &&
                     selectedCell?.col === cell.col
