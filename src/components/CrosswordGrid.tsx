@@ -1,31 +1,51 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
-import { getCrosswordData, getActiveWordCells } from "@/lib/crossword-data";
-import { getNextCell, getFirstCell } from "@/lib/crossword-navigation";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
+import { getNextCell, getWordDirection } from "@/lib/crossword-navigation";
 import { CrosswordCell } from "./CrosswordCell";
 
-const crosswordData = getCrosswordData();
+interface CrosswordGridProps {
+  data: CrosswordData;
+  selectedCell: { row: number; col: number } | null;
+  direction: "across" | "down";
+  onSelectCell: (row: number, col: number, direction: "across" | "down") => void;
+}
 
-export function CrosswordGrid() {
-  const data = useMemo(() => crosswordData, []);
-  const firstCell = getFirstCell(data);
-
-  const [selectedCell, setSelectedCell] = useState<{
-    row: number;
-    col: number;
-  } | null>(() => firstCell);
-
+export function CrosswordGrid({ data, selectedCell, direction, onSelectCell }: CrosswordGridProps) {
+  // Click handler with toggle behavior for already-selected cell
   const handleCellSelect = useCallback((row: number, col: number) => {
-    setSelectedCell({ row, col });
-  }, []);
+    const isAlreadySelected = selectedCell?.row === row && selectedCell?.col === col;
+    
+    if (isAlreadySelected) {
+      // Toggle direction if cell belongs to both word types
+      const cell = data.cells[row]?.[col];
+      if (cell) {
+        const hasAcross = cell.acrossWordId !== undefined;
+        const hasDown = cell.downWordId !== undefined;
+        
+        if (hasAcross && hasDown) {
+          const newDirection = direction === "across" ? "down" : "across";
+          onSelectCell(row, col, newDirection);
+          return;
+        }
+      }
+      // Cell only has one word type - keep current direction
+      onSelectCell(row, col, direction);
+    } else {
+      // New cell selected - keep current direction
+      onSelectCell(row, col, direction);
+    }
+  }, [selectedCell, direction, data, onSelectCell]);
+
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedCell || !gridRef.current) return;
       if (!gridRef.current.contains(document.activeElement)) return;
 
-      const direction =
+      const arrowDirection =
         e.key === "ArrowUp"
           ? "up"
           : e.key === "ArrowDown"
@@ -36,43 +56,51 @@ export function CrosswordGrid() {
                 ? "right"
                 : null;
 
-      if (!direction) return;
+      if (!arrowDirection) return;
       e.preventDefault();
+
+      // Determine word direction based on arrow key
+      const wordDirection = getWordDirection(arrowDirection);
 
       const next = getNextCell(
         data,
         selectedCell.row,
         selectedCell.col,
-        direction
+        arrowDirection
       );
       if (next) {
-        setSelectedCell(next);
+        onSelectCell(next.row, next.col, wordDirection);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [data, selectedCell]);
+  }, [data, selectedCell, onSelectCell]);
 
-  const activeWordCells = selectedCell
-    ? (() => {
-        const across = getActiveWordCells(
-          data,
-          selectedCell.row,
-          selectedCell.col,
-          "across"
-        );
-        if (across.size > 0) return across;
-        return getActiveWordCells(
-          data,
-          selectedCell.row,
-          selectedCell.col,
-          "down"
-        );
-      })()
-    : new Set<string>();
-
-  const gridRef = useRef<HTMLDivElement>(null);
+  const activeWordCells = useMemo(() => {
+    if (!selectedCell) return new Set<string>();
+    
+    // Use the tracked direction to determine which word to highlight
+    const cells = getActiveWordCells(
+      data,
+      selectedCell.row,
+      selectedCell.col,
+      direction
+    );
+    
+    // If no word exists in the current direction, fall back to the other direction
+    if (cells.size === 0) {
+      const fallbackDirection = direction === "across" ? "down" : "across";
+      return getActiveWordCells(
+        data,
+        selectedCell.row,
+        selectedCell.col,
+        fallbackDirection
+      );
+    }
+    
+    return cells;
+  }, [data, selectedCell, direction]);
 
   return (
     <div

@@ -1,30 +1,67 @@
 "use client";
 
+import { useState, useMemo, useCallback } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
 import { getCrosswordData } from "@/lib/crossword-data";
+import { getFirstCell } from "@/lib/crossword-navigation";
 
 /* =============================================================================
    GRAIN PREVIEW CONTROLS (disabled)
    =============================================================================
    To re-enable the grain preview and sliders for testing:
-   1. Uncomment the useState import above
-   2. Uncomment the state variables and preview JSX below
-   3. The preview block will appear above the crossword grid
+   1. Uncomment the state variables and preview JSX below
+   2. The preview block will appear above the crossword grid
    ============================================================================= */
 
 export function CrosswordSection() {
-  const data = getCrosswordData();
+  const data = useMemo(() => getCrosswordData(), []);
+  const firstCell = useMemo(() => getFirstCell(data), [data]);
+  
+  // Selection state with direction tracking
+  const [selection, setSelection] = useState<{
+    row: number;
+    col: number;
+    direction: "across" | "down";
+  } | null>(() => firstCell ? { ...firstCell, direction: "across" } : null);
+  
+  const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
+    setSelection({ row, col, direction });
+  }, []);
+  
+  // Determine which word(s) the selected cell belongs to
+  const activeWordIds = useMemo(() => {
+    if (!selection) return { acrossId: null as number | null, downId: null as number | null, activeType: "across" as const };
+    
+    const cell = data.cells[selection.row]?.[selection.col];
+    if (!cell || cell.type === "black") return { acrossId: null, downId: null, activeType: selection.direction };
+    
+    const acrossId = cell.acrossWordId ?? null;
+    const downId = cell.downWordId ?? null;
+    
+    // Use the tracked direction from selection state
+    return { acrossId, downId, activeType: selection.direction };
+  }, [data, selection]);
+  
+  // Sort words by clue number for display
+  const sortedAcrossWords = useMemo(
+    () => [...data.acrossWords].sort((a, b) => a.clueNumber - b.clueNumber),
+    [data.acrossWords]
+  );
+  const sortedDownWords = useMemo(
+    () => [...data.downWords].sort((a, b) => a.clueNumber - b.clueNumber),
+    [data.downWords]
+  );
   
   // UNCOMMENT TO ENABLE GRAIN PREVIEW:
-  // import { useState } from "react"; // Add to imports at top
   // const [dotSpacing, setDotSpacing] = useState(4);
   // const [dotSize, setDotSize] = useState(0.5);
   // const [dotOpacity, setDotOpacity] = useState(0.3);
   // const [dotCount, setDotCount] = useState(8);
 
   return (
-    <section className="flex flex-col gap-8 px-8 pb-12 md:flex-row md:items-start md:gap-12">
-      <div className="shrink-0">
+    <section className="w-full flex justify-center px-8" style={{ paddingTop: 200, paddingBottom: 200 }}>
+      <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-12">
+        <div className="shrink-0">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans" style={{ width: 300 }}>
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
@@ -71,29 +108,51 @@ export function CrosswordSection() {
         </div>
         */}
         
-        <CrosswordGrid />
+        <CrosswordGrid 
+          data={data} 
+          selectedCell={selection ? { row: selection.row, col: selection.col } : null}
+          direction={selection?.direction ?? "across"}
+          onSelectCell={handleSelectCell} 
+        />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-8 md:flex-row md:gap-12">
-        <div>
-          <h3 className="mb-2 font-serif text-sm font-medium text-ink">
-            Across
-          </h3>
-          <ul className="list-inside list-decimal space-y-1 font-serif text-sm text-ink">
-            {data.acrossWords.map((word) => (
-              <li key={word.id}>{word.clue}</li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-2 font-serif text-sm font-medium text-ink">
-            Down
-          </h3>
-          <ul className="list-inside list-decimal space-y-1 font-serif text-sm text-ink">
-            {data.downWords.map((word) => (
-              <li key={word.id}>{word.clue}</li>
-            ))}
-          </ul>
+        <div className="flex flex-col gap-8 md:flex-row md:gap-12">
+          <div>
+            <h3 className="mb-2 font-serif text-sm font-medium text-ink">
+              Across
+            </h3>
+            <ul className="space-y-1 font-serif text-sm text-ink">
+              {sortedAcrossWords.map((word) => {
+                const isActive = activeWordIds.acrossId === word.id && activeWordIds.activeType === "across";
+                return (
+                  <li 
+                    key={word.id}
+                    className={isActive ? "bg-mustard-100 -mx-2 px-2 py-0.5 rounded" : ""}
+                  >
+                    <span className="font-medium">{word.clueNumber}.</span> {word.clue}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+          <div>
+            <h3 className="mb-2 font-serif text-sm font-medium text-ink">
+              Down
+            </h3>
+            <ul className="space-y-1 font-serif text-sm text-ink">
+              {sortedDownWords.map((word) => {
+                const isActive = activeWordIds.downId === word.id && activeWordIds.activeType === "down";
+                return (
+                  <li 
+                    key={word.id}
+                    className={isActive ? "bg-mustard-100 -mx-2 px-2 py-0.5 rounded" : ""}
+                  >
+                    <span className="font-medium">{word.clueNumber}.</span> {word.clue}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
       </div>
     </section>

@@ -17,6 +17,7 @@ export interface CrosswordCell {
 
 export interface CrosswordWord {
   id: number;
+  clueNumber: number;
   clue: string;
   cells: { row: number; col: number }[];
 }
@@ -78,6 +79,54 @@ function getLetter(row: number, col: number): string | undefined {
   return char;
 }
 
+// Placeholder clues - keyed by the clue NUMBER shown in the grid
+// Replace with real clues later
+const ACROSS_CLUE_MAP: Record<number, string> = {
+  7: "One who sees the big picture and all its parts",
+  9: "Boot-shaped country",
+  10: "Direction of penguins and polar bears",
+  11: "Food delivery app founded in London",
+  12: "Short affirmative in German",
+  14: "Crunchy baby biscuit",
+  17: "A viewpoint or belief",
+  18: "Continent with 54 countries",
+  20: "River formation or airline alliance",
+  21: "Take responsibility for it!",
+  24: "Designer of digital experiences",
+  27: "Puzzles with interlocking words",
+  29: "Apple's interface framework",
+  30: "Winter sport on slopes",
+  31: "Norwegian payment app",
+  32: "Scandinavian language",
+  35: "Adaptive iOS layout system",
+  37: "Palindromic boat",
+};
+
+const DOWN_CLUE_MAP: Record<number, string> = {
+  1: "Capital city + country combination",
+  2: "Opposite of being cruel",
+  3: "Web's markup language",
+  4: "To obsess over something",
+  5: "To dispute or disagree",
+  6: "A quick sprint or punctuation",
+  8: "Blinking text indicator",
+  13: "Zodiac sign of the scorpion",
+  15: "Personal website section",
+  16: "Noisy African bird",
+  19: "Superstitious feline",
+  22: "Classic Italian cocktail",
+  23: "Software on your phone",
+  25: "Google's mobile OS",
+  26: "Layout systems with rows and columns",
+  28: "Design tool by Dylan Field",
+  33: "UK's capital city",
+  34: "Italian noodle dish",
+  36: "Absence of color",
+  38: "Perfect or optimal",
+  39: "Low temperature",
+  40: "Cook in an oven",
+};
+
 function buildWordsFromGrid(cells: CrosswordCell[][]): {
   acrossWords: CrosswordWord[];
   downWords: CrosswordWord[];
@@ -108,7 +157,8 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
         }
         acrossWords.push({
           id: acrossId,
-          clue: `Across ${acrossId + 1}`,
+          clueNumber: 0, // Will be set later based on cell number
+          clue: "", // Will be set later based on clue number
           cells: wordCells,
         });
         acrossId++;
@@ -137,7 +187,8 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
         }
         downWords.push({
           id: downId,
-          clue: `Down ${downId + 1}`,
+          clueNumber: 0, // Will be set later based on cell number
+          clue: "", // Will be set later based on clue number
           cells: wordCells,
         });
         downId++;
@@ -186,6 +237,17 @@ export function getCrosswordData(): CrosswordData {
 
       if (startsAcross || startsDown) {
         cell.number = clueNumber;
+        
+        // Update the word's clueNumber and clue text
+        if (startsAcross && cell.acrossWordId !== undefined) {
+          acrossWords[cell.acrossWordId].clueNumber = clueNumber;
+          acrossWords[cell.acrossWordId].clue = ACROSS_CLUE_MAP[clueNumber] || `Across clue ${clueNumber}`;
+        }
+        if (startsDown && cell.downWordId !== undefined) {
+          downWords[cell.downWordId].clueNumber = clueNumber;
+          downWords[cell.downWordId].clue = DOWN_CLUE_MAP[clueNumber] || `Down clue ${clueNumber}`;
+        }
+        
         clueNumber++;
       }
     }

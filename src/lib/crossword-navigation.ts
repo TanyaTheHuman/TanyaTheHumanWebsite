@@ -7,6 +7,15 @@ import type { CrosswordData } from "./crossword-data";
 import { getCellAt } from "./crossword-data";
 
 export type Direction = "up" | "down" | "left" | "right";
+export type WordDirection = "across" | "down";
+
+/**
+ * Maps an arrow key direction to a word direction.
+ * Left/Right arrows = across word, Up/Down arrows = down word.
+ */
+export function getWordDirection(arrowDirection: Direction): WordDirection {
+  return arrowDirection === "left" || arrowDirection === "right" ? "across" : "down";
+}
 
 export function getNextCell(
   data: CrosswordData,
