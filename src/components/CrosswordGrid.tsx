@@ -75,75 +75,45 @@ export function CrosswordGrid() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="inline-flex flex-col">
-      {/* Column numbers header */}
-      <div className="flex">
-        <div className="w-6 h-6 shrink-0" /> {/* Empty corner */}
-        {Array.from({ length: data.cols }, (_, i) => (
-          <div
-            key={`col-${i}`}
-            className="w-8 h-6 shrink-0 flex items-center justify-center text-xs text-gray-500 font-mono"
-          >
-            {i + 1}
-          </div>
-        ))}
-      </div>
-      
-      <div className="flex">
-        {/* Row numbers column */}
-        <div className="flex flex-col">
-          {Array.from({ length: data.rows }, (_, i) => (
-            <div
-              key={`row-${i}`}
-              className="w-6 h-8 shrink-0 flex items-center justify-center text-xs text-gray-500 font-mono"
-            >
-              {i + 1}
-            </div>
+    <div
+      ref={gridRef}
+      tabIndex={0}
+      className="inline-flex flex-col p-0 outline-none"
+      style={{ 
+        border: "2px solid #292524",
+        backgroundColor: "#57534e",
+        gap: "1px"
+      }}
+      role="grid"
+      aria-label="Crossword grid. Use arrow keys to navigate."
+    >
+      {data.cells.map((rowCells, rowIndex) => (
+        <div key={rowIndex} className="flex" style={{ gap: "1px" }}>
+          {rowCells.map((cell) => (
+            <CrosswordCell
+              key={`${cell.row}-${cell.col}`}
+              row={cell.row}
+              col={cell.col}
+              cellType={cell.type}
+              letter={cell.letter}
+              number={cell.number}
+              isSelected={
+                selectedCell?.row === cell.row &&
+                selectedCell?.col === cell.col
+              }
+              isInActiveWord={
+                cell.type === "letter" &&
+                activeWordCells.has(`${cell.row},${cell.col}`) &&
+                !(
+                  selectedCell?.row === cell.row &&
+                  selectedCell?.col === cell.col
+                )
+              }
+              onSelect={handleCellSelect}
+            />
           ))}
         </div>
-        
-        {/* Main grid */}
-        <div
-          ref={gridRef}
-          tabIndex={0}
-          className="inline-flex flex-col p-0 outline-none"
-          style={{ 
-            border: "2px solid #292524",
-            backgroundColor: "#57534e",
-            gap: "1px"
-          }}
-          role="grid"
-          aria-label="Crossword grid. Use arrow keys to navigate."
-        >
-          {data.cells.map((rowCells, rowIndex) => (
-            <div key={rowIndex} className="flex" style={{ gap: "1px" }}>
-              {rowCells.map((cell) => (
-                <CrosswordCell
-                  key={`${cell.row}-${cell.col}`}
-                  row={cell.row}
-                  col={cell.col}
-                  cellType={cell.type}
-                  letter={cell.letter}
-                  number={cell.number}
-                  isSelected={
-                    selectedCell?.row === cell.row &&
-                    selectedCell?.col === cell.col
-                  }
-                  isInActiveWord={
-                    cell.type === "letter" &&
-                    activeWordCells.has(`${cell.row},${cell.col}`) &&
-                    !(
-                      selectedCell?.row === cell.row &&
-                      selectedCell?.col === cell.col
-                    )
-                  }
-                  onSelect={handleCellSelect}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
+      ))}
     </div>
   );
 }
