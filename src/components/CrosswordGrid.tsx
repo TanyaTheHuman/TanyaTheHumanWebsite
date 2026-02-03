@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
 import { getNextCell, getNextCellInWord, getNextWordCell, getWordDirection, getFirstEmptyCellInNextWord } from "@/lib/crossword-navigation";
 import { CrosswordCell } from "./CrosswordCell";
@@ -14,6 +14,8 @@ interface CrosswordGridProps {
   onSelectCell: (row: number, col: number, direction: "across" | "down") => void;
   onInputLetter: (row: number, col: number, letter: string) => void;
   onClearCell: (row: number, col: number) => void;
+  onMobileKeyboardOpen?: () => void;
+  onMobileKeyboardClose?: () => void;
 }
 
 export function CrosswordGrid({ 
@@ -25,6 +27,8 @@ export function CrosswordGrid({
   onSelectCell,
   onInputLetter,
   onClearCell,
+  onMobileKeyboardOpen,
+  onMobileKeyboardClose,
 }: CrosswordGridProps) {
   // Click handler with toggle behavior for already-selected cell
   const handleCellSelect = useCallback((row: number, col: number) => {
@@ -74,11 +78,117 @@ export function CrosswordGrid({
   }, [selectedCell, direction, data, onSelectCell]);
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile/touch device for keyboard handling
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(
+        window.matchMedia("(max-width: 768px)").matches ||
+        window.matchMedia("(pointer: coarse)").matches
+      );
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Focus hidden input when cell selected on mobile (shows keyboard)
+  useEffect(() => {
+    if (isMobile && selectedCell && mobileInputRef.current) {
+      mobileInputRef.current.focus();
+    }
+  }, [isMobile, selectedCell]);
+
+  // Scroll grid into view when keyboard opens on mobile (once per cell selection)
+  const lastScrolledCellRef = useRef<string | null>(null);
+  const handleMobileInputFocus = useCallback(() => {
+    onMobileKeyboardOpen?.();
+    if (!isMobile || !selectedCell || !gridRef.current) return;
+    const cellKey = `${selectedCell.row},${selectedCell.col}`;
+    if (lastScrolledCellRef.current === cellKey) return;
+    lastScrolledCellRef.current = cellKey;
+    setTimeout(() => {
+      gridRef.current?.scrollIntoView({ behavior: "auto", block: "center" });
+    }, 350);
+  }, [isMobile, selectedCell, onMobileKeyboardOpen]);
+
+  const handleMobileInputBlur = useCallback(() => {
+    onMobileKeyboardClose?.();
+  }, [onMobileKeyboardClose]);
+
+  // Blur hidden input when clicking outside grid (hides keyboard on mobile)
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (!gridRef.current || !mobileInputRef.current) return;
+      const target = e.target as Node;
+      if (!gridRef.current.contains(target)) {
+        mobileInputRef.current.blur();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
+
+  // Handle input from mobile keyboard (hidden input)
+  const handleMobileInput = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (!selectedCell) return;
+      const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
+      if (value.length > 0) {
+        const letter = value[0]; // First character (handles single key and paste)
+        onInputLetter(selectedCell.row, selectedCell.col, letter);
+        const next = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction);
+        if (next) {
+          onSelectCell(next.row, next.col, direction);
+        } else {
+          const updatedInputs = {
+            ...userInputs,
+            [`${selectedCell.row},${selectedCell.col}`]: letter,
+          };
+          const nextWordCell = getFirstEmptyCellInNextWord(
+            data,
+            selectedCell.row,
+            selectedCell.col,
+            direction,
+            updatedInputs
+          );
+          if (nextWordCell) {
+            onSelectCell(nextWordCell.row, nextWordCell.col, direction);
+          }
+        }
+      }
+      e.target.value = "";
+    },
+    [selectedCell, data, direction, userInputs, onInputLetter, onSelectCell]
+  );
+
+  const handleMobileKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (!selectedCell) return;
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        onClearCell(selectedCell.row, selectedCell.col);
+        const prev = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
+        if (prev) {
+          onSelectCell(prev.row, prev.col, direction);
+        }
+      }
+    },
+    [selectedCell, data, direction, onClearCell, onSelectCell]
+  );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedCell || !gridRef.current) return;
       if (!gridRef.current.contains(document.activeElement)) return;
+      // On mobile, the hidden input handles keyboard - skip to avoid double handling
+      if (isMobile && document.activeElement === mobileInputRef.current) return;
 
       // Handle Tab key for jumping to next/previous word
       if (e.key === "Tab") {
@@ -211,7 +321,7 @@ export function CrosswordGrid({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [data, selectedCell, direction, userInputs, onSelectCell, onInputLetter, onClearCell]);
+  }, [data, selectedCell, direction, userInputs, onSelectCell, onInputLetter, onClearCell, isMobile]);
 
   const activeWordCells = useMemo(() => {
     if (!selectedCell) return new Set<string>();
@@ -242,7 +352,7 @@ export function CrosswordGrid({
     <div
       ref={gridRef}
       tabIndex={0}
-      className="inline-flex flex-col p-0 outline-none"
+      className="inline-flex flex-col p-0 outline-none relative"
       style={{ 
         border: "2px solid #292524",
         backgroundColor: "#57534e",
@@ -251,6 +361,29 @@ export function CrosswordGrid({
       role="grid"
       aria-label="Crossword grid. Use arrow keys to navigate."
     >
+      {/* Hidden input for mobile keyboard - only focused when cell selected */}
+      <input
+        ref={mobileInputRef}
+        type="text"
+        inputMode="text"
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="characters"
+        aria-hidden
+        tabIndex={-1}
+        onChange={handleMobileInput}
+        onKeyDown={handleMobileKeyDown}
+        onFocus={handleMobileInputFocus}
+        onBlur={handleMobileInputBlur}
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
       {data.cells.map((rowCells, rowIndex) => (
         <div key={rowIndex} className="flex" style={{ gap: "1px" }}>
           {rowCells.map((cell) => (

@@ -142,6 +142,24 @@ body {
   }
 }
 
+/* Highlighted clue: fixed to top, full width, on top of content when cell selected */
+.highlighted-clue {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  padding: 12px 24px;
+  box-sizing: border-box;
+}
+
+/* Spacer reserves space so content doesn't jump when fixed clue appears */
+.highlighted-clue-spacer {
+  height: 80px;
+  flex-shrink: 0;
+}
+
 /* Crossword cell default size (31x31px) */
 .crossword-cell {
   width: 31px !important;
@@ -158,6 +176,13 @@ body {
   .crossword-cell {
     width: 23px !important;
     height: 23px !important;
+    touch-action: manipulation; /* Removes tap delay, prevents double-tap zoom */
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease;
+  }
+
+  .crossword-cell:active {
+    transform: scale(0.92);
   }
 
   .crossword-cell-svg {
@@ -173,3 +198,4 @@ body {
     font-size: 8px !important;
   }
 }
+

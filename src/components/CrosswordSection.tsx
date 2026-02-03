@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
 import { getCrosswordData, getWordContaining } from "@/lib/crossword-data";
 import { getFirstCell } from "@/lib/crossword-navigation";
@@ -18,11 +18,14 @@ export function CrosswordInteractive() {
   const firstCell = useMemo(() => getFirstCell(data), [data]);
   
   // Selection state with direction tracking
+  // Desktop: first cell selected on load. Mobile: cleared when we detect mobile.
   const [selection, setSelection] = useState<{
     row: number;
     col: number;
     direction: "across" | "down";
   } | null>(() => firstCell ? { ...firstCell, direction: "across" } : null);
+  
+  const [isMobile, setIsMobile] = useState(false);
   
   // Toggle for showing/hiding answers (dev only, default off)
   const [showAnswers, setShowAnswers] = useState(false);
@@ -47,7 +50,28 @@ export function CrosswordInteractive() {
       setDownScrolled(downListRef.current.scrollTop > 0);
     }
   }, []);
-  
+
+  // Detect mobile on mount; clear selection only on mobile (before paint to avoid flash)
+  useLayoutEffect(() => {
+    const mobile =
+      window.matchMedia("(max-width: 768px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches;
+    setIsMobile(mobile);
+    if (mobile) {
+      setSelection(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    const check = () =>
+      setIsMobile(
+        window.matchMedia("(max-width: 768px)").matches ||
+        window.matchMedia("(pointer: coarse)").matches
+      );
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const handleInputLetter = useCallback((row: number, col: number, letter: string) => {
     setUserInputs(prev => ({
       ...prev,
@@ -121,7 +145,9 @@ export function CrosswordInteractive() {
     () => [...data.downWords].sort((a, b) => a.clueNumber - b.clueNumber),
     [data.downWords]
   );
-  
+
+  const showLargeClue = !!selectedWord;
+
   // Scroll crossing clues into view when selection changes, accounting for gradient
   useEffect(() => {
     const GRADIENT_HEIGHT = 48; // Height of the gradient fade at bottom
@@ -245,7 +271,10 @@ export function CrosswordInteractive() {
   // const [dotCount, setDotCount] = useState(8);
 
   return (
-    <section className="w-full flex justify-center px-8" style={{ paddingTop: 200, paddingBottom: 200 }}>
+    <section
+      className="w-full flex justify-center px-8"
+      style={{ paddingTop: 200, paddingBottom: 200 }}
+    >
       <div className="flex flex-col gap-8 md:flex-row md:items-start" style={{ gap: 32 }}>
         <div className="shrink-0">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
@@ -294,16 +323,31 @@ export function CrosswordInteractive() {
         </div>
         */}
         
-        {/* Highlighted clue view above the grid */}
-        {selectedWord && (
+        {/* Mobile: tap hint when no cell selected */}
+        {isMobile && !selection && (
+          <p
+            className="md:hidden text-center py-4 px-4 rounded bg-mustard-50 text-stone-600"
+            style={{
+              fontFamily: '"EB Garamond", serif',
+              fontSize: 18,
+              fontStyle: "italic",
+              letterSpacing: -0.36,
+              marginBottom: 8,
+            }}
+          >
+            Tap a cell to start
+          </p>
+        )}
+        {/* Spacer for fixed clue - prevents layout jump when clue appears */}
+        {showLargeClue && <div className="highlighted-clue-spacer" aria-hidden />}
+        {/* Highlighted clue: fixed to top, full width, overlays content */}
+        {showLargeClue && (
           <div 
-            className="bg-mustard-100 rounded"
+            className="bg-mustard-100 highlighted-clue"
             style={{
               display: "flex",
-              padding: "12px 16px",
               alignItems: "flex-start",
               gap: 16,
-              marginBottom: 16,
               width: "100%",
             }}
           >
