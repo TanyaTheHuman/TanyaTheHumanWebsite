@@ -81,10 +81,10 @@ function generateHolePath(cx: number, cy: number, blobSize: number, uniqueId: nu
   return `M${vertices.join('L')}Z`;
 }
 
-// Generate grain particles for a cell (scaled for 31x31)
-function generateGrainParticles(cellId: number) {
+// Generate grain particles for a cell (scaled for cell size)
+function generateGrainParticles(cellId: number, cellSize: number) {
   const { particleCount, minSize, maxSize, whiteRatio, opacity, holeChance, colors } = GRAIN_CONFIG;
-  const size = 31;
+  const size = cellSize;
   const particles = [];
   
   for (let i = 0; i < particleCount; i++) {
@@ -150,10 +150,8 @@ export function CrosswordCell({
   if (cellType === "black") {
     return (
       <div
-        className="shrink-0"
+        className="shrink-0 crossword-cell crossword-cell-black"
         style={{ 
-          width: 31, 
-          height: 31,
           backgroundColor: "#1a1a1a",
           backgroundImage: `repeating-linear-gradient(
             -45deg,
@@ -175,23 +173,21 @@ export function CrosswordCell({
       : "bg-cream";
 
   // Generate unique grain for this cell based on position
+  // Default to 31px for SSR, will be adjusted via CSS media query
   const cellId = row * 100 + col;
-  const grainParticles = generateGrainParticles(cellId);
+  const grainParticles = generateGrainParticles(cellId, 31);
 
   return (
     <button
       type="button"
       onClick={() => onSelect(row, col)}
-      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase ${bgClass} focus:outline-none overflow-hidden`}
-      style={{ width: 31, height: 31 }}
+      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase crossword-cell ${bgClass} focus:outline-none overflow-hidden`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
       {/* Grain overlay */}
       <svg 
-        width="31" 
-        height="31" 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none crossword-cell-svg"
         aria-hidden
       >
         {grainParticles.map((p) => (
@@ -207,19 +203,22 @@ export function CrosswordCell({
       
       {number && (
         <span
-          className="absolute font-serif text-stone-600"
+          className="absolute font-serif text-stone-600 crossword-cell-number"
           style={{ top: 1, left: 1, fontSize: 10, fontWeight: 600, lineHeight: 1, zIndex: 1 }}
         >
           {number}
         </span>
       )}
-      <span style={{ 
-        fontSize: 14, 
-        lineHeight: "18px", 
-        position: "relative", 
-        zIndex: 1,
-        fontWeight: 600
-      }}>
+      <span 
+        className="crossword-cell-letter"
+        style={{ 
+          fontSize: 14, 
+          lineHeight: "18px", 
+          position: "relative", 
+          zIndex: 1,
+          fontWeight: 600
+        }}
+      >
         {showAnswers ? letter : userInput ?? ""}
       </span>
     </button>

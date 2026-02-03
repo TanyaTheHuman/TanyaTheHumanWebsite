@@ -113,3 +113,59 @@ body {
   pointer-events: none;
   background: linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%);
 }
+
+/* Below md (< 768px): hide clue lists entirely */
+@media (max-width: 767px) {
+  .clue-lists {
+    display: none;
+  }
+}
+
+/* md to lg (768px - 1023px): stack clue lists vertically and split height to match grid */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .clue-lists {
+    height: 783px; /* Match crossword grid (707px) + highlighted clue (~60px) + margin (16px) */
+  }
+
+  .clue-lists .clue-list-container {
+    flex: 1;
+    min-height: 0; /* Allow flex items to shrink so inner scrolling works */
+    max-height: none; /* Parent controls the height */
+  }
+
+  .clue-lists .across-clue-list {
+    border-bottom: 1px solid var(--stone-800, #292524);
+  }
+}
+
+/* Crossword cell default size (31x31px) */
+.crossword-cell {
+  width: 31px !important;
+  height: 31px !important;
+}
+
+.crossword-cell-svg {
+  width: 31px !important;
+  height: 31px !important;
+}
+
+/* Below sm (< 640px): smaller crossword cells (23x23px) */
+@media (max-width: 639px) {
+  .crossword-cell {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .crossword-cell-svg {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  .crossword-cell-letter {
+    font-size: 13px !important;
+  }
+
+  .crossword-cell-number {
+    font-size: 8px !important;
+  }
+}

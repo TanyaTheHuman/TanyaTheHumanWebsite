@@ -207,6 +207,7 @@ export function CrosswordSection() {
               alignItems: "flex-start",
               gap: 16,
               marginBottom: 16,
+              width: "100%",
             }}
           >
             <span style={{
@@ -233,6 +234,7 @@ export function CrosswordSection() {
               lineHeight: "normal",
               letterSpacing: -0.4,
               marginTop: 4,
+              width: "100%",
             }}>
               {selectedWord.clue}
             </span>
@@ -268,14 +270,14 @@ export function CrosswordSection() {
         )}
       </div>
 
-        <div className="flex flex-col md:flex-row" style={{ 
+        <div className="clue-lists flex flex-col lg:flex-row" style={{ 
           gap: 24,
           borderBottom: "1px solid var(--stone-800, #292524)",
         }}>
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className={`clue-list-container ${acrossScrolled ? "clue-list-scrolled" : ""}`}
+            className={`across-clue-list clue-list-container ${acrossScrolled ? "clue-list-scrolled" : ""}`}
             style={{ 
               maxWidth: 250,
               maxHeight: 783, // Match crossword grid (707px) + highlighted clue (~60px) + margin (16px)
