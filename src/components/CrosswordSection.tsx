@@ -338,6 +338,7 @@ export function CrosswordSection() {
                         lineHeight: "normal",
                         letterSpacing: -0.28,
                         minWidth: 20,
+                        paddingLeft: 2,
                       }}
                     >
                       {word.clueNumber}
@@ -425,6 +426,7 @@ export function CrosswordSection() {
                         lineHeight: "normal",
                         letterSpacing: -0.28,
                         minWidth: 20,
+                        paddingLeft: 2,
                       }}
                     >
                       {word.clueNumber}
