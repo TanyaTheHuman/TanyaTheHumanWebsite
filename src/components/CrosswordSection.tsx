@@ -13,7 +13,7 @@ import { getFirstCell } from "@/lib/crossword-navigation";
    2. The preview block will appear above the crossword grid
    ============================================================================= */
 
-export function CrosswordSection() {
+export function CrosswordInteractive() {
   const data = useMemo(() => getCrosswordData(), []);
   const firstCell = useMemo(() => getFirstCell(data), [data]);
   

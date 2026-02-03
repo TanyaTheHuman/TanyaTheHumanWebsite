@@ -27,10 +27,14 @@ body {
 
 .frame {
   margin: 32px;
-  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   border: 1px solid #C5C5BA;
+}
+
+.frame.hero {
+  min-height: auto;
+  height: auto;
 }
 
 .border-row {

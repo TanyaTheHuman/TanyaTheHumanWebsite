@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { CrosswordSection } from "@/components/CrosswordSection";
+import { CrosswordInteractive } from "@/components/CrosswordSection";
 
 export default function Home() {
   // TEMPORARY: Breakpoint indicator for responsive debugging
@@ -31,11 +31,11 @@ export default function Home() {
 
   return (
     <>
-      <div className="frame">
+      <div className="frame hero">
         <header className="border-row top">
           <p className="border-text">Come back soon.</p>
         </header>
-        <main className="flex flex-1 flex-col items-center px-8" style={{ paddingTop: 104, paddingBottom: 104 }}>
+        <main className="flex flex-col items-center px-8" style={{ paddingTop: 104, paddingBottom: 104 }}>
           <h1 className="main-heading text-center font-normal">
             New site
             <br />
@@ -65,7 +65,9 @@ export default function Home() {
         </div>
       </div>
       
-      <CrosswordSection />
+      <div className="crossword-section">
+        <CrosswordInteractive />
+      </div>
     </>
   );
 }
