@@ -106,25 +106,6 @@ export function CrosswordInteractive() {
   const acrossClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
   const downClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
   
-  // Scroll crossing clues into view when selection changes
-  useEffect(() => {
-    // Scroll crossing across clues into view
-    crossingWordIds.crossingAcross.forEach(wordId => {
-      const element = acrossClueRefs.current.get(wordId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    });
-    
-    // Scroll crossing down clues into view
-    crossingWordIds.crossingDown.forEach(wordId => {
-      const element = downClueRefs.current.get(wordId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    });
-  }, [crossingWordIds]);
-  
   // Get the currently selected word for the highlighted clue display
   const selectedWord = useMemo(() => {
     if (!selection) return null;
@@ -140,6 +121,122 @@ export function CrosswordInteractive() {
     () => [...data.downWords].sort((a, b) => a.clueNumber - b.clueNumber),
     [data.downWords]
   );
+  
+  // Scroll crossing clues into view when selection changes, accounting for gradient
+  useEffect(() => {
+    const GRADIENT_HEIGHT = 48; // Height of the gradient fade at bottom
+
+    // Scroll crossing across clues into view
+    crossingWordIds.crossingAcross.forEach(wordId => {
+      const element = acrossClueRefs.current.get(wordId);
+      if (element && acrossListRef.current) {
+        const container = acrossListRef.current;
+        const elementTop = element.offsetTop;
+        const elementBottom = elementTop + element.offsetHeight;
+        const containerTop = container.scrollTop;
+        const containerBottom = containerTop + container.clientHeight;
+        
+        // Check if element is out of view (accounting for gradient)
+        const visibleBottom = containerBottom - GRADIENT_HEIGHT;
+        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
+        
+        if (isOutOfView) {
+          // Calculate scroll position to show clue above gradient
+          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          container.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: "smooth"
+          });
+        }
+      }
+    });
+    
+    // Scroll crossing down clues into view
+    crossingWordIds.crossingDown.forEach(wordId => {
+      const element = downClueRefs.current.get(wordId);
+      if (element && downListRef.current) {
+        const container = downListRef.current;
+        const elementTop = element.offsetTop;
+        const elementBottom = elementTop + element.offsetHeight;
+        const containerTop = container.scrollTop;
+        const containerBottom = containerTop + container.clientHeight;
+        
+        // Check if element is out of view (accounting for gradient)
+        const visibleBottom = containerBottom - GRADIENT_HEIGHT;
+        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
+        
+        if (isOutOfView) {
+          // Calculate scroll position to show clue above gradient
+          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          container.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: "smooth"
+          });
+        }
+      }
+    });
+  }, [crossingWordIds]);
+
+  // Scroll selected clue into view when it's out of view, accounting for gradient
+  useEffect(() => {
+    if (!selectedWord) return;
+
+    const isAcross = activeWordIds.activeType === "across" && activeWordIds.acrossId === selectedWord.id;
+    const isDown = activeWordIds.activeType === "down" && activeWordIds.downId === selectedWord.id;
+    const GRADIENT_HEIGHT = 48; // Height of the gradient fade at bottom
+
+    // Handle across clues
+    if (isAcross && acrossListRef.current) {
+      const element = acrossClueRefs.current.get(selectedWord.id);
+      if (element) {
+        const container = acrossListRef.current;
+        const elementTop = element.offsetTop;
+        const elementBottom = elementTop + element.offsetHeight;
+        const containerTop = container.scrollTop;
+        const containerBottom = containerTop + container.clientHeight;
+        
+        // Check if element is out of view (accounting for gradient)
+        const visibleBottom = containerBottom - GRADIENT_HEIGHT;
+        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
+        
+        if (isOutOfView) {
+          // Calculate scroll position to show clue above gradient
+          // Position element so its bottom is above the gradient area
+          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          container.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: "smooth"
+          });
+        }
+      }
+    }
+
+    // Handle down clues
+    if (isDown && downListRef.current) {
+      const element = downClueRefs.current.get(selectedWord.id);
+      if (element) {
+        const container = downListRef.current;
+        const elementTop = element.offsetTop;
+        const elementBottom = elementTop + element.offsetHeight;
+        const containerTop = container.scrollTop;
+        const containerBottom = containerTop + container.clientHeight;
+        
+        // Check if element is out of view (accounting for gradient)
+        const visibleBottom = containerBottom - GRADIENT_HEIGHT;
+        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
+        
+        if (isOutOfView) {
+          // Calculate scroll position to show clue above gradient
+          // Position element so its bottom is above the gradient area
+          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          container.scrollTo({
+            top: Math.max(0, scrollPosition),
+            behavior: "smooth"
+          });
+        }
+      }
+    }
+  }, [selectedWord, sortedAcrossWords, sortedDownWords, activeWordIds]);
   
   // UNCOMMENT TO ENABLE GRAIN PREVIEW:
   // const [dotSpacing, setDotSpacing] = useState(4);
