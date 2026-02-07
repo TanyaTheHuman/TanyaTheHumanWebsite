@@ -352,7 +352,7 @@ export function CrosswordGrid({
     <div
       ref={gridRef}
       tabIndex={0}
-      className="inline-flex flex-col p-0 outline-none relative"
+      className="group inline-flex flex-col p-0 outline-none relative"
       style={{ 
         border: "2px solid #292524",
         backgroundColor: "#57534e",

@@ -270,12 +270,24 @@ export function CrosswordInteractive() {
   // const [dotOpacity, setDotOpacity] = useState(0.3);
   // const [dotCount, setDotCount] = useState(8);
 
+  const clueContent = showLargeClue && selectedWord ? (
+    <>
+      <span className="text-stone-800 text-right font-serif text-[26px] font-bold leading-normal tracking-[-0.52px] min-w-[32px]">
+        {selectedWord.clueNumber}
+      </span>
+      <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
+        {selectedWord.clue}
+      </span>
+    </>
+  ) : null;
+
   return (
-    <section
-      className={`w-full flex justify-center px-8 pt-[200px] pb-[200px] ${showLargeClue ? "crossword-section-clue-visible" : ""}`}
-    >
-      <div className="flex flex-col gap-8 md:flex-row md:items-start">
-        <div className="shrink-0">
+    <div className="group">
+      <section
+        className="w-full flex justify-center px-8 pt-[200px] pb-[200px]"
+      >
+        <div className="flex flex-col gap-8 md:flex-row md:items-start">
+          <div className="shrink-0">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
@@ -330,17 +342,10 @@ export function CrosswordInteractive() {
             Tap a cell to start
           </p>
         )}
-        {/* Highlighted clue: above grid on desktop, fixed to bottom on mobile */}
-        {showLargeClue && selectedWord && (
-          <div
-            className="bg-mustard-100 rounded highlighted-clue flex items-start gap-4 py-3 px-4 mb-0 z-10 w-full"
-          >
-            <span className="text-stone-800 text-right font-serif text-[26px] font-bold leading-normal tracking-[-0.52px] min-w-[32px]">
-              {selectedWord.clueNumber}
-            </span>
-            <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
-              {selectedWord.clue}
-            </span>
+        {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
+        {clueContent && (
+          <div className="hidden md:flex bg-mustard-100 rounded items-start gap-4 py-3 px-4 mb-0 z-10 w-full">
+            {clueContent}
           </div>
         )}
         
@@ -453,5 +458,14 @@ export function CrosswordInteractive() {
         </div>
       </div>
     </section>
+      {/* Mobile clue: fixed overlay when input focused, docks above keyboard (pure CSS) */}
+      {clueContent && (
+        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-svh top-0 inset-x-0 pointer-events-none">
+          <div className="absolute sm:hidden bottom-0 left-0 right-0 flex items-start gap-4 py-3 px-6 bg-mustard-100 w-full text-ink rounded-none">
+            {clueContent}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

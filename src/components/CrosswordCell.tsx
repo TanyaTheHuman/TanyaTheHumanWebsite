@@ -167,9 +167,9 @@ export function CrosswordCell({
   }
 
   const bgClass = isSelected
-    ? "bg-mustard-300"
+    ? "bg-cream group-focus-within:bg-mustard-300"
     : isInActiveWord
-      ? "bg-mustard-100"
+      ? "bg-cream group-focus-within:bg-mustard-100"
       : "bg-cream";
 
   // Generate unique grain for this cell based on position

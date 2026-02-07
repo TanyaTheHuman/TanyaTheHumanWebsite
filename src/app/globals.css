@@ -142,25 +142,6 @@ body {
   }
 }
 
-/* Mobile only: clue fixed to bottom of viewport when cell selected */
-@media (max-width: 768px) {
-  .highlighted-clue {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    margin: 0;
-    border-radius: 0;
-    padding: 12px 24px;
-    box-sizing: border-box;
-  }
-
-  .crossword-section-clue-visible {
-    padding-bottom: 120px;
-  }
-}
-
 /* Crossword cell default size (31x31px) */
 .crossword-cell {
   width: 31px !important;
