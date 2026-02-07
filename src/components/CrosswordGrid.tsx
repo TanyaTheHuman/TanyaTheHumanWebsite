@@ -97,24 +97,20 @@ export function CrosswordGrid({
   }, []);
 
   // Focus hidden input when cell selected on mobile (shows keyboard)
+  // Only focus when input doesn't already have focus - avoids keyboard flicker when typing
+  // preventScroll: true - input is off-screen (-left-[9999px]); focus() would scroll viewport otherwise
   useEffect(() => {
     if (isMobile && selectedCell && mobileInputRef.current) {
-      mobileInputRef.current.focus();
+      const input = mobileInputRef.current;
+      if (document.activeElement !== input) {
+        input.focus({ preventScroll: true });
+      }
     }
   }, [isMobile, selectedCell]);
 
-  // Scroll grid into view when keyboard opens on mobile (once per cell selection)
-  const lastScrolledCellRef = useRef<string | null>(null);
   const handleMobileInputFocus = useCallback(() => {
     onMobileKeyboardOpen?.();
-    if (!isMobile || !selectedCell || !gridRef.current) return;
-    const cellKey = `${selectedCell.row},${selectedCell.col}`;
-    if (lastScrolledCellRef.current === cellKey) return;
-    lastScrolledCellRef.current = cellKey;
-    setTimeout(() => {
-      gridRef.current?.scrollIntoView({ behavior: "auto", block: "center" });
-    }, 350);
-  }, [isMobile, selectedCell, onMobileKeyboardOpen]);
+  }, [onMobileKeyboardOpen]);
 
   const handleMobileInputBlur = useCallback(() => {
     onMobileKeyboardClose?.();

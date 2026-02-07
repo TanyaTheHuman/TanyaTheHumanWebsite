@@ -150,6 +150,7 @@ export function CrosswordCell({
   if (cellType === "black") {
     return (
       <div
+        id={`cell-${row}-${col}`}
         className="shrink-0 !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] bg-ink bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)]"
         aria-hidden
       />
@@ -169,9 +170,16 @@ export function CrosswordCell({
 
   return (
     <button
-      type="button"
-      onClick={() => onSelect(row, col)}
-      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden ${bgClass}`}
+      id={`cell-${row}-${col}`}
+      // href={`#cell-${row}-${col}`}
+      onClick={(e) => {
+        e.preventDefault();
+        onSelect(row, col);
+        // Manual scroll: prevents browser from focusing the anchor, which steals focus
+        // from the hidden input and blocks the mobile keyboard from opening
+        e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+      }}
+      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden no-underline text-inherit flex items-center justify-center ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >

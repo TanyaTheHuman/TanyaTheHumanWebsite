@@ -92,35 +92,40 @@ export function CrosswordInteractive() {
     setSelection({ row, col, direction });
   }, []);
 
-  // Mobile clue bar: previous word (left chevron)
-  const handlePrevWord = useCallback(() => {
-    if (!selection) return;
-    const next = getFirstEmptyCellInPreviousWord(
+  // Mobile clue bar: prev/next cells for anchor hrefs
+  const prevCell = useMemo(() => {
+    if (!selection) return null;
+    return getFirstEmptyCellInPreviousWord(
       data,
       selection.row,
       selection.col,
       selection.direction,
       userInputs
     );
-    if (next) {
-      handleSelectCell(next.row, next.col, selection.direction);
-    }
-  }, [selection, data, userInputs, handleSelectCell]);
+  }, [selection, data, userInputs]);
 
-  // Mobile clue bar: next word (right chevron)
-  const handleNextWord = useCallback(() => {
-    if (!selection) return;
-    const next = getFirstEmptyCellInNextWord(
+  const nextCell = useMemo(() => {
+    if (!selection) return null;
+    return getFirstEmptyCellInNextWord(
       data,
       selection.row,
       selection.col,
       selection.direction,
       userInputs
     );
-    if (next) {
-      handleSelectCell(next.row, next.col, selection.direction);
+  }, [selection, data, userInputs]);
+
+  const handlePrevWord = useCallback(() => {
+    if (prevCell) {
+      handleSelectCell(prevCell.row, prevCell.col, selection!.direction);
     }
-  }, [selection, data, userInputs, handleSelectCell]);
+  }, [prevCell, selection, handleSelectCell]);
+
+  const handleNextWord = useCallback(() => {
+    if (nextCell) {
+      handleSelectCell(nextCell.row, nextCell.col, selection!.direction);
+    }
+  }, [nextCell, selection, handleSelectCell]);
 
   // Mobile clue bar: toggle direction (middle tap)
   const handleToggleDirection = useCallback(() => {
@@ -500,24 +505,44 @@ export function CrosswordInteractive() {
     </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons */}
       {clueContent && (
-        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-svh top-0 inset-x-0 pointer-events-none z-50">
+        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
           <div
             ref={clueBarRef}
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
+            className="fixed bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
           >
-            <button
-              type="button"
-              onClick={handlePrevWord}
-              className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent"
-              aria-label="Previous word"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
-              </svg>
-            </button>
-            <button
-              type="button"
+            {prevCell ? (
+              <a
+                href={`#cell-${prevCell.row}-${prevCell.col}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handlePrevWord();
+                  document.getElementById(`cell-${prevCell.row}-${prevCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent no-underline text-inherit"
+                aria-label="Previous word"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                  <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                </svg>
+              </a>
+            ) : (
+              <div
+                role="button"
+                tabIndex={-1}
+                onClick={() => {}}
+                className="w-10 shrink-0 flex items-center justify-center cursor-default touch-manipulation p-0 border-0 bg-transparent opacity-40"
+                aria-label="Previous word"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                  <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                </svg>
+              </div>
+            )}
+            <div
+              role="button"
+              tabIndex={-1}
               onClick={handleToggleDirection}
+              onKeyDown={(e) => e.key === "Enter" && handleToggleDirection()}
               className="flex-1 min-w-0 flex items-start gap-4 px-2 touch-manipulation"
             >
               {selectedWord && (
@@ -530,17 +555,35 @@ export function CrosswordInteractive() {
                   </span>
                 </>
               )}
-            </button>
-            <button
-              type="button"
-              onClick={handleNextWord}
-              className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent"
-              aria-label="Next word"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
-              </svg>
-            </button>
+            </div>
+            {nextCell ? (
+              <a
+                href={`#cell-${nextCell.row}-${nextCell.col}`}
+                onClick={(e) => {
+                  handleNextWord();
+                  e.preventDefault();
+                  document.getElementById(`cell-${nextCell.row}-${nextCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }}
+                className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent no-underline text-inherit"
+                aria-label="Next word"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                  <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                </svg>
+              </a>
+            ) : (
+              <div
+                role="button"
+                tabIndex={-1}
+                onClick={() => {}}
+                className="w-10 shrink-0 flex items-center justify-center cursor-default touch-manipulation p-0 border-0 bg-transparent opacity-40"
+                aria-label="Next word"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                  <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                </svg>
+              </div>
+            )}
           </div>
         </div>
       )}

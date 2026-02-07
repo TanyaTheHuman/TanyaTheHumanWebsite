@@ -1,5 +1,34 @@
 @import "tailwindcss";
 
+html,
+body {
+  overflow-x: hidden;
+}
+
+html {
+  scroll-padding-top: 8px;
+  scroll-padding-bottom: 80px;
+  scroll-behavior: smooth;
+}
+
+/* Mobile: account for keyboard (~300px) so cell stays visible above it */
+@media (max-width: 768px) {
+  html {
+    scroll-padding-bottom: 320px;
+  }
+}
+
+[id^="cell-"] {
+  scroll-margin-top: 8px;
+  scroll-margin-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  [id^="cell-"] {
+    scroll-margin-bottom: 320px;
+  }
+}
+
 @theme {
   --color-cream: #EAE8E1;
   --color-ink: #1a1a1a;
