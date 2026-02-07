@@ -159,6 +159,44 @@ export function getFirstEmptyCellInNextWord(
 }
 
 /**
+ * Find the first empty cell in the previous word of the same direction.
+ * Used for backward navigation (e.g. left chevron).
+ *
+ * @param userInputs - Record of user inputs keyed by "row,col"
+ * @returns The first empty cell in the previous available word, or null if all words are filled
+ */
+export function getFirstEmptyCellInPreviousWord(
+  data: CrosswordData,
+  currentRow: number,
+  currentCol: number,
+  wordDirection: WordDirection,
+  userInputs: Record<string, string>
+): { row: number; col: number } | null {
+  const words = wordDirection === "across" ? data.acrossWords : data.downWords;
+  const currentWord = getWordContaining(data, currentRow, currentCol, wordDirection);
+
+  if (!currentWord || words.length === 0) return null;
+
+  const sortedWords = [...words].sort((a, b) => a.clueNumber - b.clueNumber);
+  const currentIndex = sortedWords.findIndex((w) => w.id === currentWord.id);
+  if (currentIndex === -1) return null;
+
+  for (let i = 1; i <= sortedWords.length; i++) {
+    const prevIndex = (currentIndex - i + sortedWords.length) % sortedWords.length;
+    const prevWord = sortedWords[prevIndex];
+
+    for (const cell of prevWord.cells) {
+      const key = `${cell.row},${cell.col}`;
+      if (!userInputs[key]) {
+        return { row: cell.row, col: cell.col };
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
  * Get the next word in the same direction, ordered by clue number.
  * Tab goes to the next word sequentially, Shift+Tab goes to the previous.
  * When reaching the end of across words, wraps to first down word (and vice versa).

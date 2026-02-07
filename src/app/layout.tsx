@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${ebGaramond.variable} min-h-screen font-serif bg-cream text-ink`}
+        className={`${ebGaramond.variable} min-h-screen font-serif bg-cream text-ink [font-feature-settings:"dlig"_1,"hlig"_1,"fina"_1,"kern"_1,"rlig"_1]`}
       >
         {children}
       </body>

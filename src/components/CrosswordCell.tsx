@@ -150,17 +150,7 @@ export function CrosswordCell({
   if (cellType === "black") {
     return (
       <div
-        className="shrink-0 crossword-cell crossword-cell-black"
-        style={{ 
-          backgroundColor: "#1a1a1a",
-          backgroundImage: `repeating-linear-gradient(
-            -45deg,
-            transparent,
-            transparent 2px,
-            rgba(87,83,78,0.15) 2px,
-            rgba(87,83,78,0.15) 3px
-          )`
-        }}
+        className="shrink-0 !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] bg-ink bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)]"
         aria-hidden
       />
     );
@@ -181,13 +171,13 @@ export function CrosswordCell({
     <button
       type="button"
       onClick={() => onSelect(row, col)}
-      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase crossword-cell ${bgClass} focus:outline-none overflow-hidden`}
+      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
       {/* Grain overlay */}
       <svg 
-        className="absolute inset-0 pointer-events-none crossword-cell-svg"
+        className="absolute inset-0 pointer-events-none !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px]"
         aria-hidden
       >
         {grainParticles.map((p) => (
@@ -202,23 +192,11 @@ export function CrosswordCell({
       </svg>
       
       {number && (
-        <span
-          className="absolute font-serif text-stone-600 crossword-cell-number"
-          style={{ top: 1, left: 1, fontSize: 10, fontWeight: 600, lineHeight: 1, zIndex: 1 }}
-        >
+        <span className="absolute top-px left-px font-serif text-stone-600 text-[10px] font-semibold leading-none z-[1] max-sm:text-[8px]">
           {number}
         </span>
       )}
-      <span 
-        className="crossword-cell-letter"
-        style={{ 
-          fontSize: 14, 
-          lineHeight: "18px", 
-          position: "relative", 
-          zIndex: 1,
-          fontWeight: 600
-        }}
-      >
+      <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]">
         {showAnswers ? letter : userInput ?? ""}
       </span>
     </button>

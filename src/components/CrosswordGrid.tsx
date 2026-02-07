@@ -16,6 +16,7 @@ interface CrosswordGridProps {
   onClearCell: (row: number, col: number) => void;
   onMobileKeyboardOpen?: () => void;
   onMobileKeyboardClose?: () => void;
+  excludeFromBlurRef?: React.RefObject<HTMLElement | null>;
 }
 
 export function CrosswordGrid({ 
@@ -29,6 +30,7 @@ export function CrosswordGrid({
   onClearCell,
   onMobileKeyboardOpen,
   onMobileKeyboardClose,
+  excludeFromBlurRef,
 }: CrosswordGridProps) {
   // Click handler with toggle behavior for already-selected cell
   const handleCellSelect = useCallback((row: number, col: number) => {
@@ -123,7 +125,7 @@ export function CrosswordGrid({
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (!gridRef.current || !mobileInputRef.current) return;
       const target = e.target as Node;
-      if (!gridRef.current.contains(target)) {
+      if (!gridRef.current.contains(target) && !excludeFromBlurRef?.current?.contains(target)) {
         mobileInputRef.current.blur();
       }
     };
@@ -133,7 +135,7 @@ export function CrosswordGrid({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, []);
+  }, [excludeFromBlurRef]);
 
   // Handle input from mobile keyboard (hidden input)
   const handleMobileInput = useCallback(
@@ -352,12 +354,7 @@ export function CrosswordGrid({
     <div
       ref={gridRef}
       tabIndex={0}
-      className="group inline-flex flex-col p-0 outline-none relative"
-      style={{ 
-        border: "2px solid #292524",
-        backgroundColor: "#57534e",
-        gap: "1px"
-      }}
+      className="group inline-flex flex-col p-0 outline-none relative border-2 border-stone-800 bg-stone-600 gap-px"
       role="grid"
       aria-label="Crossword grid. Use arrow keys to navigate."
     >
@@ -375,17 +372,10 @@ export function CrosswordGrid({
         onKeyDown={handleMobileKeyDown}
         onFocus={handleMobileInputFocus}
         onBlur={handleMobileInputBlur}
-        style={{
-          position: "absolute",
-          left: "-9999px",
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: "none",
-        }}
+        className="absolute -left-[9999px] w-px h-px opacity-0 pointer-events-none"
       />
       {data.cells.map((rowCells, rowIndex) => (
-        <div key={rowIndex} className="flex" style={{ gap: "1px" }}>
+        <div key={rowIndex} className="flex gap-px">
           {rowCells.map((cell) => (
             <CrosswordCell
               key={`${cell.row}-${cell.col}`}

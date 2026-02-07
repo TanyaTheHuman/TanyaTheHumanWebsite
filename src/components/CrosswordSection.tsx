@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
 import { getCrosswordData, getWordContaining } from "@/lib/crossword-data";
-import { getFirstCell } from "@/lib/crossword-navigation";
+import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousWord } from "@/lib/crossword-navigation";
 
 /* =============================================================================
    GRAIN PREVIEW CONTROLS (disabled)
@@ -38,6 +38,7 @@ export function CrosswordInteractive() {
   const [downScrolled, setDownScrolled] = useState(false);
   const acrossListRef = useRef<HTMLDivElement>(null);
   const downListRef = useRef<HTMLDivElement>(null);
+  const clueBarRef = useRef<HTMLDivElement>(null);
   
   const handleAcrossScroll = useCallback(() => {
     if (acrossListRef.current) {
@@ -90,6 +91,49 @@ export function CrosswordInteractive() {
   const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
     setSelection({ row, col, direction });
   }, []);
+
+  // Mobile clue bar: previous word (left chevron)
+  const handlePrevWord = useCallback(() => {
+    if (!selection) return;
+    const next = getFirstEmptyCellInPreviousWord(
+      data,
+      selection.row,
+      selection.col,
+      selection.direction,
+      userInputs
+    );
+    if (next) {
+      handleSelectCell(next.row, next.col, selection.direction);
+    }
+  }, [selection, data, userInputs, handleSelectCell]);
+
+  // Mobile clue bar: next word (right chevron)
+  const handleNextWord = useCallback(() => {
+    if (!selection) return;
+    const next = getFirstEmptyCellInNextWord(
+      data,
+      selection.row,
+      selection.col,
+      selection.direction,
+      userInputs
+    );
+    if (next) {
+      handleSelectCell(next.row, next.col, selection.direction);
+    }
+  }, [selection, data, userInputs, handleSelectCell]);
+
+  // Mobile clue bar: toggle direction (middle tap)
+  const handleToggleDirection = useCallback(() => {
+    if (!selection) return;
+    const cell = data.cells[selection.row]?.[selection.col];
+    if (!cell || cell.type === "black") return;
+    const hasAcross = cell.acrossWordId !== undefined;
+    const hasDown = cell.downWordId !== undefined;
+    if (hasAcross && hasDown) {
+      const newDirection = selection.direction === "across" ? "down" : "across";
+      handleSelectCell(selection.row, selection.col, newDirection);
+    }
+  }, [selection, data, handleSelectCell]);
   
   // Determine which word(s) the selected cell belongs to
   const activeWordIds = useMemo(() => {
@@ -335,16 +379,9 @@ export function CrosswordInteractive() {
         */}
         
         {/* Mobile: tap hint when no cell selected */}
-        {isMobile && !selection && (
-          <p
-            className="md:hidden text-center py-4 px-4 rounded bg-mustard-50 text-stone-600 font-serif text-[18px] italic tracking-[-0.36px] mb-2"
-          >
-            Tap a cell to start
-          </p>
-        )}
         {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
         {clueContent && (
-          <div className="hidden md:flex bg-mustard-100 rounded items-start gap-4 py-3 px-4 mb-0 z-10 w-full">
+          <div className="hidden md:flex bg-mustard-100 rounded items-start gap-4 py-3 px-4 mb-6 z-10 w-full">
             {clueContent}
           </div>
         )}
@@ -358,6 +395,7 @@ export function CrosswordInteractive() {
           onSelectCell={handleSelectCell}
           onInputLetter={handleInputLetter}
           onClearCell={handleClearCell}
+          excludeFromBlurRef={clueBarRef}
         />
         
         {/* DEV ONLY: Show/Hide Answers Toggle - only visible in development mode */}
@@ -378,13 +416,13 @@ export function CrosswordInteractive() {
         )}
       </div>
 
-        <div className="clue-lists flex flex-col lg:flex-row gap-6 border-b border-stone-800">
+        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-lg:h-[783px]">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className={`across-clue-list clue-list-container max-w-[250px] max-h-[783px] overflow-y-auto ${acrossScrolled ? "clue-list-scrolled" : ""}`}
+            className="across-clue-list clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 md:max-h-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:border-b md:border-stone-800"
           >
-            <h3 className="clue-list-header sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on]">
+            <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Across
             </h3>
             <ul>
@@ -416,13 +454,14 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
+            <div className="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none" />
           </div>
           <div 
             ref={downListRef}
             onScroll={handleDownScroll}
-            className={`clue-list-container max-w-[250px] max-h-[783px] overflow-y-auto ${downScrolled ? "clue-list-scrolled" : ""}`}
+            className="clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 md:max-h-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
           >
-            <h3 className="clue-list-header sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on]">
+            <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Down
             </h3>
             <ul>
@@ -454,15 +493,54 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
+            <div className="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
     </section>
-      {/* Mobile clue: fixed overlay when input focused, docks above keyboard (pure CSS) */}
+      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons */}
       {clueContent && (
-        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-svh top-0 inset-x-0 pointer-events-none">
-          <div className="absolute sm:hidden bottom-0 left-0 right-0 flex items-start gap-4 py-3 px-6 bg-mustard-100 w-full text-ink rounded-none">
-            {clueContent}
+        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-svh top-0 inset-x-0 pointer-events-none z-50">
+          <div
+            ref={clueBarRef}
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
+          >
+            <button
+              type="button"
+              onClick={handlePrevWord}
+              className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent"
+              aria-label="Previous word"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={handleToggleDirection}
+              className="flex-1 min-w-0 flex items-start gap-4 px-2 touch-manipulation"
+            >
+              {selectedWord && (
+                <>
+                  <span className="text-stone-800 text-right font-serif text-[20px] font-bold leading-normal tracking-[-0.4px] min-w-[28px] shrink-0">
+                    {selectedWord.clueNumber}
+                  </span>
+                  <span className="text-stone-800 text-justify font-serif text-[18px] font-normal leading-normal tracking-[-0.32px] w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
+                    {selectedWord.clue}
+                  </span>
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={handleNextWord}
+              className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent"
+              aria-label="Next word"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
+                <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+              </svg>
+            </button>
           </div>
         </div>
       )}

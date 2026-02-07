@@ -31,19 +31,19 @@ export default function Home() {
 
   return (
     <>
-      <div className="frame hero">
-        <header className="border-row top">
-          <p className="border-text">Come back soon.</p>
+      <div className="m-8 flex flex-col border border-border min-h-auto h-auto">
+        <header className="flex items-center justify-center -mt-px pt-0">
+          <p className="text-sm whitespace-nowrap px-4 py-4 bg-cream relative -top-[9px]">Come back soon.</p>
         </header>
-        <main className="flex flex-col items-center px-8" style={{ paddingTop: 104, paddingBottom: 104 }}>
-          <h1 className="main-heading text-center font-normal">
+        <main className="flex flex-col items-center px-8 pt-[104px] pb-[104px]">
+          <h1 className="text-[64px] leading-[62px] sm:text-[154px] sm:leading-[154px] text-center font-normal">
             New site
             <br />
             coming <span className="italic">soonish.</span>
           </h1>
         </main>
-        <footer className="border-row bottom">
-          <p className="border-text">But not too soon.</p>
+        <footer className="flex items-center justify-center -mb-px pb-0">
+          <p className="text-sm whitespace-nowrap px-4 py-4 bg-cream relative -bottom-[9px]">But not too soon.</p>
         </footer>
       </div>
       
@@ -51,16 +51,7 @@ export default function Home() {
       <div 
         className="w-full flex justify-center px-8 pt-8"
       >
-        <div 
-          className="p-3 bg-stone-200 rounded text-center"
-          style={{
-            fontFamily: 'monospace',
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#292524',
-            border: '2px solid #57534e',
-          }}
-        >
+        <div className="p-3 bg-stone-200 rounded text-center font-mono text-sm font-semibold text-stone-800 border-2 border-stone-600">
           Breakpoint: {getCurrentBreakpoint()} | Width: {windowWidth}px
         </div>
       </div>
