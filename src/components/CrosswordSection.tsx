@@ -26,7 +26,7 @@ export function CrosswordInteractive() {
   } | null>(() => firstCell ? { ...firstCell, direction: "across" } : null);
   
   const [isMobile, setIsMobile] = useState(false);
-  
+
   // Toggle for showing/hiding answers (dev only, default off)
   const [showAnswers, setShowAnswers] = useState(false);
   
@@ -272,13 +272,12 @@ export function CrosswordInteractive() {
 
   return (
     <section
-      className="w-full flex justify-center px-8"
-      style={{ paddingTop: 200, paddingBottom: 200 }}
+      className={`w-full flex justify-center px-8 pt-[200px] pb-[200px] ${showLargeClue ? "crossword-section-clue-visible" : ""}`}
     >
-      <div className="flex flex-col gap-8 md:flex-row md:items-start" style={{ gap: 32 }}>
+      <div className="flex flex-col gap-8 md:flex-row md:items-start">
         <div className="shrink-0">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
-        <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans" style={{ width: 300 }}>
+        <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
           <div className="mb-3">
             <label className="block text-xs text-stone-600 mb-1">Dot Spacing: {dotSpacing}px</label>
@@ -305,8 +304,8 @@ export function CrosswordInteractive() {
           </div>
         </div>
         <div className="mb-4">
-          <div style={{ width: 200, height: 200, position: "relative", border: "1px solid #ccc" }}>
-            <svg width="200" height="200" style={{ position: "absolute", top: 0, left: 0 }}>
+          <div className="w-[200px] h-[200px] relative border border-[#ccc]">
+            <svg width="200" height="200" className="absolute inset-0">
               <rect width="200" height="200" fill="#EAE8E1"/>
               {Array.from({ length: dotCount * 50 }, (_, i) => {
                 const hash = (n: number, seed: number) => { const x = Math.sin(n * seed) * 10000; return x - Math.floor(x); };
@@ -326,57 +325,20 @@ export function CrosswordInteractive() {
         {/* Mobile: tap hint when no cell selected */}
         {isMobile && !selection && (
           <p
-            className="md:hidden text-center py-4 px-4 rounded bg-mustard-50 text-stone-600"
-            style={{
-              fontFamily: '"EB Garamond", serif',
-              fontSize: 18,
-              fontStyle: "italic",
-              letterSpacing: -0.36,
-              marginBottom: 8,
-            }}
+            className="md:hidden text-center py-4 px-4 rounded bg-mustard-50 text-stone-600 font-serif text-[18px] italic tracking-[-0.36px] mb-2"
           >
             Tap a cell to start
           </p>
         )}
-        {/* Spacer for fixed clue - prevents layout jump when clue appears */}
-        {showLargeClue && <div className="highlighted-clue-spacer" aria-hidden />}
-        {/* Highlighted clue: fixed to top, full width, overlays content */}
-        {showLargeClue && (
-          <div 
-            className="bg-mustard-100 highlighted-clue"
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: 16,
-              width: "100%",
-            }}
+        {/* Highlighted clue: above grid on desktop, fixed to bottom on mobile */}
+        {showLargeClue && selectedWord && (
+          <div
+            className="bg-mustard-100 rounded highlighted-clue flex items-start gap-4 py-3 px-4 mb-0 z-10 w-full"
           >
-            <span style={{
-              color: "var(--stone-800, #292524)",
-              textAlign: "right",
-              fontFamily: '"EB Garamond", serif',
-              fontSize: 26,
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "normal",
-              letterSpacing: -0.52,
-              minWidth: 32,
-            }}>
+            <span className="text-stone-800 text-right font-serif text-[26px] font-bold leading-normal tracking-[-0.52px] min-w-[32px]">
               {selectedWord.clueNumber}
             </span>
-            <span style={{
-              color: "var(--stone-800, #292524)",
-              textAlign: "left",
-              fontFeatureSettings: "'dlig' on, 'hlig' on",
-              fontFamily: '"EB Garamond", serif',
-              fontSize: 20,
-              fontStyle: "normal",
-              fontWeight: 400,
-              lineHeight: "normal",
-              letterSpacing: -0.4,
-              marginTop: 4,
-              width: "100%",
-            }}>
+            <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
               {selectedWord.clue}
             </span>
           </div>
@@ -411,37 +373,13 @@ export function CrosswordInteractive() {
         )}
       </div>
 
-        <div className="clue-lists flex flex-col lg:flex-row" style={{ 
-          gap: 24,
-          borderBottom: "1px solid var(--stone-800, #292524)",
-        }}>
+        <div className="clue-lists flex flex-col lg:flex-row gap-6 border-b border-stone-800">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className={`across-clue-list clue-list-container ${acrossScrolled ? "clue-list-scrolled" : ""}`}
-            style={{ 
-              maxWidth: 250,
-              maxHeight: 783, // Match crossword grid (707px) + highlighted clue (~60px) + margin (16px)
-              overflowY: "auto",
-            }}
+            className={`across-clue-list clue-list-container max-w-[250px] max-h-[783px] overflow-y-auto ${acrossScrolled ? "clue-list-scrolled" : ""}`}
           >
-            <h3 className="clue-list-header" style={{
-              position: "sticky",
-              top: 0,
-              backgroundColor: "var(--paper, #EAE8E1)",
-              color: "var(--stone-800, #292524)",
-              fontFeatureSettings: "'dlig' on, 'hlig' on, 'fina' on, 'kern' on, 'rlig' on, 'swsh' on, 'cswh' on",
-              fontFamily: '"EB Garamond", serif',
-              fontSize: 20,
-              fontStyle: "italic",
-              fontWeight: 500,
-              lineHeight: "normal",
-              letterSpacing: -0.4,
-              paddingBottom: 16,
-              paddingLeft: 6,
-              marginBottom: 0,
-              zIndex: 1,
-            }}>
+            <h3 className="clue-list-header sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on]">
               Across
             </h3>
             <ul>
@@ -450,7 +388,7 @@ export function CrosswordInteractive() {
                 const isCrossing = crossingWordIds.crossingAcross.has(word.id);
                 const firstCell = word.cells[0];
                 const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
-                const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
+                const textColorClass = isComplete ? "text-stone-400" : "text-stone-800";
                 return (
                   <li 
                     key={word.id}
@@ -458,44 +396,15 @@ export function CrosswordInteractive() {
                       if (el) acrossClueRefs.current.set(word.id, el);
                       else acrossClueRefs.current.delete(word.id);
                     }}
-                    className={isActive ? "bg-mustard-100 rounded" : ""}
-                    style={{
-                      display: "flex",
-                      padding: "8px 6px",
-                      alignItems: "flex-start",
-                      gap: 12,
-                      cursor: "pointer",
-                    }}
+                    className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
                     onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "across")}
                   >
                     <span 
-                      className={isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}
-                      style={{
-                        color: textColor,
-                        textAlign: "left",
-                        fontFeatureSettings: "'dlig' on, 'hlig' on",
-                        fontFamily: '"EB Garamond", serif',
-                        fontSize: 14,
-                        fontStyle: "normal",
-                        fontWeight: 700,
-                        lineHeight: "normal",
-                        letterSpacing: -0.28,
-                        minWidth: 20,
-                        paddingLeft: 2,
-                      }}
+                      className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
                     >
                       {word.clueNumber}
                     </span>
-                    <span style={{
-                      color: textColor,
-                      textAlign: "left",
-                      fontFamily: '"EB Garamond", serif',
-                      fontSize: 16,
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      lineHeight: "normal",
-                      letterSpacing: -0.32,
-                    }}>
+                    <span className={`text-left font-serif text-[16px] font-normal leading-normal tracking-[-0.32px] ${textColorClass}`}>
                       {word.clue}
                     </span>
                   </li>
@@ -506,30 +415,9 @@ export function CrosswordInteractive() {
           <div 
             ref={downListRef}
             onScroll={handleDownScroll}
-            className={`clue-list-container ${downScrolled ? "clue-list-scrolled" : ""}`}
-            style={{ 
-              maxWidth: 250,
-              maxHeight: 783, // Match crossword grid (707px) + highlighted clue (~60px) + margin (16px)
-              overflowY: "auto",
-            }}
+            className={`clue-list-container max-w-[250px] max-h-[783px] overflow-y-auto ${downScrolled ? "clue-list-scrolled" : ""}`}
           >
-            <h3 className="clue-list-header" style={{
-              position: "sticky",
-              top: 0,
-              backgroundColor: "var(--paper, #EAE8E1)",
-              color: "var(--stone-800, #292524)",
-              fontFeatureSettings: "'dlig' on, 'hlig' on, 'fina' on, 'kern' on, 'rlig' on, 'swsh' on, 'cswh' on",
-              fontFamily: '"EB Garamond", serif',
-              fontSize: 20,
-              fontStyle: "italic",
-              fontWeight: 500,
-              lineHeight: "normal",
-              letterSpacing: -0.4,
-              paddingBottom: 16,
-              paddingLeft: 6,
-              marginBottom: 0,
-              zIndex: 1,
-            }}>
+            <h3 className="clue-list-header sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on]">
               Down
             </h3>
             <ul>
@@ -538,7 +426,7 @@ export function CrosswordInteractive() {
                 const isCrossing = crossingWordIds.crossingDown.has(word.id);
                 const firstCell = word.cells[0];
                 const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
-                const textColor = isComplete ? "var(--stone-400, #a8a29e)" : "var(--stone-800, #292524)";
+                const textColorClass = isComplete ? "text-stone-400" : "text-stone-800";
                 return (
                   <li 
                     key={word.id}
@@ -546,44 +434,15 @@ export function CrosswordInteractive() {
                       if (el) downClueRefs.current.set(word.id, el);
                       else downClueRefs.current.delete(word.id);
                     }}
-                    className={isActive ? "bg-mustard-100 rounded" : ""}
-                    style={{
-                      display: "flex",
-                      padding: "8px 6px",
-                      alignItems: "flex-start",
-                      gap: 12,
-                      cursor: "pointer",
-                    }}
+                    className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
                     onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "down")}
                   >
                     <span 
-                      className={isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}
-                      style={{
-                        color: textColor,
-                        textAlign: "left",
-                        fontFeatureSettings: "'dlig' on, 'hlig' on",
-                        fontFamily: '"EB Garamond", serif',
-                        fontSize: 14,
-                        fontStyle: "normal",
-                        fontWeight: 700,
-                        lineHeight: "normal",
-                        letterSpacing: -0.28,
-                        minWidth: 20,
-                        paddingLeft: 2,
-                      }}
+                      className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
                     >
                       {word.clueNumber}
                     </span>
-                    <span style={{
-                      color: textColor,
-                      textAlign: "left",
-                      fontFamily: '"EB Garamond", serif',
-                      fontSize: 16,
-                      fontStyle: "normal",
-                      fontWeight: 400,
-                      lineHeight: "normal",
-                      letterSpacing: -0.32,
-                    }}>
+                    <span className={`text-left font-serif text-[16px] font-normal leading-normal tracking-[-0.32px] ${textColorClass}`}>
                       {word.clue}
                     </span>
                   </li>
