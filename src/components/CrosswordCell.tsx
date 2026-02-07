@@ -175,9 +175,13 @@ export function CrosswordCell({
       onClick={(e) => {
         e.preventDefault();
         onSelect(row, col);
-        // Manual scroll: prevents browser from focusing the anchor, which steals focus
-        // from the hidden input and blocks the mobile keyboard from opening
-        e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Mobile only: scroll to cell so it stays visible above keyboard
+        const isMobile =
+          window.matchMedia("(max-width: 768px)").matches ||
+          window.matchMedia("(pointer: coarse)").matches;
+        if (isMobile) {
+          e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
       }}
       className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden no-underline text-inherit flex items-center justify-center ${bgClass}`}
       tabIndex={-1}
