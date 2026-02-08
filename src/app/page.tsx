@@ -36,7 +36,7 @@ export default function Home() {
           <p className="text-sm whitespace-nowrap px-4 py-4 bg-cream relative -top-[9px]">Come back soon.</p>
         </header>
         <main className="flex flex-col items-center px-8 pt-[104px] pb-[104px]">
-          <h1 className="text-[64px] leading-[62px] sm:text-[154px] sm:leading-[154px] text-center font-normal">
+          <h1 className="h1 text-center font-normal">
             New site
             <br />
             coming <span className="italic">soonish.</span>
