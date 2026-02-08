@@ -17,6 +17,7 @@ interface CrosswordGridProps {
   onMobileKeyboardOpen?: () => void;
   onMobileKeyboardClose?: () => void;
   excludeFromBlurRef?: React.RefObject<HTMLElement | null>;
+  gridRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export function CrosswordGrid({ 
@@ -31,6 +32,7 @@ export function CrosswordGrid({
   onMobileKeyboardOpen,
   onMobileKeyboardClose,
   excludeFromBlurRef,
+  gridRef: gridRefProp,
 }: CrosswordGridProps) {
   // Click handler with toggle behavior for already-selected cell
   const handleCellSelect = useCallback((row: number, col: number) => {
@@ -79,7 +81,8 @@ export function CrosswordGrid({
     }
   }, [selectedCell, direction, data, onSelectCell]);
 
-  const gridRef = useRef<HTMLDivElement>(null);
+  const internalGridRef = useRef<HTMLDivElement>(null);
+  const gridRef = gridRefProp ?? internalGridRef;
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 

@@ -39,6 +39,7 @@ export function CrosswordInteractive() {
   const acrossListRef = useRef<HTMLDivElement>(null);
   const downListRef = useRef<HTMLDivElement>(null);
   const clueBarRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   
   const handleAcrossScroll = useCallback(() => {
     if (acrossListRef.current) {
@@ -401,6 +402,7 @@ export function CrosswordInteractive() {
           onInputLetter={handleInputLetter}
           onClearCell={handleClearCell}
           excludeFromBlurRef={clueBarRef}
+          gridRef={gridRef}
         />
         
         {/* DEV ONLY: Show/Hide Answers Toggle - only visible in development mode */}
@@ -445,7 +447,13 @@ export function CrosswordInteractive() {
                       else acrossClueRefs.current.delete(word.id);
                     }}
                     className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
-                    onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "across")}
+                    onClick={() => {
+                      if (firstCell) {
+                        handleSelectCell(firstCell.row, firstCell.col, "across");
+                        gridRef.current?.focus();
+                        document.getElementById(`cell-${firstCell.row}-${firstCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }
+                    }}
                   >
                     <span 
                       className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
@@ -484,7 +492,13 @@ export function CrosswordInteractive() {
                       else downClueRefs.current.delete(word.id);
                     }}
                     className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
-                    onClick={() => firstCell && handleSelectCell(firstCell.row, firstCell.col, "down")}
+                    onClick={() => {
+                      if (firstCell) {
+                        handleSelectCell(firstCell.row, firstCell.col, "down");
+                        gridRef.current?.focus();
+                        document.getElementById(`cell-${firstCell.row}-${firstCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }
+                    }}
                   >
                     <span 
                       className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
