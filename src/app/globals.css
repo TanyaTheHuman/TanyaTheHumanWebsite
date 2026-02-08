@@ -12,7 +12,7 @@ html {
 }
 
 /* Mobile: account for keyboard (~300px) so cell stays visible above it */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   html {
     scroll-padding-bottom: 320px;
   }
@@ -27,7 +27,7 @@ html {
   [id^="cell-"] {
     scroll-margin-bottom: 320px;
   }
-}
+} */
 
 @theme {
   --color-cream: #EAE8E1;
@@ -44,8 +44,186 @@ html {
   --color-mustard-800: #63501E;
   --color-mustard-900: #463813;
   --color-mustard-950: #1E190B;
+
+  /* Figma type scale */
+  --size-xxs: 10px;
+  --size-xs: 13px;
+  --size-s: 16px;
+  --size-m: 26px;
+  --size-l: 40px;
+  --size-xl: 54px;
+  --size-2xl: 82px;
+  --size-3xl: 96px;
+  --size-4xl: 120px;
+  --size-5xl: 154px;
+
+  --h1-size: var(--size-5xl);
+  --h2-size: var(--size-4xl);
+  --h3-size: var(--size-3xl);
+  --h4-size: var(--size-2xl);
+  --h5-size: var(--size-xl);
+  --h6-size: var(--size-xl);
+  --body-default-size: var(--size-m);
+  --subtitle-size: var(--size-l);
+  --caption-size: var(--size-s);
+  --footnote-size: var(--size-xxs);
+  --body-default-italic-size: var(--size-m);
+  --body-large-size: var(--size-l);
+  --body-large-italic-size: var(--size-l);
 }
 
 @theme inline {
   --font-serif: var(--font-eb-garamond), Georgia, serif;
+}
+
+:root {
+  /* Figma typography font families - all use project serif */
+  --h1-font-family: var(--font-serif);
+  --h2-font-family: var(--font-serif);
+  --h3-font-family: var(--font-serif);
+  --h4-font-family: var(--font-serif);
+  --h5-font-family: var(--font-serif);
+  --h6-font-family: var(--font-serif);
+  --subtitle-font-family: var(--font-serif);
+  --body-default-font-family: var(--font-serif);
+  --body-default-italic-font-family: var(--font-serif);
+  --body-large-font-family: var(--font-serif);
+  --body-large-italic-font-family: var(--font-serif);
+  --caption-font-family: var(--font-serif);
+  --footnote-font-family: var(--font-serif);
+}
+
+@layer utilities {
+  .h1 {
+    font-family: var(--h1-font-family);
+    font-weight: 400;
+    font-size: var(--h1-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h1-italic {
+    font-family: var(--h1-font-family);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--h1-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h2 {
+    font-family: var(--h2-font-family);
+    font-weight: 400;
+    font-size: var(--h2-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h2-italic {
+    font-family: var(--h2-font-family);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--h2-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h3 {
+    font-family: var(--h3-font-family);
+    font-weight: 400;
+    font-size: var(--h3-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h3-italic {
+    font-family: var(--h3-font-family);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--h3-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h4 {
+    font-family: var(--h4-font-family);
+    font-weight: 400;
+    font-size: var(--h4-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h5 {
+    font-family: var(--h5-font-family);
+    font-weight: 400;
+    font-size: var(--h5-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .h6 {
+    font-family: var(--h6-font-family);
+    font-weight: 400;
+    font-size: var(--h6-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .subtitle {
+    font-family: var(--subtitle-font-family);
+    font-weight: 600;
+    font-size: var(--subtitle-size);
+    line-height: 1.2;
+    letter-spacing: 0em;
+  }
+
+  .body-large {
+    font-family: var(--body-large-font-family);
+    font-weight: 400;
+    font-size: var(--body-large-size);
+    line-height: 1.4;
+    letter-spacing: 0em;
+  }
+
+  .body-large-italic {
+    font-family: var(--body-large-italic-font-family);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--body-large-italic-size);
+    line-height: 1.4;
+    letter-spacing: 0em;
+  }
+
+  .body-default {
+    font-family: var(--body-default-font-family);
+    font-weight: 400;
+    font-size: var(--body-default-size);
+    line-height: 1.4;
+    letter-spacing: 0em;
+  }
+
+  .body-default-italic {
+    font-family: var(--body-default-italic-font-family);
+    font-weight: 400;
+    font-style: italic;
+    font-size: var(--body-default-italic-size);
+    line-height: 1.4;
+    letter-spacing: 0em;
+  }
+
+  .caption {
+    font-family: var(--caption-font-family);
+    font-weight: 400;
+    font-size: var(--caption-size);
+    line-height: 1.5;
+    letter-spacing: 0em;
+  }
+
+  .footnote {
+    font-family: var(--footnote-font-family);
+    font-weight: 400;
+    font-size: var(--footnote-size);
+    line-height: 1.1;
+    letter-spacing: 0em;
+  }
 }
