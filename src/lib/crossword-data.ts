@@ -123,8 +123,8 @@ const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
 };
 
 const DOWN_CLUE_BY_ANSWER: Record<string, string> = {
-  OSLO: "My first ever international flight was a one-way ticket here",
-  KIND: "If you can be anything in this world...",
+  OSLONORWAY: "My first ever international flight was a one-way ticket here",
+  BEKIND: "If you can be anything in this world...",
   HTML: "What 7-down assures me this website is written in",
   UNO: "The cause of more family feuds in my house than Monopoly",
   DASH: "10-across was acquired by Door-this in 2024",
