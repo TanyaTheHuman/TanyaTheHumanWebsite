@@ -41,7 +41,7 @@ const ROWS = 22;
 // Grid: 7 cells blacked (ARGUE/DELTA/OWNIT); 4-down FIXATE removed, UNO added at col 10 (1-based)
 const GRID_LAYOUT = [
   "O...B..H..U....D.", // Row 1 (1-based): U starts UNO down at col 10
-  "SYSTEMSTHINNER.A.", // Row 2: N at col 11 (index 10) for UNO
+  "SYSTEMSTHINKER.A.", // Row 2
   "L...K..M..O....S.", // Row 3: O at col 11 (index 10) for UNO
   "O.C.ITALIA.SOUTH.", // Row 4
   "N.U.N......C.....", // Row 5
