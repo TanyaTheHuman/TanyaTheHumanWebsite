@@ -112,7 +112,7 @@ const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
   CROSSWORDS: "My favourite word puzzles (in case you haven't noticed)",
   UIKIT:
     "Usually creating and maintaining this to make rest of my work easy and consistent",
-  SKI: "Despite living in 1-down for 5 years, I still hate this snowy activity",
+  SKI: "Despite 5 snowy winters, I still can't do this",
   VIPPS:
     "Before 10-across, I was at one of Scandinavia's leading fintechs",
   NORWEGIAN:
@@ -131,7 +131,7 @@ const DOWN_CLUE_BY_ANSWER: Record<string, string> = {
   CURSOR: "The tool I fought with to create what you see here",
   SCORPIO: "Being born in November makes me one of these, I guess",
   VHS: "Folks my age fondly remember renting movies in this format",
-  ABOUTME: "This puzzle replaces this part of my site",
+  ABOUTME: "The theme of this puzzle",
   HADADA: 'A large Ibis known locally as a "flying vuvuzela"',
   HADEDA: 'A large Ibis known locally as a "flying vuvuzela"',
   BLACKCAT:
