@@ -38,45 +38,63 @@ const ROWS = 22;
  * Each string represents a row: letters = letter cells, '.' = black cells
  * Grid is 17 columns × 23 rows
  */
+// Original grid with only 7 cells blacked: A,G,E of 5dn (ARGUE); E,T of 19ac (DELTA); W,I of 21ac (OWNIT)
 const GRID_LAYOUT = [
-  "O...B..H.F...A.D.", // Row 1
-  "SYSTEMSTHINKER.A.", // Row 2
-  "L...K..M.X...G.S.", // Row 3
-  "O.C.ITALIA.SOUTH.", // Row 4
-  "N.U.N....T.C.E...", // Row 5
-  "O.R.DELIVEROO.JA.", // Row 6
-  "RUSK.......R...B.", // Row 7
-  "W.O..H....OPINION", // Row 8
-  "AFRICA.B...I...U.", // Row 9
-  "Y....DELTA.OWNIT.", // Row 10
-  "..A..E.A.N...E.M.", // Row 11 - +ANDROID(col10)
-  "..PRODUCTDESIGNER", // Row 12
-  "..P..A.K.R...R...", // Row 13
-  "..S.G..CROSSWORDS", // Row 14
-  "....R..A.I...N...", // Row 15
-  "...UIKIT.D.SKIING", // Row 16
-  ".F..D...L........", // Row 17
-  "VIPPS..NORWEGIAN.", // Row 18
-  ".G.A.C..N.H..D..B", // Row 19
-  ".M.S.O..D.I..E..A", // Row 20
-  ".AUTOLAYOUT.KAYAK", // Row 21
-  "...A.D..N.E..L..E", // Row 22
+  "O...B..H.F.....D.", // Row 0: (0,13) A -> .
+  "SYSTEMSTHINKER.A.", // Row 1
+  "L...K..M.X.....S.", // Row 2: (2,13) G -> .
+  "O.C.ITALIA.SOUTH.", // Row 3
+  "N.U.N....T.C.....", // Row 4: (4,13) E -> .
+  "O.R.DELIVEROO.JA.", // Row 5
+  "RUSK.......R...B.", // Row 6
+  "W.O..H....OPINION", // Row 7
+  "AFRICA.B...I...U.", // Row 8
+  "Y....D.L.A.O.N.T.", // Row 9: (9,6)(9,8)(9,12)(9,14) E,T,W,I -> .
+  "..A..E.A.N...E.M.", // Row 10
+  "..PRODUCTDESIGNER", // Row 11
+  "..P..A.K.R...R...", // Row 12
+  "..S.G..CROSSWORDS", // Row 13
+  "....R..A.I...N...", // Row 14
+  "...UIKIT.D.SKIING", // Row 15
+  ".F..D...L........", // Row 16
+  "VIPPS..NORWEGIAN.", // Row 17
+  ".G.A.C..N.H..D..B", // Row 18
+  ".M.S.O..D.I..E..A", // Row 19
+  ".AUTOLAYOUT.KAYAK", // Row 20
+  "...A.D..N.E..L..E", // Row 21
 ];
 
-function isBlack(row: number, col: number): boolean {
-  if (row < 0 || row >= GRID_LAYOUT.length) return true;
-  const rowStr = GRID_LAYOUT[row];
+function isBlackInLayout(row: number, col: number, layout: string[]): boolean {
+  if (row < 0 || row >= layout.length) return true;
+  const rowStr = layout[row];
   if (col < 0 || col >= rowStr.length) return true;
   return rowStr[col] === ".";
 }
 
-function getLetter(row: number, col: number): string | undefined {
-  if (row < 0 || row >= GRID_LAYOUT.length) return undefined;
-  const rowStr = GRID_LAYOUT[row];
+function getLetterFromLayout(row: number, col: number, layout: string[]): string | undefined {
+  if (row < 0 || row >= layout.length) return undefined;
+  const rowStr = layout[row];
   if (col < 0 || col >= rowStr.length) return undefined;
   const char = rowStr[col];
   if (char === "." || char === "_") return undefined;
   return char;
+}
+
+function buildCellsFromLayout(layout: string[]): CrosswordCell[][] {
+  const out: CrosswordCell[][] = [];
+  for (let r = 0; r < layout.length; r++) {
+    out[r] = [];
+    for (let c = 0; c < layout[r].length; c++) {
+      const type: CellType = isBlackInLayout(r, c, layout) ? "black" : "letter";
+      out[r][c] = {
+        row: r,
+        col: c,
+        type,
+        letter: getLetterFromLayout(r, c, layout),
+      };
+    }
+  }
+  return out;
 }
 
 // Placeholder clues - keyed by the clue NUMBER shown in the grid
@@ -91,7 +109,6 @@ const ACROSS_CLUE_MAP: Record<number, string> = {
   17: "A viewpoint or belief",
   18: "Continent with 54 countries",
   20: "River formation or airline alliance",
-  21: "Take responsibility for it!",
   24: "Designer of digital experiences",
   27: "Puzzles with interlocking words",
   29: "Apple's interface framework",
@@ -107,7 +124,6 @@ const DOWN_CLUE_MAP: Record<number, string> = {
   2: "Opposite of being cruel",
   3: "Web's markup language",
   4: "To obsess over something",
-  5: "To dispute or disagree",
   6: "A quick sprint or punctuation",
   8: "Blinking text indicator",
   13: "Zodiac sign of the scorpion",
@@ -199,56 +215,127 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
   return { acrossWords, downWords };
 }
 
+// Remnant words to remove after blacking 7 cells: RU (down col 13), DLA (across row 9), ONT (across row 9)
+function isRemovedDownWord(w: CrosswordWord): boolean {
+  return (
+    w.cells.length === 2 &&
+    w.cells[0].col === 13 &&
+    w.cells[0].row === 1 &&
+    w.cells[1].row === 3
+  );
+}
+function isRemovedAcrossWord(w: CrosswordWord): boolean {
+  if (w.cells.length !== 3 || w.cells[0].row !== 9) return false;
+  const cols = w.cells.map((c) => c.col).sort((a, b) => a - b);
+  return (
+    (cols[0] === 5 && cols[1] === 7 && cols[2] === 9) ||
+    (cols[0] === 11 && cols[1] === 13 && cols[2] === 15)
+  );
+}
+
 export function getCrosswordData(): CrosswordData {
-  const cells: CrosswordCell[][] = [];
-
-  for (let r = 0; r < ROWS; r++) {
-    cells[r] = [];
-    for (let c = 0; c < COLS; c++) {
-      const type: CellType = isBlack(r, c) ? "black" : "letter";
-      cells[r][c] = {
-        row: r,
-        col: c,
-        type,
-        letter: getLetter(r, c),
-      };
-    }
-  }
-
+  const cells = buildCellsFromLayout(GRID_LAYOUT);
   const { acrossWords, downWords } = buildWordsFromGrid(cells);
 
-  // Assign clue numbers to cells that start words
-  // Scan left-to-right, top-to-bottom
+  // Assign initial clue numbers in scan order (left-to-right, top-to-bottom)
   let clueNumber = 1;
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const cell = cells[r][c];
       if (cell.type !== "letter") continue;
 
-      // Check if this cell starts an across word
       const startsAcross =
         (c === 0 || cells[r][c - 1].type === "black") &&
-        (c < COLS - 1 && cells[r][c + 1].type === "letter");
-
-      // Check if this cell starts a down word
+        c < COLS - 1 &&
+        cells[r][c + 1].type === "letter";
       const startsDown =
         (r === 0 || cells[r - 1][c].type === "black") &&
-        (r < ROWS - 1 && cells[r + 1][c].type === "letter");
+        r < ROWS - 1 &&
+        cells[r + 1][c].type === "letter";
 
       if (startsAcross || startsDown) {
         cell.number = clueNumber;
-        
-        // Update the word's clueNumber and clue text
         if (startsAcross && cell.acrossWordId !== undefined) {
           acrossWords[cell.acrossWordId].clueNumber = clueNumber;
-          acrossWords[cell.acrossWordId].clue = ACROSS_CLUE_MAP[clueNumber] || `Across clue ${clueNumber}`;
+          acrossWords[cell.acrossWordId].clue =
+            ACROSS_CLUE_MAP[clueNumber] || `Across clue ${clueNumber}`;
         }
         if (startsDown && cell.downWordId !== undefined) {
           downWords[cell.downWordId].clueNumber = clueNumber;
-          downWords[cell.downWordId].clue = DOWN_CLUE_MAP[clueNumber] || `Down clue ${clueNumber}`;
+          downWords[cell.downWordId].clue =
+            DOWN_CLUE_MAP[clueNumber] || `Down clue ${clueNumber}`;
         }
-        
         clueNumber++;
+      }
+    }
+  }
+
+  // Remove remnant words (ex-5dn RU, ex-19ac DLA, ex-21ac ONT)
+  const keptDown = downWords.filter((w) => !isRemovedDownWord(w));
+  const keptAcross = acrossWords.filter((w) => !isRemovedAcrossWord(w));
+
+  const newDownWords: CrosswordWord[] = keptDown.map((w, i) => ({ ...w, id: i }));
+  const newAcrossWords: CrosswordWord[] = keptAcross.map((w, i) => ({ ...w, id: i }));
+
+  const removedDownIds = new Set(downWords.filter(isRemovedDownWord).map((w) => w.id));
+  const removedAcrossIds = new Set(
+    acrossWords.filter(isRemovedAcrossWord).map((w) => w.id)
+  );
+  const oldDownToNew = new Map<number, number>();
+  keptDown.forEach((w, i) => oldDownToNew.set(w.id, i));
+  const oldAcrossToNew = new Map<number, number>();
+  keptAcross.forEach((w, i) => oldAcrossToNew.set(w.id, i));
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = cells[r][c];
+      if (cell.type !== "letter") continue;
+      if (cell.acrossWordId !== undefined) {
+        cell.acrossWordId = removedAcrossIds.has(cell.acrossWordId)
+          ? undefined
+          : oldAcrossToNew.get(cell.acrossWordId);
+      }
+      if (cell.downWordId !== undefined) {
+        cell.downWordId = removedDownIds.has(cell.downWordId)
+          ? undefined
+          : oldDownToNew.get(cell.downWordId);
+      }
+    }
+  }
+
+  // Renumber clues 1..N with no gaps (removed word starts have undefined word id, so skip them)
+  let nextNumber = 1;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = cells[r][c];
+      if (cell.type !== "letter") continue;
+
+      const startsAcross =
+        (c === 0 || cells[r][c - 1].type === "black") &&
+        c < COLS - 1 &&
+        cells[r][c + 1].type === "letter";
+      const startsDown =
+        (r === 0 || cells[r - 1][c].type === "black") &&
+        r < ROWS - 1 &&
+        cells[r + 1][c].type === "letter";
+
+      if (startsAcross || startsDown) {
+        const hasKeptWord =
+          (startsAcross && cell.acrossWordId !== undefined) ||
+          (startsDown && cell.downWordId !== undefined);
+
+        if (hasKeptWord) {
+          cell.number = nextNumber;
+          if (startsAcross && cell.acrossWordId !== undefined) {
+            newAcrossWords[cell.acrossWordId].clueNumber = nextNumber;
+          }
+          if (startsDown && cell.downWordId !== undefined) {
+            newDownWords[cell.downWordId].clueNumber = nextNumber;
+          }
+          nextNumber++;
+        } else {
+          cell.number = undefined;
+        }
       }
     }
   }
@@ -257,8 +344,8 @@ export function getCrosswordData(): CrosswordData {
     rows: ROWS,
     cols: COLS,
     cells,
-    acrossWords,
-    downWords,
+    acrossWords: newAcrossWords,
+    downWords: newDownWords,
   };
 }
 
