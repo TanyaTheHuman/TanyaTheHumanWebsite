@@ -53,9 +53,9 @@ const GRID_LAYOUT = [
   "..A..E.A.N...E.M.", // Row 10
   "..PRODUCTDESIGNER", // Row 11
   "..P..A.K.R...R...", // Row 12
-  "..S.G..CROSSWORDS", // Row 13
-  "....R..A.I.I.N...", // Row 15
-  "...UIKIT.D.SKIING", // Row 16
+  "..S.G..CROSSWORDS", // Row 13: last S starts SEW down
+  "....R..A.I.I.N..E", // Row 14: E of SEW
+  "...UIKIT.D.SKI..W", // Row 15: SKI (was SKIING), W of SEW
   ".F..D...L..T.....", // Row 17
   "VIPPS..NORWEGIAN.", // Row 18
   ".G.A.C..N..R.D..B", // Row 19
@@ -112,8 +112,7 @@ const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
   CROSSWORDS: "My favourite word puzzles (in case you haven't noticed)",
   UIKIT:
     "Usually creating and maintaining this to make rest of my work easy and consistent",
-  SKIING:
-    "Despite living in 1-down for 5 years, I still hate this snowy activity",
+  SKI: "Despite living in 1-down for 5 years, I still hate this snowy activity",
   VIPPS:
     "Before 10-across, I was at one of Scandinavia's leading fintechs",
   NORWEGIAN:
@@ -148,6 +147,7 @@ const DOWN_CLUE_BY_ANSWER: Record<string, string> = {
   IDEAS: "Mind set?",
   COLD: "My unusual personal preference when it comes to toast",
   BAKE: "I'd rather cook than do this",
+  SEW: "Taught myself to do this",
 };
 
 function buildWordsFromGrid(cells: CrosswordCell[][]): {

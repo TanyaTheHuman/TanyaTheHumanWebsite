@@ -12,7 +12,7 @@ AFRICA | See 12-across
 PRODUCTDESIGNER | Automator or layouts and drawer of rectangles (for 13+ years)
 CROSSWORDS | My favourite word puzzles (in case you haven't noticed)
 UIKIT | Usually creating and maintaining this to make rest of my work easy and consistent
-SKIING | Despite living in 1-down for 5 years, I still hate this snowy activity
+SKI | Despite living in 1-down for 5 years, I still hate this snowy activity
 VIPPS| Before 10-across, I was at one of Scandinavia's leading fintechs
 NORWEGIAN | Jeg snakker litt av dette språket fordi jeg bodd i 1-ned for fem år
 AUTOLAYOUT | It definitely fills my container, if you know what I mean
@@ -41,3 +41,4 @@ PASTA | The noodle of my people over at 8-across
 IDEAS | Mind set?
 COLD | My unusual personal preference when it comes to toast
 BAKE | I'd rather cook than do this
+SEW | Taught myself to do this
