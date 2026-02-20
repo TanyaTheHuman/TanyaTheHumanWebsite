@@ -45,9 +45,9 @@ const GRID_LAYOUT = [
   "L...K..M.X.....S.", // Row 2: (2,13) G -> .
   "O.C.ITALIA.SOUTH.", // Row 3
   "N.U.N....T.C.....", // Row 4: (4,13) E -> .
-  "O.R.DELIVEROO.JA.", // Row 5
-  "RUSK.......R...B.", // Row 6
-  "W.O..H....OPINION", // Row 7
+  "O.R.DELIVEROO.JA.", // Row 5 (1-based row 6: V at col 9)
+  "RUSK....H..R...B.", // Row 6: H at col 9 (1-based); R (SCORPIO) and B (ABOUT ME) correct
+  "W.O..H..S.OPINION", // Row 7: (7,9) S of VHS down
   "AFRICA.B...I...U.", // Row 8
   "Y....D.L.A.O.N.T.", // Row 9: (9,6)(9,8)(9,12)(9,14) E,T,W,I -> .
   "..A..E.A.N...E.M.", // Row 10
@@ -118,6 +118,9 @@ const ACROSS_CLUE_MAP: Record<number, string> = {
   35: "Adaptive iOS layout system",
   37: "Palindromic boat",
 };
+
+// Clue for the added down word VHS (row 6–8, col 9 in 1-based)
+const CLUE_VHS = "Old video format";
 
 const DOWN_CLUE_MAP: Record<number, string> = {
   1: "Capital city + country combination",
@@ -338,6 +341,13 @@ export function getCrosswordData(): CrosswordData {
         }
       }
     }
+  }
+
+  // Set clue for the added down word VHS (cells spell VHS)
+  const wordLetters = (word: CrosswordWord) =>
+    word.cells.map((c) => cells[c.row][c.col].letter ?? "").join("");
+  for (const w of newDownWords) {
+    if (wordLetters(w) === "VHS") w.clue = CLUE_VHS;
   }
 
   return {
