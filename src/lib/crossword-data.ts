@@ -38,18 +38,18 @@ const ROWS = 22;
  * Each string represents a row: letters = letter cells, '.' = black cells
  * Grid is 17 columns × 23 rows
  */
-// Original grid with only 7 cells blacked: A,G,E of 5dn (ARGUE); E,T of 19ac (DELTA); W,I of 21ac (OWNIT)
+// Grid: 7 cells blacked (ARGUE/DELTA/OWNIT); 4-down FIXATE removed, UNO added at col 10 (1-based)
 const GRID_LAYOUT = [
-  "O...B..H.F.....D.", // Row 0: (0,13) A -> .
-  "SYSTEMSTHINKER.A.", // Row 1
-  "L...K..M.X.....S.", // Row 2: (2,13) G -> .
-  "O.C.ITALIA.SOUTH.", // Row 3
-  "N.U.N....T.C.....", // Row 4: (4,13) E -> .
-  "O.R.DELIVEROO.JA.", // Row 5 (1-based row 6: V at col 9)
-  "RUSK....H..R...B.", // Row 6: H at col 9 (1-based); R (SCORPIO) and B (ABOUT ME) correct
-  "W.O..H..S.OPINION", // Row 7: (7,9) S of VHS down
-  "AFRICA.B...I...U.", // Row 8
-  "Y....D.L.A.O.N.T.", // Row 9: (9,6)(9,8)(9,12)(9,14) E,T,W,I -> .
+  "O...B..H..U....D.", // Row 1 (1-based): U starts UNO down at col 10
+  "SYSTEMSTHINNER.A.", // Row 2: N at col 11 (index 10) for UNO
+  "L...K..M..O....S.", // Row 3: O at col 11 (index 10) for UNO
+  "O.C.ITALIA.SOUTH.", // Row 4
+  "N.U.N......C.....", // Row 5
+  "O.R.DELIVEROO.JA.", // Row 6
+  "RUSK....H..R...B.", // Row 7: H of VHS
+  "W.O..H..S.OPINION", // Row 8: S of VHS
+  "AFRICA.B...I...U.", // Row 9
+  "Y....D.L.A.O.N.T.", // Row 10
   "..A..E.A.N...E.M.", // Row 10
   "..PRODUCTDESIGNER", // Row 11
   "..P..A.K.R...R...", // Row 12
@@ -119,14 +119,11 @@ const ACROSS_CLUE_MAP: Record<number, string> = {
   37: "Palindromic boat",
 };
 
-// Clue for the added down word VHS (row 6–8, col 9 in 1-based)
-const CLUE_VHS = "Old video format";
-
 const DOWN_CLUE_MAP: Record<number, string> = {
   1: "Capital city + country combination",
   2: "Opposite of being cruel",
   3: "Web's markup language",
-  4: "To obsess over something",
+  4: "Card game with a Draw Four", // UNO (replaces FIXATE)
   6: "A quick sprint or punctuation",
   8: "Blinking text indicator",
   13: "Zodiac sign of the scorpion",
@@ -341,13 +338,6 @@ export function getCrosswordData(): CrosswordData {
         }
       }
     }
-  }
-
-  // Set clue for the added down word VHS (cells spell VHS)
-  const wordLetters = (word: CrosswordWord) =>
-    word.cells.map((c) => cells[c.row][c.col].letter ?? "").join("");
-  for (const w of newDownWords) {
-    if (wordLetters(w) === "VHS") w.clue = CLUE_VHS;
   }
 
   return {
