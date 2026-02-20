@@ -54,14 +54,14 @@ const GRID_LAYOUT = [
   "..PRODUCTDESIGNER", // Row 11
   "..P..A.K.R...R...", // Row 12
   "..S.G..CROSSWORDS", // Row 13
-  "....R..A.I...N...", // Row 14
-  "...UIKIT.D.SKIING", // Row 15
-  ".F..D...L........", // Row 16
-  "VIPPS..NORWEGIAN.", // Row 17
-  ".G.A.C..N.H..D..B", // Row 18
-  ".M.S.O..D.I..E..A", // Row 19
-  ".AUTOLAYOUT.KAYAK", // Row 20
-  "...A.D..N.E..L..E", // Row 21
+  "....R..A.I.I.N...", // Row 15
+  "...UIKIT.D.SKIING", // Row 16
+  ".F..D...L..T.....", // Row 17
+  "VIPPS..NORWEGIAN.", // Row 18
+  ".G.A.C..N..R.D..B", // Row 19
+  ".M.S.O..D....E..A", // Row 20
+  ".AUTOLAYOUT.KAYAK", // Row 21
+  "...A.D..N....S..E", // Row 22
 ];
 
 function isBlackInLayout(row: number, col: number, layout: string[]): boolean {
@@ -215,8 +215,12 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
   return { acrossWords, downWords };
 }
 
-// Remnant words to remove after blacking 7 cells: RU (down col 13), DLA (across row 9), ONT (across row 9)
-function isRemovedDownWord(w: CrosswordWord): boolean {
+// Remnant words to remove: RU (down col 13), WHITE (32 down), DLA/ONT (across row 9)
+function isRemovedDownWord(w: CrosswordWord, cells: CrosswordCell[][]): boolean {
+  const wordStr = w.cells
+    .map((c) => cells[c.row][c.col].letter ?? "")
+    .join("");
+  if (wordStr === "WHITE") return true;
   return (
     w.cells.length === 2 &&
     w.cells[0].col === 13 &&
@@ -270,14 +274,16 @@ export function getCrosswordData(): CrosswordData {
     }
   }
 
-  // Remove remnant words (ex-5dn RU, ex-19ac DLA, ex-21ac ONT)
-  const keptDown = downWords.filter((w) => !isRemovedDownWord(w));
+  // Remove remnant words (ex-5dn RU, ex-32dn WHITE, ex-19ac DLA, ex-21ac ONT)
+  const keptDown = downWords.filter((w) => !isRemovedDownWord(w, cells));
   const keptAcross = acrossWords.filter((w) => !isRemovedAcrossWord(w));
 
   const newDownWords: CrosswordWord[] = keptDown.map((w, i) => ({ ...w, id: i }));
   const newAcrossWords: CrosswordWord[] = keptAcross.map((w, i) => ({ ...w, id: i }));
 
-  const removedDownIds = new Set(downWords.filter(isRemovedDownWord).map((w) => w.id));
+  const removedDownIds = new Set(
+    downWords.filter((w) => isRemovedDownWord(w, cells)).map((w) => w.id)
+  );
   const removedAcrossIds = new Set(
     acrossWords.filter(isRemovedAcrossWord).map((w) => w.id)
   );
@@ -338,6 +344,15 @@ export function getCrosswordData(): CrosswordData {
         }
       }
     }
+  }
+
+  // Set each word's clue to its answer (letters from grid)
+  const letterAt = (row: number, col: number) => cells[row][col].letter ?? "";
+  for (const w of newAcrossWords) {
+    w.clue = w.cells.map((c) => letterAt(c.row, c.col)).join("");
+  }
+  for (const w of newDownWords) {
+    w.clue = w.cells.map((c) => letterAt(c.row, c.col)).join("");
   }
 
   return {
