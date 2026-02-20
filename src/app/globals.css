@@ -84,14 +84,13 @@ html {
     font-family: var(--h1-font-family);
     font-weight: 400;
     font-size: 5rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
   }
 
   @media (min-width: 768px) {
     .h1 {
       font-size: 7.5rem;
-      line-height: 1.2;
     }
   }
 
@@ -106,14 +105,13 @@ html {
     font-weight: 400;
     font-style: italic;
     font-size: 5rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.05em;
   }
 
   @media (min-width: 768px) {
     .h1-italic {
       font-size: 7.5rem;
-      line-height: 1.2;
     }
   }
 
@@ -127,14 +125,13 @@ html {
     font-family: var(--h2-font-family);
     font-weight: 400;
     font-size: 3.75rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h2 {
       font-size: 5.625rem;
-      line-height: 1.2;
     }
   }
 
@@ -149,14 +146,13 @@ html {
     font-weight: 400;
     font-style: italic;
     font-size: 3.75rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h2-italic {
       font-size: 5.625rem;
-      line-height: 1.2;
     }
   }
 
@@ -170,14 +166,13 @@ html {
     font-family: var(--h3-font-family);
     font-weight: 400;
     font-size: 3rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h3 {
       font-size: 4.5rem;
-      line-height: 1.2;
     }
   }
 
@@ -192,14 +187,13 @@ html {
     font-weight: 400;
     font-style: italic;
     font-size: 3rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.1;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h3-italic {
       font-size: 4.5rem;
-      line-height: 1.2;
     }
   }
 
@@ -213,14 +207,13 @@ html {
     font-family: var(--h4-font-family);
     font-weight: 400;
     font-size: 2.5rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h4 {
       font-size: 3.75rem;
-      line-height: 1.2;
     }
   }
 
@@ -234,8 +227,8 @@ html {
     font-family: var(--h5-font-family);
     font-weight: 400;
     font-size: 2.125rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
@@ -255,14 +248,13 @@ html {
     font-family: var(--h6-font-family);
     font-weight: 400;
     font-size: 1.5rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.2;
+    letter-spacing: 0.03em;
   }
 
   @media (min-width: 768px) {
     .h6 {
       font-size: 2.25rem;
-      line-height: 1.2;
     }
   }
 
@@ -276,14 +268,13 @@ html {
     font-family: var(--subtitle-font-family);
     font-weight: 600;
     font-size: 1.25rem;
-    line-height: 0.96;
-    letter-spacing: 0em;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
   }
 
   @media (min-width: 768px) {
     .subtitle {
       font-size: 1.40625rem;
-      line-height: 1.2;
     }
   }
 
@@ -297,13 +288,13 @@ html {
     font-family: var(--body-large-font-family);
     font-weight: 400;
     font-size: 1.125rem;
-    line-height: 1.12;
-    letter-spacing: 0em;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
   }
 
   @media (min-width: 768px) {
     .body-large {
-      line-height: 1.4;
+      line-height: 1.3;
     }
   }
 
@@ -312,13 +303,13 @@ html {
     font-weight: 400;
     font-style: italic;
     font-size: 1.125rem;
-    line-height: 1.12;
-    letter-spacing: 0em;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
   }
 
   @media (min-width: 768px) {
     .body-large-italic {
-      line-height: 1.4;
+      line-height: 1.3;
     }
   }
 
@@ -326,13 +317,13 @@ html {
     font-family: var(--body-default-font-family);
     font-weight: 400;
     font-size: 1rem;
-    line-height: 1.12;
-    letter-spacing: 0em;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
   }
 
   @media (min-width: 768px) {
     .body-default {
-      line-height: 1.4;
+      line-height: 1.3;
     }
   }
 
@@ -341,13 +332,27 @@ html {
     font-weight: 400;
     font-style: italic;
     font-size: 1rem;
-    line-height: 1.12;
-    letter-spacing: 0em;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
   }
 
   @media (min-width: 768px) {
     .body-default-italic {
-      line-height: 1.4;
+      line-height: 1.3;
+    }
+  }
+
+  .body-default-bold {
+    font-family: var(--body-default-font-family);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+  }
+
+  @media (min-width: 768px) {
+    .body-default-bold {
+      line-height: 1.3;
     }
   }
 
@@ -355,14 +360,14 @@ html {
     font-family: var(--caption-font-family);
     font-weight: 400;
     font-size: 0.75rem;
-    line-height: 1.2;
+    line-height: 1.4;
     letter-spacing: 0em;
   }
 
   @media (min-width: 768px) {
     .caption {
       font-size: 0.84375rem;
-      line-height: 1.5;
+      line-height: 1.4;
     }
   }
 

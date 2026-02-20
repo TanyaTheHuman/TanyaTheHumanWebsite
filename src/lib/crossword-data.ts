@@ -108,7 +108,7 @@ const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
   OPINION: "I'll offer a strong one of these, loosely held",
   AFRICA: "See 12-across",
   PRODUCTDESIGNER:
-    "Automator or layouts and drawer of rectangles (for 13+ years)",
+    "Automator or layouts and drawer of rectangles",
   CROSSWORDS: "My favourite word puzzles (in case you haven't noticed)",
   UIKIT:
     "Usually creating and maintaining this to make rest of my work easy and consistent",
