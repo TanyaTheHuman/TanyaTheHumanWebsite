@@ -97,50 +97,57 @@ function buildCellsFromLayout(layout: string[]): CrosswordCell[][] {
   return out;
 }
 
-// Placeholder clues - keyed by the clue NUMBER shown in the grid
-// Replace with real clues later
-const ACROSS_CLUE_MAP: Record<number, string> = {
-  7: "One who sees the big picture and all its parts",
-  9: "Boot-shaped country",
-  10: "Direction of penguins and polar bears",
-  11: "Food delivery app founded in London",
-  12: "Short affirmative in German",
-  14: "Crunchy baby biscuit",
-  17: "A viewpoint or belief",
-  18: "Continent with 54 countries",
-  20: "River formation or airline alliance",
-  24: "Designer of digital experiences",
-  27: "Puzzles with interlocking words",
-  29: "Apple's interface framework",
-  30: "Winter sport on slopes",
-  31: "Norwegian payment app",
-  32: "Scandinavian language",
-  35: "Adaptive iOS layout system",
-  37: "Palindromic boat",
+// Real clues keyed by answer (from docs/crossword-clues.txt). Grid answer is the key.
+const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
+  SYSTEMSTHINKER: "Always looking at the whole picture",
+  ITALIA: "Boot-shaped country that makes up half my heritage",
+  SOUTH: "With 21-across, where I was born and raised",
+  DELIVEROO: "Currently here, doing IC stuff and leading a small team",
+  JA: "Joburg affirmative that still lingers in my lexicon",
+  RUSK: "Like a biscotti, but Afrikaans",
+  OPINION: "I'll offer a strong one of these, loosely held",
+  AFRICA: "See 12-across",
+  PRODUCTDESIGNER:
+    "Automator or layouts and drawer of rectangles (for 13+ years)",
+  CROSSWORDS: "My favourite word puzzles (in case you haven't noticed)",
+  UIKIT:
+    "Usually creating and maintaining this to make rest of my work easy and consistent",
+  SKIING:
+    "Despite living in 1-down for 5 years, I still hate this snowy activity",
+  VIPPS:
+    "Before 10-across, I was at one of Scandinavia's leading fintechs",
+  NORWEGIAN:
+    "Jeg snakker litt av dette språket fordi jeg bodd i 1-ned for fem år",
+  AUTOLAYOUT: "It definitely fills my container, if you know what I mean",
+  KAYAK:
+    "Once paddled one of these (unknowingly) across a shipping lane in Ha long bay",
 };
 
-const DOWN_CLUE_MAP: Record<number, string> = {
-  1: "Capital city + country combination",
-  2: "Opposite of being cruel",
-  3: "Web's markup language",
-  4: "Card game with a Draw Four", // UNO (replaces FIXATE)
-  6: "A quick sprint or punctuation",
-  8: "Blinking text indicator",
-  13: "Zodiac sign of the scorpion",
-  15: "Personal website section",
-  16: "Noisy African bird",
-  19: "Superstitious feline",
-  22: "Classic Italian cocktail",
-  23: "Software on your phone",
-  25: "Google's mobile OS",
-  26: "Layout systems with rows and columns",
-  28: "Design tool by Dylan Field",
-  33: "UK's capital city",
-  34: "Italian noodle dish",
-  36: "Absence of color",
-  38: "Perfect or optimal",
-  39: "Low temperature",
-  40: "Cook in an oven",
+const DOWN_CLUE_BY_ANSWER: Record<string, string> = {
+  OSLO: "My first ever international flight was a one-way ticket here",
+  KIND: "If you can be anything in this world...",
+  HTML: "What 7-down assures me this website is written in",
+  UNO: "The cause of more family feuds in my house than Monopoly",
+  DASH: "10-across was acquired by Door-this in 2024",
+  CURSOR: "The tool I fought with to create what you see here",
+  SCORPIO: "Being born in November makes me one of these, I guess",
+  VHS: "Folks my age fondly remember renting movies in this format",
+  ABOUTME: "This puzzle replaces this part of my site",
+  HADADA: 'A large Ibis known locally as a "flying vuvuzela"',
+  HADEDA: 'A large Ibis known locally as a "flying vuvuzela"',
+  BLACKCAT:
+    "Furry, panther-like animal that insists on sleeping on my keyboard",
+  ANDROID: "Might be rare to meet a 22-across that prefers this",
+  NEGRONI: "The Sbagliato version is indeed a mistake",
+  APPS: "Makes up most of my portfolio, with some tooling and web in-between",
+  GRIDS: "This puzzle's construction relies on these",
+  SISTER: "I'm a big one of these by 4 years",
+  FIGMA: "One of the tools of my trade",
+  LONDON: "Currently living here",
+  PASTA: "The noodle of my people over at 8-across",
+  IDEAS: "Mind set?",
+  COLD: "My unusual personal preference when it comes to toast",
+  BAKE: "I'd rather cook than do this",
 };
 
 function buildWordsFromGrid(cells: CrosswordCell[][]): {
@@ -261,13 +268,11 @@ export function getCrosswordData(): CrosswordData {
         cell.number = clueNumber;
         if (startsAcross && cell.acrossWordId !== undefined) {
           acrossWords[cell.acrossWordId].clueNumber = clueNumber;
-          acrossWords[cell.acrossWordId].clue =
-            ACROSS_CLUE_MAP[clueNumber] || `Across clue ${clueNumber}`;
+          acrossWords[cell.acrossWordId].clue = "";
         }
         if (startsDown && cell.downWordId !== undefined) {
           downWords[cell.downWordId].clueNumber = clueNumber;
-          downWords[cell.downWordId].clue =
-            DOWN_CLUE_MAP[clueNumber] || `Down clue ${clueNumber}`;
+          downWords[cell.downWordId].clue = "";
         }
         clueNumber++;
       }
@@ -346,13 +351,15 @@ export function getCrosswordData(): CrosswordData {
     }
   }
 
-  // Set each word's clue to its answer (letters from grid)
+  // Set each word's clue from real clues (keyed by answer), fallback to answer
   const letterAt = (row: number, col: number) => cells[row][col].letter ?? "";
   for (const w of newAcrossWords) {
-    w.clue = w.cells.map((c) => letterAt(c.row, c.col)).join("");
+    const answer = w.cells.map((c) => letterAt(c.row, c.col)).join("");
+    w.clue = ACROSS_CLUE_BY_ANSWER[answer] ?? answer;
   }
   for (const w of newDownWords) {
-    w.clue = w.cells.map((c) => letterAt(c.row, c.col)).join("");
+    const answer = w.cells.map((c) => letterAt(c.row, c.col)).join("");
+    w.clue = DOWN_CLUE_BY_ANSWER[answer] ?? answer;
   }
 
   return {
