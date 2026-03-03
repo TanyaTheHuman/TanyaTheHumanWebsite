@@ -107,6 +107,7 @@ html {
     font-size: 5rem;
     line-height: 1.1;
     letter-spacing: 0.05em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on, "fina" on;
   }
 
   @media (min-width: 768px) {
@@ -148,6 +149,7 @@ html {
     font-size: 3.75rem;
     line-height: 1.1;
     letter-spacing: 0.03em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on;
   }
 
   @media (min-width: 768px) {
@@ -189,6 +191,7 @@ html {
     font-size: 3rem;
     line-height: 1.1;
     letter-spacing: 0.03em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on;
   }
 
   @media (min-width: 768px) {
@@ -305,6 +308,7 @@ html {
     font-size: 1.125rem;
     line-height: 1.3;
     letter-spacing: 0.01em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on;
   }
 
   @media (min-width: 768px) {
@@ -334,6 +338,7 @@ html {
     font-size: 1rem;
     line-height: 1.3;
     letter-spacing: 0.01em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on;
   }
 
   @media (min-width: 768px) {

@@ -59,6 +59,17 @@ export default function Home() {
       <div className="crossword-section">
         <CrosswordInteractive />
       </div>
+
+      <section className="flex flex-col items-center self-stretch py-[158px] px-[56px] gap-0">
+        <img
+          src="/ok-bye.png"
+          alt="Woman waving goodbye with a peace sign"
+          className="max-w-[140px] h-auto"
+        />
+        <p className="body-large">
+          Ok, <span className="body-large-italic">bye</span>
+        </p>
+      </section>
     </>
   );
 }

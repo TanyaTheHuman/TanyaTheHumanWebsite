@@ -205,7 +205,7 @@ export function CrosswordInteractive() {
 
   // Scroll crossing clues into view when selection changes, accounting for gradient
   useEffect(() => {
-    const GRADIENT_HEIGHT = 48; // Height of the gradient fade at bottom
+    const GRADIENT_HEIGHT = 32; // Height of the gradient fade at bottom (matches h-8)
 
     // Scroll crossing across clues into view
     crossingWordIds.crossingAcross.forEach(wordId => {
@@ -264,7 +264,7 @@ export function CrosswordInteractive() {
 
     const isAcross = activeWordIds.activeType === "across" && activeWordIds.acrossId === selectedWord.id;
     const isDown = activeWordIds.activeType === "down" && activeWordIds.downId === selectedWord.id;
-    const GRADIENT_HEIGHT = 48; // Height of the gradient fade at bottom
+    const GRADIENT_HEIGHT = 32; // Height of the gradient fade at bottom (matches h-8)
 
     // Handle across clues
     if (isAcross && acrossListRef.current) {
@@ -330,7 +330,7 @@ export function CrosswordInteractive() {
       <span className="text-stone-800 text-right font-serif text-[26px] font-bold leading-normal tracking-[-0.52px] min-w-[32px]">
         {selectedWord.clueNumber}
       </span>
-      <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
+      <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 flex-1 min-w-0 [font-feature-settings:'dlig'_on,'hlig'_on]">
         {selectedWord.clue}
       </span>
     </>
@@ -341,8 +341,8 @@ export function CrosswordInteractive() {
       <section
         className="w-full flex justify-center px-8 pt-[200px] pb-[200px]"
       >
-        <div className="flex flex-col gap-8 md:flex-row md:items-start">
-          <div className="shrink-0">
+        <div className="flex flex-col gap-8 md:flex-row md:items-stretch">
+          <div className="shrink-0 w-min">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
@@ -392,7 +392,7 @@ export function CrosswordInteractive() {
         {/* Mobile: tap hint when no cell selected */}
         {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
         {clueContent && (
-          <div className="hidden md:flex bg-mustard-100 rounded items-start gap-4 py-3 px-4 mb-6 z-10 w-full">
+          <div className="hidden md:flex bg-mustard-100 rounded items-center justify-center gap-4 py-3 px-4 mb-6 z-10 w-full h-[88px]">
             {clueContent}
           </div>
         )}
@@ -429,11 +429,11 @@ export function CrosswordInteractive() {
         )}
       </div>
 
-        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-lg:h-[783px]">
+        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px] relative">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className="across-clue-list clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 md:max-h-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:border-b md:border-stone-800"
+            className="across-clue-list clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:max-lg:border-b md:max-lg:border-stone-800"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Across
@@ -473,12 +473,12 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
-            <div className="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none" />
+            <div className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none lg:hidden" />
           </div>
           <div 
             ref={downListRef}
             onScroll={handleDownScroll}
-            className="clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 md:max-h-none overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
+            className="clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Down
@@ -518,8 +518,15 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
-            <div className="sticky bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none" />
+            <div className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none lg:hidden" />
           </div>
+          {/* Single full-width gradient at bottom when lists are side by side (lg), same treatment as stacked md */}
+          <div
+            className="hidden lg:block absolute bottom-0 left-0 right-0 h-8 pointer-events-none z-10"
+            style={{
+              background: "linear-gradient(to top, var(--color-cream) 0%, rgba(234, 232, 225, 0.4) 40%, transparent 100%)",
+            }}
+          />
         </div>
       </div>
     </section>
