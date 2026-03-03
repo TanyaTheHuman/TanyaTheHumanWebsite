@@ -131,6 +131,7 @@ interface CrosswordCellProps {
   number?: number;
   isSelected: boolean;
   isInActiveWord: boolean;
+  isCrossReferenced?: boolean;
   showAnswers: boolean;
   onSelect: (row: number, col: number) => void;
 }
@@ -144,6 +145,7 @@ export function CrosswordCell({
   number,
   isSelected,
   isInActiveWord,
+  isCrossReferenced,
   showAnswers,
   onSelect,
 }: CrosswordCellProps) {
@@ -161,7 +163,9 @@ export function CrosswordCell({
     ? "bg-cream group-focus-within:bg-mustard-300"
     : isInActiveWord
       ? "bg-cream group-focus-within:bg-mustard-100"
-      : "bg-cream";
+      : isCrossReferenced
+        ? "bg-cream group-focus-within:bg-mustard-100"
+        : "bg-cream";
 
   // Generate unique grain for this cell based on position
   // Default to 31px for SSR, will be adjusted via CSS media query

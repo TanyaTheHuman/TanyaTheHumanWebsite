@@ -11,6 +11,7 @@ interface CrosswordGridProps {
   direction: "across" | "down";
   showAnswers: boolean;
   userInputs: Record<string, string>;
+  crossReferencedCells?: Set<string>;
   onSelectCell: (row: number, col: number, direction: "across" | "down") => void;
   onInputLetter: (row: number, col: number, letter: string) => void;
   onClearCell: (row: number, col: number) => void;
@@ -26,6 +27,7 @@ export function CrosswordGrid({
   direction, 
   showAnswers, 
   userInputs,
+  crossReferencedCells,
   onSelectCell,
   onInputLetter,
   onClearCell,
@@ -391,6 +393,15 @@ export function CrosswordGrid({
               isInActiveWord={
                 cell.type === "letter" &&
                 activeWordCells.has(`${cell.row},${cell.col}`) &&
+                !(
+                  selectedCell?.row === cell.row &&
+                  selectedCell?.col === cell.col
+                )
+              }
+              isCrossReferenced={
+                cell.type === "letter" &&
+                !!crossReferencedCells?.has(`${cell.row},${cell.col}`) &&
+                !activeWordCells.has(`${cell.row},${cell.col}`) &&
                 !(
                   selectedCell?.row === cell.row &&
                   selectedCell?.col === cell.col

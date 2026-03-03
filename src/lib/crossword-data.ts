@@ -97,58 +97,65 @@ function buildCellsFromLayout(layout: string[]): CrosswordCell[][] {
   return out;
 }
 
-// Real clues keyed by answer (from docs/crossword-clues.txt). Grid answer is the key.
-const ACROSS_CLUE_BY_ANSWER: Record<string, string> = {
-  SYSTEMSTHINKER: "Always looking at the whole picture",
-  ITALIA: "Boot-shaped country that makes up half my heritage",
-  SOUTH: "With 21-across, where I was born and raised",
-  DELIVEROO: "Currently here, doing IC stuff and leading a small team",
-  JA: "Joburg affirmative that still lingers in my lexicon",
-  RUSK: "Like a biscotti, but Afrikaans",
-  OPINION: "I'll offer a strong one of these, loosely held",
-  AFRICA: "See 12-across",
-  PRODUCTDESIGNER:
-    "Automator or layouts and drawer of rectangles",
-  CROSSWORDS: "My favourite word puzzles (in case you haven't noticed)",
-  UIKIT:
-    "Usually creating and maintaining this to make rest of my work easy and consistent",
-  SKI: "Despite 5 snowy winters, I still can't do this",
-  VIPPS:
-    "Before 10-across, I was at one of Scandinavia's leading fintechs",
-  NORWEGIAN:
-    "Jeg snakker litt av dette språket fordi jeg bodd i 1-ned for fem år",
-  AUTOLAYOUT: "It definitely fills my container, if you know what I mean",
-  KAYAK:
-    "Once paddled one of these (unknowingly) across a shipping lane in Ha long bay",
-};
+interface ClueEntry {
+  clueNumber: number;
+  answer: string;
+  clue: string;
+}
 
-const DOWN_CLUE_BY_ANSWER: Record<string, string> = {
-  OSLONORWAY: "My first ever international flight was a one-way ticket here",
-  BEKIND: "If you can be anything in this world...",
-  HTML: "What 7-down assures me this website is written in",
-  UNO: "The cause of more family feuds in my house than Monopoly",
-  DASH: "10-across was acquired by Door-this in 2024",
-  CURSOR: "The tool I fought with to create what you see here",
-  SCORPIO: "Being born in November makes me one of these, I guess",
-  VHS: "Folks my age fondly remember renting movies in this format",
-  ABOUTME: "The theme of this puzzle",
-  HADADA: 'A large Ibis known locally as a "flying vuvuzela"',
-  HADEDA: 'A large Ibis known locally as a "flying vuvuzela"',
-  BLACKCAT:
-    "Furry, panther-like animal that insists on sleeping on my keyboard",
-  ANDROID: "Might be rare to meet a 22-across that prefers this",
-  NEGRONI: "The Sbagliato version is indeed a mistake",
-  APPS: "Makes up most of my portfolio, with some tooling and web in-between",
-  GRIDS: "This puzzle's construction relies on these",
-  SISTER: "I'm a big one of these by 4 years",
-  FIGMA: "One of the tools of my trade",
-  LONDON: "Currently living here",
-  PASTA: "The noodle of my people over at 8-across",
-  IDEAS: "Mind set?",
-  COLD: "My unusual personal preference when it comes to toast",
-  BAKE: "I'd rather cook than do this",
-  SEW: "Taught myself to do this",
-};
+const ACROSS_CLUES: ClueEntry[] = [
+  { clueNumber: 6, answer: "SYSTEMSTHINKER", clue: "Always looking at the whole picture" },
+  { clueNumber: 8, answer: "ITALIA", clue: "Boot-shaped country that makes up half my heritage" },
+  { clueNumber: 9, answer: "SOUTH", clue: "With 17-across, where I was born and raised" },
+  { clueNumber: 10, answer: "DELIVEROO", clue: "Currently here, doing IC stuff and leading a small team" },
+  { clueNumber: 12, answer: "JA", clue: "Joburg affirmative that still lingers in my lexicon" },
+  { clueNumber: 14, answer: "RUSK", clue: "Like a biscotti, but Afrikaans" },
+  { clueNumber: 16, answer: "OPINION", clue: "I'll offer a strong one of these, loosely held" },
+  { clueNumber: 17, answer: "AFRICA", clue: "See 9-across" },
+  { clueNumber: 22, answer: "PRODUCTDESIGNER", clue: "Automator or layouts and drawer of rectangles" },
+  { clueNumber: 24, answer: "CROSSWORDS", clue: "My favourite word puzzles (in case you haven't noticed)" },
+  { clueNumber: 27, answer: "UIKIT", clue: "Usually creating and maintaining this to make rest of my work easy and consistent" },
+  { clueNumber: 28, answer: "SKI", clue: "Despite 5 snowy winters, I still can't do this" },
+  { clueNumber: 31, answer: "VIPPS", clue: "Before 10-across, I was at one of Scandinavia's leading fintechs" },
+  { clueNumber: 33, answer: "NORWEGIAN", clue: "Jeg snakker litt av dette språket fordi jeg bodd i 1-down for fem år" },
+  { clueNumber: 37, answer: "AUTOLAYOUT", clue: "It definitely fills my container, if you know what I mean" },
+  { clueNumber: 38, answer: "KAYAK", clue: "Once paddled one of these (unknowingly) across a shipping lane in Ha long bay" },
+];
+
+const DOWN_CLUES: ClueEntry[] = [
+  { clueNumber: 1, answer: "OSLONORWAY", clue: "My first ever international flight was a one-way ticket here" },
+  { clueNumber: 2, answer: "BEKIND", clue: "If you can be anything in this world..." },
+  { clueNumber: 3, answer: "HTML", clue: "What 7-down assures me this website is written in" },
+  { clueNumber: 4, answer: "UNO", clue: "The cause of more family feuds in my house than Monopoly" },
+  { clueNumber: 5, answer: "DASH", clue: "10-across was acquired by Door-this in 2024" },
+  { clueNumber: 7, answer: "CURSOR", clue: "The tool I fought with to create what you see here" },
+  { clueNumber: 9, answer: "SCORPIO", clue: "Being born in November makes me one of these, I guess" },
+  { clueNumber: 11, answer: "VHS", clue: "Folks my age fondly remember renting movies in this format" },
+  { clueNumber: 13, answer: "ABOUTME", clue: "The theme of this puzzle" },
+  { clueNumber: 15, answer: "HADEDA", clue: 'A large Ibis known locally as a "flying vuvuzela"' },
+  { clueNumber: 18, answer: "BLACKCAT", clue: "Furry, panther-like animal that insists on sleeping on my keyboard" },
+  { clueNumber: 19, answer: "ANDROID", clue: "Might be rare to meet a 22-across that prefers this" },
+  { clueNumber: 20, answer: "NEGRONI", clue: "The Sbagliato version is indeed a mistake" },
+  { clueNumber: 21, answer: "APPS", clue: "Makes up most of my portfolio, with some tooling and web in-between" },
+  { clueNumber: 23, answer: "GRIDS", clue: "This puzzle's construction relies on these" },
+  { clueNumber: 25, answer: "SISTER", clue: "I'm a big one of these by 4 years" },
+  { clueNumber: 26, answer: "SEW", clue: "Taught myself to do this" },
+  { clueNumber: 29, answer: "FIGMA", clue: "One of the tools of my trade" },
+  { clueNumber: 30, answer: "LONDON", clue: "Currently living here" },
+  { clueNumber: 32, answer: "PASTA", clue: "The noodle of my people over at 8-across" },
+  { clueNumber: 34, answer: "IDEAS", clue: "Mind set?" },
+  { clueNumber: 35, answer: "COLD", clue: "My unusual personal preference when it comes to toast" },
+  { clueNumber: 36, answer: "BAKE", clue: "I'd rather cook than do this" },
+];
+
+function buildClueMap(entries: ClueEntry[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const e of entries) map[e.answer] = e.clue;
+  return map;
+}
+
+const ACROSS_CLUE_BY_ANSWER = buildClueMap(ACROSS_CLUES);
+const DOWN_CLUE_BY_ANSWER = buildClueMap(DOWN_CLUES);
 
 function buildWordsFromGrid(cells: CrosswordCell[][]): {
   acrossWords: CrosswordWord[];
@@ -411,4 +418,42 @@ export function getActiveWordCells(
   return new Set(
     word.cells.map((c) => `${c.row},${c.col}`)
   );
+}
+
+const CROSS_REF_PATTERN = /(\d+)-(across|down)/gi;
+
+export function parseCrossReferences(
+  clue: string
+): { clueNumber: number; direction: "across" | "down" }[] {
+  const refs: { clueNumber: number; direction: "across" | "down" }[] = [];
+  let match;
+  CROSS_REF_PATTERN.lastIndex = 0;
+  while ((match = CROSS_REF_PATTERN.exec(clue)) !== null) {
+    refs.push({
+      clueNumber: parseInt(match[1], 10),
+      direction: match[2].toLowerCase() as "across" | "down",
+    });
+  }
+  return refs;
+}
+
+export function getCrossReferencedCells(
+  data: CrosswordData,
+  word: CrosswordWord | null
+): Set<string> {
+  if (!word) return new Set();
+  const refs = parseCrossReferences(word.clue);
+  if (refs.length === 0) return new Set();
+
+  const cells = new Set<string>();
+  for (const ref of refs) {
+    const words = ref.direction === "across" ? data.acrossWords : data.downWords;
+    const target = words.find((w) => w.clueNumber === ref.clueNumber);
+    if (target) {
+      for (const c of target.cells) {
+        cells.add(`${c.row},${c.col}`);
+      }
+    }
+  }
+  return cells;
 }

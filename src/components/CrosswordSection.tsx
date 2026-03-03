@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
-import { getCrosswordData, getWordContaining } from "@/lib/crossword-data";
+import { getCrosswordData, getWordContaining, getCrossReferencedCells } from "@/lib/crossword-data";
 import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousWord } from "@/lib/crossword-navigation";
 
 /* =============================================================================
@@ -186,6 +186,11 @@ export function CrosswordInteractive() {
     return getWordContaining(data, selection.row, selection.col, selection.direction);
   }, [data, selection]);
   
+  const crossReferencedCells = useMemo(
+    () => getCrossReferencedCells(data, selectedWord),
+    [data, selectedWord]
+  );
+
   // Sort words by clue number for display
   const sortedAcrossWords = useMemo(
     () => [...data.acrossWords].sort((a, b) => a.clueNumber - b.clueNumber),
@@ -398,6 +403,7 @@ export function CrosswordInteractive() {
           direction={selection?.direction ?? "across"}
           showAnswers={showAnswers}
           userInputs={userInputs}
+          crossReferencedCells={crossReferencedCells}
           onSelectCell={handleSelectCell}
           onInputLetter={handleInputLetter}
           onClearCell={handleClearCell}
