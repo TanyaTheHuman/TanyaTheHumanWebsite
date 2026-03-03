@@ -1,0 +1,18 @@
+---
+description: Use Tailwind CSS 4.0 for styling; prefer CSS over JavaScript when both can achieve the same result
+alwaysApply: true
+---
+
+# Tailwind CSS & Styling Conventions
+
+## Tailwind First
+
+- Use **Tailwind CSS 4.0** utility classes for all styling.
+- Avoid writing custom CSS in `globals.css` or component styles when Tailwind can achieve the same result.
+- Use arbitrary values when needed: `h-[100svh]`, `pb-[120px]`, `[-webkit-overflow-scrolling:touch]`.
+
+## Prefer CSS Over JavaScript
+
+- Use CSS for layout, visibility, and interaction when possible.
+- Prefer `group-focus-within:`, `:hover`, `:focus`, media queries, and `sm:`/`md:` breakpoints over JavaScript state and event listeners.
+- Add event listeners only when CSS cannot achieve the desired behavior.
