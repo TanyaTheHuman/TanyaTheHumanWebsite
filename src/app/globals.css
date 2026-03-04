@@ -50,6 +50,9 @@ a:focus-visible {
 
 @theme {
   --color-cream: #EAE8E1;
+  /* Custom extra-small breakpoint for hero layout:
+     base = <=375px, xsm: >=376px */
+  --breakpoint-xsm: 376px;
   --color-ink: #1a1a1a;
   --color-border: #C5C5BA;
   --color-mustard-50: #EBE5D5;
@@ -137,6 +140,44 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .h1-italic {
+      font-size: 10rem;
+    }
+  }
+
+  /* Hero-specific title scaling: keep two-line layout without overflow */
+  .hero-title {
+    font-family: var(--h1-font-family);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.05em;
+    /* Smaller and responsive on narrow viewports, matching h1 at md+ */
+    font-size: clamp(3rem, 10vw, 5rem);
+  }
+
+  .hero-title-italic {
+    font-family: var(--h1-font-family);
+    font-weight: 400;
+    font-style: italic;
+    line-height: 1.1;
+    letter-spacing: -0.05em;
+    font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on, "fina" on;
+    font-size: clamp(3rem, 10vw, 5rem);
+  }
+
+  @media (min-width: 768px) {
+    .hero-title {
+      font-size: 7.5rem;
+    }
+    .hero-title-italic {
+      font-size: 7.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-title {
+      font-size: 10rem;
+    }
+    .hero-title-italic {
       font-size: 10rem;
     }
   }

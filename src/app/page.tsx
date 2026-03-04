@@ -35,26 +35,28 @@ export default function Home() {
         className="flex flex-col items-center self-stretch py-[120px] px-[56px] gap-[120px]"
         aria-label="Hero"
       >
-        <p className="caption text-stone-600">Designer of things</p>
+        <p className="caption text-stone-600 text-center sm:text-left">Designer of things</p>
 
-        <div className="flex flex-row items-center gap-8 justify-center w-full max-w-[1200px]">
+        <div className="flex flex-col items-center text-center gap-8 justify-center w-full max-w-[1200px] sm:flex-row sm:items-center sm:text-left">
           <img
             src="/header-back.png"
             alt=""
-            className="w-[385px] h-[566px] object-contain"
+            className="w-[140px] h-auto object-contain mx-auto sm:w-[220px] md:w-[260px] lg:w-[300px]"
           />
-          <div className="flex flex-col gap-12 min-w-0">
-            <h1 className="h1 text-stone-800">
+          <div className="flex flex-col gap-12 min-w-0 items-center text-center sm:items-start sm:text-left">
+            <h1 className="hero-title text-stone-800">
               Tanya,
               <br />
-              the{" "}
-              <span className="relative inline-block">
-                <span
-                  className="absolute inset-0 bg-mustard-300/25 rounded"
-                  aria-hidden
-                />
-                <span className="relative z-10 h1-italic text-mustard-900">
-                  human
+              <span className="inline-block whitespace-nowrap">
+                the{" "}
+                <span className="relative inline-block">
+                  <span
+                    className="absolute inset-0 bg-mustard-300/25 rounded"
+                    aria-hidden
+                  />
+                  <span className="relative z-10 hero-title-italic text-mustard-900">
+                    human
+                  </span>
                 </span>
               </span>
             </h1>
