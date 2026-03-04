@@ -32,18 +32,18 @@ export default function Home() {
   return (
     <>
       <section
-        className="flex flex-col items-center self-stretch py-[80px] px-[56px] gap-[80px]"
+        className="flex flex-col items-center self-stretch py-[80px] px-[56px] gap-[104px]"
         aria-label="Hero"
       >
         <p className="caption text-stone-600 text-center sm:text-left">Designer of things</p>
 
-        <div className="flex flex-col items-center text-center gap-3 justify-center w-full max-w-[1200px] sm:flex-row sm:items-center sm:text-left">
+        <div className="flex flex-col items-center text-center gap-3 justify-end w-full max-w-[1200px] sm:flex-row sm:items-center sm:text-left">
           <img
             src="/header-back.png"
             alt=""
             className="w-[140px] h-auto object-contain mx-auto sm:w-[220px] md:w-[260px] lg:w-[360px] xl:w-[420px] 2xl:w-[480px]"
           />
-          <div className="flex flex-col gap-12 min-w-0 items-center text-center w-full sm:w-[598px] sm:items-start sm:text-left">
+          <div className="flex flex-col gap-6 min-w-0 items-center text-center w-full sm:w-[598px] sm:items-start sm:text-left">
             <h1 className="hero-title text-stone-800">
               Tanya,
               <br />
@@ -61,11 +61,10 @@ export default function Home() {
               </span>
             </h1>
             <p className="h6 text-ink w-full">
-              Hello. I'm a{" "}
-              <a href="#">24-across</a> based in{" "}
-              <a href="#">31-down</a>. Currently an IC and
-              team-lead at <a href="#">11-across</a>,
-              previously at <a href="#">32-across</a>.
+              <a href="#">22-across</a> based in{" "}
+              <a href="#">30-down</a>, currently at{" "}
+              <a href="#">10-across</a>, previously at{" "}
+              <a href="#">31-across</a>
             </p>
           </div>
         </div>
