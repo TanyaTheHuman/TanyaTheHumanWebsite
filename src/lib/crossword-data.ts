@@ -407,6 +407,16 @@ export function getWordContaining(
   return words[wordId] ?? null;
 }
 
+export function getWordByClueNumber(
+  data: CrosswordData,
+  clueNumber: number,
+  direction: "across" | "down"
+): CrosswordWord | null {
+  const words =
+    direction === "across" ? data.acrossWords : data.downWords;
+  return words.find((w) => w.clueNumber === clueNumber) ?? null;
+}
+
 export function getActiveWordCells(
   data: CrosswordData,
   selectedRow: number,

@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { CrosswordInteractive } from "@/components/CrosswordSection";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { CrosswordInteractive, type CrosswordInteractiveHandle } from "@/components/CrosswordSection";
 
 export default function Home() {
+  const crosswordRef = useRef<CrosswordInteractiveHandle>(null);
+
+  const scrollToCrosswordWord = useCallback((clueNumber: number, direction: "across" | "down") => {
+    document.getElementById("crossword")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    crosswordRef.current?.scrollToWord(clueNumber, direction);
+  }, []);
+
   // TEMPORARY: Breakpoint indicator for responsive debugging
   const [windowWidth, setWindowWidth] = useState<number>(0);
   
@@ -61,10 +68,49 @@ export default function Home() {
               </span>
             </h1>
             <p className="h6 text-ink w-full">
-              <a href="#">22-across</a> based in{" "}
-              <a href="#">30-down</a>, currently at{" "}
-              <a href="#">10-across</a>, previously at{" "}
-              <a href="#">31-across</a>
+              <a
+                href="#crossword"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToCrosswordWord(22, "across");
+                }}
+                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+              >
+                22-across
+              </a>{" "}
+              based in{" "}
+              <a
+                href="#crossword"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToCrosswordWord(30, "down");
+                }}
+                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+              >
+                30-down
+              </a>
+              , currently at{" "}
+              <a
+                href="#crossword"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToCrosswordWord(10, "across");
+                }}
+                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+              >
+                10-across
+              </a>
+              , previously at{" "}
+              <a
+                href="#crossword"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToCrosswordWord(31, "across");
+                }}
+                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+              >
+                31-across
+              </a>
             </p>
           </div>
         </div>
@@ -81,8 +127,8 @@ export default function Home() {
         </div>
       </div>
       
-      <div className="crossword-section">
-        <CrosswordInteractive />
+      <div id="crossword" className="crossword-section">
+        <CrosswordInteractive ref={crosswordRef} />
       </div>
 
       <section className="flex flex-col items-center self-stretch py-[200px] px-[56px] gap-0">

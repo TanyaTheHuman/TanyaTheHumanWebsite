@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect, forwardRef, useImperativeHandle } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
-import { getCrosswordData, getWordContaining, getCrossReferencedCells } from "@/lib/crossword-data";
+import { getCrosswordData, getWordContaining, getCrossReferencedCells, getWordByClueNumber } from "@/lib/crossword-data";
 import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousWord } from "@/lib/crossword-navigation";
+
+export interface CrosswordInteractiveHandle {
+  scrollToWord(clueNumber: number, direction: "across" | "down"): void;
+}
 
 /* =============================================================================
    GRAIN PREVIEW CONTROLS (disabled)
@@ -13,7 +17,7 @@ import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousW
    2. The preview block will appear above the crossword grid
    ============================================================================= */
 
-export function CrosswordInteractive() {
+export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, object>(function CrosswordInteractive(_, ref) {
   const data = useMemo(() => getCrosswordData(), []);
   const firstCell = useMemo(() => getFirstCell(data), [data]);
   
@@ -92,6 +96,24 @@ export function CrosswordInteractive() {
   const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
     setSelection({ row, col, direction });
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    scrollToWord(clueNumber: number, direction: "across" | "down") {
+      const word = getWordByClueNumber(data, clueNumber, direction);
+      if (!word?.cells.length) return;
+      const first = word.cells[0];
+      setSelection({ row: first.row, col: first.col, direction });
+      setTimeout(() => {
+        const cellEl = document.getElementById(`cell-${first.row}-${first.col}`) as HTMLElement | null;
+        if (cellEl) {
+          cellEl.focus();
+          cellEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          gridRef.current?.focus();
+        }
+      }, 0);
+    },
+  }), [data]);
 
   // Mobile clue bar: prev/next cells for anchor hrefs
   const prevCell = useMemo(() => {
@@ -619,4 +641,4 @@ export function CrosswordInteractive() {
       )}
     </div>
   );
-}
+});
