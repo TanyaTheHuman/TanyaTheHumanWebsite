@@ -31,22 +31,46 @@ export default function Home() {
 
   return (
     <>
-      <div className="m-8 flex flex-col border border-border min-h-auto h-auto">
-        <header className="flex items-center justify-center -mt-px pt-0">
-          <p className="text-sm whitespace-nowrap px-4 py-4 bg-cream relative -top-[9px]">Come back soon.</p>
-        </header>
-        <main className="flex flex-col items-center px-8 pt-[104px] pb-[104px]">
-          <h1 className="h1 text-center font-normal">
-            New site
-            <br />
-            coming <span className="italic">soonish.</span>
-          </h1>
-        </main>
-        <footer className="flex items-center justify-center -mb-px pb-0">
-          <p className="text-sm whitespace-nowrap px-4 py-4 bg-cream relative -bottom-[9px]">But not too soon.</p>
-        </footer>
-      </div>
-      
+      <section
+        className="flex flex-col items-center self-stretch py-[120px] px-[56px] gap-[120px]"
+        aria-label="Hero"
+      >
+        <p className="caption text-stone-600">Designer of things</p>
+
+        <div className="flex flex-row items-center gap-8 justify-center w-full max-w-[1200px]">
+          <img
+            src="/header-back.png"
+            alt=""
+            className="w-[385px] h-[566px] object-contain"
+          />
+          <div className="flex flex-col gap-12 min-w-0">
+            <h1 className="h1 text-stone-800">
+              Tanya,
+              <br />
+              the{" "}
+              <span className="relative inline-block">
+                <span
+                  className="absolute inset-0 bg-mustard-300/25 rounded"
+                  aria-hidden
+                />
+                <span className="relative z-10 h1-italic text-mustard-900">
+                  human
+                </span>
+              </span>
+            </h1>
+            <p className="h6 text-ink">
+              Hello. I'm a{" "}
+              <a href="#">24-across</a> based in{" "}
+              <a href="#">31-down</a>. Currently an IC and
+              team-lead at <a href="#">11-across</a>,
+              previously at <a href="#">32-across</a>.
+            </p>
+          </div>
+        </div>
+
+        <p className="caption text-stone-600">Enjoyer of puzzles</p>
+      </section>
+
       {/* TEMPORARY: Breakpoint indicator - remove when done */}
       <div 
         className="w-full flex justify-center px-8 pt-8"

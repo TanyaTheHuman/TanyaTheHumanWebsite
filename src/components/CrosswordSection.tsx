@@ -341,7 +341,7 @@ export function CrosswordInteractive() {
       <section
         className="w-full flex justify-center px-8 pt-[200px] pb-[200px]"
       >
-        <div className="flex flex-col gap-8 md:flex-row md:items-stretch">
+        <div className="flex flex-col gap-8 md:flex-row md:items-stretch w-full max-w-[1200px]">
           <div className="shrink-0 w-min">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
@@ -429,7 +429,7 @@ export function CrosswordInteractive() {
         )}
       </div>
 
-        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px] relative">
+        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px]">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
@@ -473,7 +473,12 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
-            <div className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none lg:hidden" />
+            <div
+              className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 pointer-events-none"
+              style={{
+                background: "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
+              }}
+            />
           </div>
           <div 
             ref={downListRef}
@@ -518,15 +523,13 @@ export function CrosswordInteractive() {
                 );
               })}
             </ul>
-            <div className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream/90 to-transparent pointer-events-none lg:hidden" />
+            <div
+              className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 pointer-events-none"
+              style={{
+                background: "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
+              }}
+            />
           </div>
-          {/* Single full-width gradient at bottom when lists are side by side (lg), same treatment as stacked md */}
-          <div
-            className="hidden lg:block absolute bottom-0 left-0 right-0 h-8 pointer-events-none z-10"
-            style={{
-              background: "linear-gradient(to top, var(--color-cream) 0%, rgba(234, 232, 225, 0.4) 40%, transparent 100%)",
-            }}
-          />
         </div>
       </div>
     </section>
