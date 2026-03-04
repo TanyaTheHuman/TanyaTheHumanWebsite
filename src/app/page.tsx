@@ -39,35 +39,36 @@ export default function Home() {
   return (
     <>
       <section
-        className="flex flex-col items-center self-stretch py-[80px] px-[56px] gap-[104px]"
+        className="flex flex-col items-center self-stretch h-fit py-[80px] px-[56px] gap-[104px]"
         aria-label="Hero"
       >
         <p className="caption text-stone-600 text-center sm:text-left">Designer of things</p>
 
-        <div className="flex flex-col items-center text-center gap-3 justify-end w-full max-w-[1200px] sm:flex-row sm:items-center sm:text-left">
+        <div className="flex flex-col items-center text-center gap-2 justify-end w-full max-w-[1200px] sm:flex-row sm:items-center sm:text-left h-fit">
           <img
             src="/header-back.png"
             alt=""
-            className="w-[140px] h-auto object-contain mx-auto sm:w-[220px] md:w-[260px] lg:w-[360px] xl:w-[420px] 2xl:w-[480px]"
+            className="w-[140px] h-auto object-contain mx-auto sm:mx-0 sm:w-[220px] md:w-[260px] lg:w-[360px] xl:w-[420px] 2xl:w-[480px]"
           />
           <div className="flex flex-col gap-6 min-w-0 items-center text-center w-full sm:w-[598px] sm:items-start sm:text-left">
-            <h1 className="hero-title text-stone-800">
-              Tanya,
-              <br />
-              <span className="inline-block whitespace-nowrap">
-                the{" "}
-                <span className="relative inline-block">
-                  <span
-                    className="absolute inset-0 bg-mustard-300/25 rounded"
-                    aria-hidden
-                  />
-                  <span className="relative z-10 hero-title-italic text-mustard-900">
-                    human
+            <div className="relative inline-block w-fit h-fit self-start">
+              <h2 className="h2 text-stone-800">
+                Tanya,
+                <br />
+                <span className="inline-block whitespace-nowrap">
+                  the{" "}
+                  <span className="relative inline-block">
+                    <span
+                      className="absolute inset-0 bg-mustard-300/25 rounded"
+                      aria-hidden
+                    />
+                    <span className="relative z-10 h2-italic text-mustard-900">
+                      human
+                    </span>
                   </span>
                 </span>
-              </span>
-            </h1>
-            <p className="h6 text-ink w-full">
+              </h2>
+              <p className="h6 text-ink mt-6 w-full">
               <a
                 href="#crossword"
                 onClick={(e) => {
@@ -112,6 +113,7 @@ export default function Home() {
                 31-across
               </a>
             </p>
+            </div>
           </div>
         </div>
 

@@ -118,7 +118,7 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .h1 {
-      font-size: 10rem;
+      font-size: 9.625rem;
     }
   }
 
@@ -140,7 +140,7 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .h1-italic {
-      font-size: 10rem;
+      font-size: 9.625rem;
     }
   }
 
@@ -175,10 +175,10 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .hero-title {
-      font-size: 10rem;
+      font-size: 9.625rem;
     }
     .hero-title-italic {
-      font-size: 10rem;
+      font-size: 9.625rem;
     }
   }
 
@@ -282,7 +282,7 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .h4 {
-      font-size: 5rem;
+      font-size: 5.125rem;
     }
   }
 
@@ -303,7 +303,7 @@ a:focus-visible {
 
   @media (min-width: 1024px) {
     .h5 {
-      font-size: 4.25rem;
+      font-size: 3.375rem;
     }
   }
 
@@ -317,13 +317,13 @@ a:focus-visible {
 
   @media (min-width: 768px) {
     .h6 {
-      font-size: 2.25rem;
+      font-size: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .h6 {
-      font-size: 3rem;
+      font-size: 2rem;
     }
   }
 
