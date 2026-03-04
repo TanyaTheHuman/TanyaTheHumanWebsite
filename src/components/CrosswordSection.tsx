@@ -429,11 +429,11 @@ export function CrosswordInteractive() {
         )}
       </div>
 
-        <div className="clue-lists hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px]">
+        <div className="clue-lists w-full hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px]">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className="across-clue-list clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:max-lg:border-b md:max-lg:border-stone-800"
+            className="across-clue-list clue-list-container max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:max-lg:border-b md:max-lg:border-stone-800"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Across
@@ -483,7 +483,7 @@ export function CrosswordInteractive() {
           <div 
             ref={downListRef}
             onScroll={handleDownScroll}
-            className="clue-list-container max-w-[250px] max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
+            className="clue-list-container max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Down
