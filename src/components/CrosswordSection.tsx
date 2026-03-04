@@ -341,7 +341,7 @@ export function CrosswordInteractive() {
       <section
         className="w-full flex justify-center px-8 pt-[120px] pb-[120px]"
       >
-        <div className="flex flex-col gap-8 md:flex-row md:items-stretch w-full max-w-[1200px]">
+        <div className="flex flex-col items-center md:items-stretch gap-8 md:flex-row w-full max-w-[1200px]">
           <div className="shrink-0 w-min">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
