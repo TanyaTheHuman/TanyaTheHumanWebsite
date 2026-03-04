@@ -339,7 +339,7 @@ export function CrosswordInteractive() {
   return (
     <div className="group">
       <section
-        className="w-full flex justify-center px-8 pt-[200px] pb-[200px]"
+        className="w-full flex justify-center px-8 pt-[120px] pb-[120px]"
       >
         <div className="flex flex-col gap-8 md:flex-row md:items-stretch w-full max-w-[1200px]">
           <div className="shrink-0 w-min">
