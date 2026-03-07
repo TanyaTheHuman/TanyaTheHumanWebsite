@@ -30,6 +30,16 @@ a:focus-visible {
   text-underline-position: from-font;
 }
 
+::selection {
+  background: color-mix(in srgb, var(--color-mustard-300) 25%, transparent);
+  color: var(--color-mustard-900);
+}
+
+::-moz-selection {
+  background: color-mix(in srgb, var(--color-mustard-300) 25%, transparent);
+  color: var(--color-mustard-900);
+}
+
 /* Mobile: account for keyboard (~300px) so cell stays visible above it */
 /* @media (max-width: 768px) {
   html {
