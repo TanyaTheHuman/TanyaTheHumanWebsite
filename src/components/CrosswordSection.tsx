@@ -609,9 +609,9 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         </div>
       </div>
     </section>
-      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons */}
+      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below sm) */}
       {clueContent && (
-        <div className="sm:hidden hidden group-focus-within:fixed group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
+        <div className="hidden max-sm:group-focus-within:fixed max-sm:group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
           <div
             ref={clueBarRef}
             className="fixed bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
