@@ -39,7 +39,7 @@ export default function Home() {
   return (
     <>
       <section
-        className="flex flex-col items-center self-stretch h-fit py-[80px] px-[56px] gap-[104px]"
+        className="flex flex-col items-center self-stretch h-fit py-[32px] px-[56px] gap-[104px]"
         aria-label="Hero"
       >
         <p className="caption text-stone-600 text-center sm:text-left">Designer of things</p>
@@ -48,7 +48,7 @@ export default function Home() {
           <img
             src="/header-back.png"
             alt=""
-            className="w-[140px] h-auto object-contain mx-auto sm:mx-0 sm:w-[220px] md:w-[260px] lg:w-[360px] xl:w-[420px] 2xl:w-[480px]"
+            className="w-[140px] h-auto object-contain mx-auto sm:mx-0 sm:w-[220px] md:w-[260px] lg:w-[280px] xl:w-[320px] 2xl:w-[480px]"
           />
           <div className="flex flex-col gap-6 min-w-0 items-center text-center w-full sm:w-[598px] sm:items-start sm:text-left">
             <div className="relative inline-block w-fit h-fit self-start">
