@@ -2,11 +2,16 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect, forwardRef, useImperativeHandle } from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
-import { getCrosswordData, getWordContaining, getCrossReferencedCells, getWordByClueNumber } from "@/lib/crossword-data";
+import { getCrosswordData, getWordContaining, getCrossReferencedCells, getWordByClueNumber, getFilledWordsMap } from "@/lib/crossword-data";
+import { loadProgress, saveProgress } from "@/lib/crossword-storage";
 import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousWord } from "@/lib/crossword-navigation";
 
 export interface CrosswordInteractiveHandle {
   scrollToWord(clueNumber: number, direction: "across" | "down"): void;
+}
+
+export interface CrosswordInteractiveProps {
+  onFilledWordsChange?: (filledWords: Record<string, string>) => void;
 }
 
 /* =============================================================================
@@ -17,7 +22,7 @@ export interface CrosswordInteractiveHandle {
    2. The preview block will appear above the crossword grid
    ============================================================================= */
 
-export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, object>(function CrosswordInteractive(_, ref) {
+export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, CrosswordInteractiveProps>(function CrosswordInteractive({ onFilledWordsChange }, ref) {
   const data = useMemo(() => getCrosswordData(), []);
   const firstCell = useMemo(() => getFirstCell(data), [data]);
   
@@ -44,7 +49,8 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, objec
   const downListRef = useRef<HTMLDivElement>(null);
   const clueBarRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  
+  const saveEffectRunCount = useRef(0);
+
   const handleAcrossScroll = useCallback(() => {
     if (acrossListRef.current) {
       setAcrossScrolled(acrossListRef.current.scrollTop > 0);
@@ -56,6 +62,36 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, objec
       setDownScrolled(downListRef.current.scrollTop > 0);
     }
   }, []);
+
+  // Load persisted progress from localStorage (client-only, after mount to avoid hydration mismatch)
+  useEffect(() => {
+    const progress = loadProgress(data);
+    if (progress) {
+      setUserInputs(progress.userInputs);
+      const mobile =
+        window.matchMedia("(max-width: 768px)").matches ||
+        window.matchMedia("(pointer: coarse)").matches;
+      if (!mobile && progress.selection) {
+        setSelection(progress.selection);
+      }
+    }
+  }, [data]);
+
+  // Persist progress to localStorage when userInputs or selection change (skip first run to avoid overwriting before load)
+  useEffect(() => {
+    saveEffectRunCount.current += 1;
+    if (saveEffectRunCount.current <= 1) return;
+    saveProgress({ userInputs, selection });
+  }, [userInputs, selection]);
+
+  const filledWordsMap = useMemo(
+    () => getFilledWordsMap(data, userInputs),
+    [data, userInputs]
+  );
+
+  useEffect(() => {
+    onFilledWordsChange?.(filledWordsMap);
+  }, [onFilledWordsChange, filledWordsMap]);
 
   // Detect mobile on mount; clear selection only on mobile (before paint to avoid flash)
   useLayoutEffect(() => {
@@ -96,6 +132,15 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, objec
   const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
     setSelection({ row, col, direction });
   }, []);
+
+  const handleResetProgress = useCallback(() => {
+    setUserInputs({});
+    setSelection(firstCell ? { ...firstCell, direction: "across" } : null);
+    saveProgress({
+      userInputs: {},
+      selection: firstCell ? { ...firstCell, direction: "across" } : null,
+    });
+  }, [firstCell]);
 
   useImperativeHandle(ref, () => ({
     scrollToWord(clueNumber: number, direction: "across" | "down") {
@@ -433,21 +478,30 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, objec
           gridRef={gridRef}
         />
         
-        {/* DEV ONLY: Show/Hide Answers Toggle - only visible in development mode */}
-        {process.env.NODE_ENV === 'development' && (
-          <label className="flex items-center gap-2 mt-4 cursor-pointer select-none">
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={showAnswers}
-                onChange={(e) => setShowAnswers(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
-              <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
-            </div>
-            <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
-          </label>
+        {/* DEV ONLY: Show answers toggle and Reset - only visible in development mode */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="flex flex-wrap items-center gap-4 mt-4">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={showAnswers}
+                  onChange={(e) => setShowAnswers(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
+                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+              </div>
+              <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
+            </label>
+            <button
+              type="button"
+              onClick={handleResetProgress}
+              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
+            >
+              Reset (dev only)
+            </button>
+          </div>
         )}
       </div>
 

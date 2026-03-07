@@ -30,6 +30,9 @@ export interface CrosswordData {
   downWords: CrosswordWord[];
 }
 
+/** Bump when grid or clues change so old localStorage progress is ignored. */
+export const CROSSWORD_VERSION = 1;
+
 const COLS = 17;
 const ROWS = 22;
 
@@ -389,6 +392,16 @@ export function getCellAt(
   return data.cells[row][col];
 }
 
+/** True if (row, col) is a letter cell in the grid (for validating saved progress). */
+export function isLetterCell(
+  data: CrosswordData,
+  row: number,
+  col: number
+): boolean {
+  const cell = getCellAt(data, row, col);
+  return cell !== null && cell.type === "letter";
+}
+
 export function getWordContaining(
   data: CrosswordData,
   row: number,
@@ -415,6 +428,83 @@ export function getWordByClueNumber(
   const words =
     direction === "across" ? data.acrossWords : data.downWords;
   return words.find((w) => w.clueNumber === clueNumber) ?? null;
+}
+
+/**
+ * Returns the correct answer for a clue from the grid (solution letters).
+ * Used for validation so we only show filled words in the hero when they are correct.
+ */
+export function getCorrectWord(
+  data: CrosswordData,
+  clueNumber: number,
+  direction: "across" | "down"
+): string {
+  const word = getWordByClueNumber(data, clueNumber, direction);
+  if (!word?.cells.length) return "";
+  return word.cells
+    .map((c) => data.cells[c.row]?.[c.col]?.letter ?? "")
+    .join("");
+}
+
+/**
+ * Returns true if the user's filled word for a clue matches the correct answer (case-insensitive).
+ */
+export function isWordCorrect(
+  data: CrosswordData,
+  userInputs: Record<string, string>,
+  clueNumber: number,
+  direction: "across" | "down"
+): boolean {
+  const filled = getFilledWord(data, userInputs, clueNumber, direction);
+  if (filled == null) return false;
+  const correct = getCorrectWord(data, clueNumber, direction);
+  return filled.toUpperCase() === correct.toUpperCase();
+}
+
+/**
+ * Returns the filled-in word for a clue if every cell has user input; otherwise null.
+ * Used e.g. to show "London" instead of "30-down" in the hero when the word is complete.
+ */
+export function getFilledWord(
+  data: CrosswordData,
+  userInputs: Record<string, string>,
+  clueNumber: number,
+  direction: "across" | "down"
+): string | null {
+  const word = getWordByClueNumber(data, clueNumber, direction);
+  if (!word?.cells.length) return null;
+  const letters: string[] = [];
+  for (const c of word.cells) {
+    const letter = userInputs[`${c.row},${c.col}`];
+    if (!letter) return null;
+    letters.push(letter);
+  }
+  return letters.join("");
+}
+
+/**
+ * Returns a map of "clueNumber-direction" to filled word for every clue that is
+ * complete and correct. Used for the hero subtitle so we only replace the reference
+ * when the user has entered the right answer.
+ */
+export function getFilledWordsMap(
+  data: CrosswordData,
+  userInputs: Record<string, string>
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const w of data.acrossWords) {
+    const filled = getFilledWord(data, userInputs, w.clueNumber, "across");
+    if (filled && isWordCorrect(data, userInputs, w.clueNumber, "across")) {
+      out[`${w.clueNumber}-across`] = filled;
+    }
+  }
+  for (const w of data.downWords) {
+    const filled = getFilledWord(data, userInputs, w.clueNumber, "down");
+    if (filled && isWordCorrect(data, userInputs, w.clueNumber, "down")) {
+      out[`${w.clueNumber}-down`] = filled;
+    }
+  }
+  return out;
 }
 
 export function getActiveWordCells(

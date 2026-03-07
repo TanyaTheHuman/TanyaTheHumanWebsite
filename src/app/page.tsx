@@ -1,10 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useCallback, useRef } from "react";
 import { CrosswordInteractive, type CrosswordInteractiveHandle } from "@/components/CrosswordSection";
+
+function displayWord(filledWords: Record<string, string>, key: string): string {
+  const word = filledWords[key];
+  if (!word) return key;
+  if (key === "22-across" && word.toUpperCase() === "PRODUCTDESIGNER") {
+    return "Product designer";
+  }
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+}
 
 export default function Home() {
   const crosswordRef = useRef<CrosswordInteractiveHandle>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement>(null);
+  const [titleWidth, setTitleWidth] = useState<number>(0);
+  const [filledWords, setFilledWords] = useState<Record<string, string>>({});
 
   const scrollToCrosswordWord = useCallback((clueNumber: number, direction: "across" | "down") => {
     document.getElementById("crossword")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -36,6 +48,24 @@ export default function Home() {
     return `default (<640px)`;
   }, [windowWidth]);
 
+  const measureTitleWidth = useCallback(() => {
+    const el = heroTitleRef.current;
+    if (el) setTitleWidth(el.offsetWidth);
+  }, []);
+
+  useLayoutEffect(() => {
+    measureTitleWidth();
+    const observer = new ResizeObserver(measureTitleWidth);
+    const el = heroTitleRef.current;
+    if (el) observer.observe(el);
+    return () => observer.disconnect();
+  }, [measureTitleWidth]);
+
+  useEffect(() => {
+    window.addEventListener("resize", measureTitleWidth);
+    return () => window.removeEventListener("resize", measureTitleWidth);
+  }, [measureTitleWidth]);
+
   return (
     <>
       <section
@@ -51,8 +81,11 @@ export default function Home() {
             className="w-[140px] h-auto object-contain mx-auto sm:mx-0 sm:w-[220px] md:w-[260px] lg:w-[280px] xl:w-[320px] 2xl:w-[480px]"
           />
           <div className="flex flex-col gap-6 min-w-0 items-center text-center w-full sm:w-[598px] sm:items-start sm:text-left">
-            <div className="relative inline-block w-fit h-fit self-start">
-              <h2 className="h2 text-stone-800">
+            <div className="flex flex-col items-center self-center text-center sm:items-start sm:self-start sm:text-left">
+              <h2
+                ref={heroTitleRef}
+                className="h2 text-stone-800"
+              >
                 Tanya,
                 <br />
                 <span className="inline-block whitespace-nowrap">
@@ -68,51 +101,54 @@ export default function Home() {
                   </span>
                 </span>
               </h2>
-              <p className="h6 text-ink mt-6 w-full">
-              <a
-                href="#crossword"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToCrosswordWord(22, "across");
-                }}
-                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+              <p
+                className="h6 text-ink mt-6 min-w-0 break-words"
+                style={titleWidth > 0 ? { maxWidth: titleWidth } : undefined}
               >
-                22-across
-              </a>{" "}
-              based in{" "}
-              <a
-                href="#crossword"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToCrosswordWord(30, "down");
-                }}
-                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
-              >
-                30-down
-              </a>
-              , currently at{" "}
-              <a
-                href="#crossword"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToCrosswordWord(10, "across");
-                }}
-                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
-              >
-                10-across
-              </a>
-              , previously at{" "}
-              <a
-                href="#crossword"
-                onClick={(e) => {
-                  e.preventDefault();
-                  scrollToCrosswordWord(31, "across");
-                }}
-                className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
-              >
-                31-across
-              </a>
-            </p>
+                <a
+                  href="#crossword"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToCrosswordWord(22, "across");
+                  }}
+                  className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+                >
+                  {displayWord(filledWords, "22-across")}
+                </a>{" "}
+                based in{" "}
+                <a
+                  href="#crossword"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToCrosswordWord(30, "down");
+                  }}
+                  className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+                >
+                  {displayWord(filledWords, "30-down")}
+                </a>
+                , currently at{" "}
+                <a
+                  href="#crossword"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToCrosswordWord(10, "across");
+                  }}
+                  className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+                >
+                  {displayWord(filledWords, "10-across")}
+                </a>
+                , previously at{" "}
+                <a
+                  href="#crossword"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToCrosswordWord(31, "across");
+                  }}
+                  className="underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded"
+                >
+                  {displayWord(filledWords, "31-across")}
+                </a>
+              </p>
             </div>
           </div>
         </div>
@@ -130,7 +166,7 @@ export default function Home() {
       </div>
       
       <div id="crossword" className="crossword-section">
-        <CrosswordInteractive ref={crosswordRef} />
+        <CrosswordInteractive ref={crosswordRef} onFilledWordsChange={setFilledWords} />
       </div>
 
       <section className="flex flex-col items-center self-stretch py-[200px] px-[56px] gap-0">

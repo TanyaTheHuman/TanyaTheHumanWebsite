@@ -176,14 +176,17 @@ export function CrosswordGrid({
       if (!selectedCell) return;
       if (e.key === "Backspace") {
         e.preventDefault();
+        const wasFilled = !!userInputs[`${selectedCell.row},${selectedCell.col}`];
         onClearCell(selectedCell.row, selectedCell.col);
-        const prev = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
-        if (prev) {
-          onSelectCell(prev.row, prev.col, direction);
+        if (!wasFilled) {
+          const prev = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
+          if (prev) {
+            onSelectCell(prev.row, prev.col, direction);
+          }
         }
       }
     },
-    [selectedCell, data, direction, onClearCell, onSelectCell]
+    [selectedCell, data, direction, userInputs, onClearCell, onSelectCell]
   );
 
   useEffect(() => {
@@ -209,27 +212,28 @@ export function CrosswordGrid({
         return;
       }
       
-      // Handle Backspace to clear current cell and move back within word
+      // Handle Backspace: if cell is filled, clear and keep focus; if empty, move to previous cell
       if (e.key === "Backspace") {
         e.preventDefault();
+        const wasFilled = !!userInputs[`${selectedCell.row},${selectedCell.col}`];
         onClearCell(selectedCell.row, selectedCell.col);
-        
-        // Move to previous cell within the same word
-        const prev = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
-        if (prev) {
-          onSelectCell(prev.row, prev.col, direction);
-        } else {
-          // At start of word - jump to last cell of previous word in same direction
-          const prevWordResult = getNextWordCell(data, selectedCell.row, selectedCell.col, direction, true);
-          if (prevWordResult) {
-            // getNextWordCell returns the first cell, but we want the last cell
-            const prevWords = prevWordResult.newDirection === "across" ? data.acrossWords : data.downWords;
-            const prevWord = prevWords.find(w => 
-              w.cells.some(c => c.row === prevWordResult.row && c.col === prevWordResult.col)
-            );
-            if (prevWord && prevWord.cells.length > 0) {
-              const lastCell = prevWord.cells[prevWord.cells.length - 1];
-              onSelectCell(lastCell.row, lastCell.col, prevWordResult.newDirection);
+        if (!wasFilled) {
+          // Cell was already empty - move to previous cell within the same word
+          const prev = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
+          if (prev) {
+            onSelectCell(prev.row, prev.col, direction);
+          } else {
+            // At start of word - jump to last cell of previous word in same direction
+            const prevWordResult = getNextWordCell(data, selectedCell.row, selectedCell.col, direction, true);
+            if (prevWordResult) {
+              const prevWords = prevWordResult.newDirection === "across" ? data.acrossWords : data.downWords;
+              const prevWord = prevWords.find(w =>
+                w.cells.some(c => c.row === prevWordResult.row && c.col === prevWordResult.col)
+              );
+              if (prevWord && prevWord.cells.length > 0) {
+                const lastCell = prevWord.cells[prevWord.cells.length - 1];
+                onSelectCell(lastCell.row, lastCell.col, prevWordResult.newDirection);
+              }
             }
           }
         }
