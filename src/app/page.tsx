@@ -169,15 +169,17 @@ export default function Home() {
         <CrosswordInteractive ref={crosswordRef} onFilledWordsChange={setFilledWords} />
       </div>
 
-      <section className="flex flex-col items-center self-stretch py-[200px] px-[56px] gap-0">
-        <img
-          src="/ok-bye.png"
-          alt="Woman waving goodbye with a peace sign"
-          className="max-w-[140px] h-auto"
-        />
-        <p className="body-large">
-          Ok, <span className="body-large-italic">bye</span>
-        </p>
+      <section className="flex flex-col items-center self-stretch py-[200px] px-[56px]">
+        <div className="flex flex-col items-center gap-2">
+          <img
+            src="/ok-bye.png"
+            alt="Woman waving goodbye with a peace sign"
+            className="max-w-[84px] xsm:max-w-[105px] sm:max-w-[140px] h-auto"
+          />
+          <p className="body-large">
+            Ok, <span className="body-large-italic">bye</span>
+          </p>
+        </div>
       </section>
     </>
   );
