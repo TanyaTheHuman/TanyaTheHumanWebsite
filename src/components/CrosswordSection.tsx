@@ -38,6 +38,9 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
 
   // Toggle for showing/hiding answers (dev only, default off)
   const [showAnswers, setShowAnswers] = useState(false);
+
+  // Clear grid confirmation modal
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   
   // User input state: maps "row,col" to the letter entered by user
   const [userInputs, setUserInputs] = useState<Record<string, string>>({});
@@ -49,7 +52,55 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   const downListRef = useRef<HTMLDivElement>(null);
   const clueBarRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
+  const gridColumnRef = useRef<HTMLDivElement>(null);
+  const crosswordRowRef = useRef<HTMLDivElement>(null);
+  const [gridColumnHeight, setGridColumnHeight] = useState<number | null>(null);
   const saveEffectRunCount = useRef(0);
+
+  // Ensure a cell is always selected (e.g. after loading progress with no selection)
+  useEffect(() => {
+    if (selection == null) {
+      const cell = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
+      if (cell) setSelection({ row: cell.row, col: cell.col, direction: "across" });
+    }
+  }, [data, firstCell, selection]);
+
+  // Focus the selected cell when selection changes (so a cell is always in focus)
+  useLayoutEffect(() => {
+    if (!selection) return;
+    const cellEl = document.getElementById(`cell-${selection.row}-${selection.col}`);
+    if (cellEl && typeof (cellEl as HTMLElement).focus === "function") (cellEl as HTMLElement).focus();
+    else gridRef.current?.focus();
+  }, [selection?.row, selection?.col]);
+
+  // When focus leaves the crossword area, put it back on the selected cell
+  useEffect(() => {
+    const rowEl = crosswordRowRef.current;
+    if (!rowEl) return;
+    const handleFocusOut = (e: FocusEvent) => {
+      const next = e.relatedTarget as Node | null;
+      if (next != null && rowEl.contains(next)) return;
+      if (!selection) return;
+      requestAnimationFrame(() => {
+        const cellEl = document.getElementById(`cell-${selection.row}-${selection.col}`);
+        if (cellEl && typeof (cellEl as HTMLElement).focus === "function") (cellEl as HTMLElement).focus();
+        else gridRef.current?.focus();
+      });
+    };
+    rowEl.addEventListener("focusout", handleFocusOut, true);
+    return () => rowEl.removeEventListener("focusout", handleFocusOut, true);
+  }, [selection]);
+
+  // Match right column (clue lists + buttons) height to grid column (highlight clue + grid)
+  useLayoutEffect(() => {
+    const el = gridColumnRef.current;
+    if (!el) return;
+    const updateHeight = () => setGridColumnHeight(el.offsetHeight);
+    updateHeight();
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const handleAcrossScroll = useCallback(() => {
     if (acrossListRef.current) {
@@ -71,11 +122,16 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       const mobile =
         window.matchMedia("(max-width: 768px)").matches ||
         window.matchMedia("(pointer: coarse)").matches;
-      if (!mobile && progress.selection) {
-        setSelection(progress.selection);
-      }
+      const nextSelection =
+        !mobile && progress.selection
+          ? progress.selection
+          : (() => {
+              const c = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
+              return c ? { row: c.row, col: c.col, direction: "across" as const } : null;
+            })();
+      if (nextSelection) setSelection(nextSelection);
     }
-  }, [data]);
+  }, [data, firstCell]);
 
   // Persist progress to localStorage when userInputs or selection change (skip first run to avoid overwriting before load)
   useEffect(() => {
@@ -93,15 +149,12 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     onFilledWordsChange?.(filledWordsMap);
   }, [onFilledWordsChange, filledWordsMap]);
 
-  // Detect mobile on mount; clear selection only on mobile (before paint to avoid flash)
+  // Detect mobile on mount (selection is kept so a cell is always in focus)
   useLayoutEffect(() => {
     const mobile =
       window.matchMedia("(max-width: 768px)").matches ||
       window.matchMedia("(pointer: coarse)").matches;
     setIsMobile(mobile);
-    if (mobile) {
-      setSelection(null);
-    }
   }, []);
 
   useEffect(() => {
@@ -128,19 +181,42 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       return next;
     });
   }, []);
-  
+
+  const handleRevealSquare = useCallback(() => {
+    if (!selection) return;
+    const cell = data.cells[selection.row]?.[selection.col];
+    if (!cell || cell.type !== "letter" || !cell.letter) return;
+    setUserInputs(prev => ({
+      ...prev,
+      [`${selection.row},${selection.col}`]: cell.letter!.toUpperCase(),
+    }));
+  }, [data, selection]);
+
+  const handleRevealWord = useCallback(() => {
+    if (!selection) return;
+    const word = getWordContaining(data, selection.row, selection.col, selection.direction);
+    if (!word?.cells.length) return;
+    setUserInputs(prev => {
+      const next = { ...prev };
+      for (const c of word.cells) {
+        const letter = data.cells[c.row]?.[c.col]?.letter;
+        if (letter) next[`${c.row},${c.col}`] = letter.toUpperCase();
+      }
+      return next;
+    });
+  }, [data, selection]);
+
   const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
     setSelection({ row, col, direction });
   }, []);
 
   const handleResetProgress = useCallback(() => {
     setUserInputs({});
-    setSelection(firstCell ? { ...firstCell, direction: "across" } : null);
-    saveProgress({
-      userInputs: {},
-      selection: firstCell ? { ...firstCell, direction: "across" } : null,
-    });
-  }, [firstCell]);
+    const cell = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
+    const nextSelection = cell ? { row: cell.row, col: cell.col, direction: "across" as const } : null;
+    setSelection(nextSelection);
+    saveProgress({ userInputs: {}, selection: nextSelection });
+  }, [firstCell, data]);
 
   useImperativeHandle(ref, () => ({
     scrollToWord(clueNumber: number, direction: "across" | "down") {
@@ -406,10 +482,14 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   return (
     <div className="group">
       <section
-        className="w-full flex justify-center px-8 pt-[120px] pb-[120px]"
+        className="w-full flex flex-col items-center px-8 pt-[120px] pb-[120px]"
       >
-        <div className="flex flex-col items-center md:items-stretch gap-8 md:flex-row w-full max-w-[1200px]">
-          <div className="shrink-0 w-min">
+        <div
+          ref={crosswordRowRef}
+          className="flex flex-col items-center md:items-stretch gap-8 md:flex-row w-full max-w-[1200px]"
+          style={gridColumnHeight != null ? { height: gridColumnHeight, minHeight: 0 } : undefined}
+        >
+          <div ref={gridColumnRef} className="shrink-0 w-min md:self-start">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
@@ -464,48 +544,67 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         )}
         
-        <CrosswordGrid 
-          data={data} 
-          selectedCell={selection ? { row: selection.row, col: selection.col } : null}
-          direction={selection?.direction ?? "across"}
-          showAnswers={showAnswers}
-          userInputs={userInputs}
-          crossReferencedCells={crossReferencedCells}
-          onSelectCell={handleSelectCell}
-          onInputLetter={handleInputLetter}
-          onClearCell={handleClearCell}
-          excludeFromBlurRef={clueBarRef}
-          gridRef={gridRef}
-        />
-        
-        {/* DEV ONLY: Show answers toggle and Reset - only visible in development mode */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="flex flex-wrap items-center gap-4 mt-4">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  checked={showAnswers}
-                  onChange={(e) => setShowAnswers(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
-                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
-              </div>
-              <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
-            </label>
-            <button
-              type="button"
-              onClick={handleResetProgress}
-              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
+        <div className="relative inline-flex flex-col">
+          <CrosswordGrid 
+            data={data} 
+            selectedCell={selection ? { row: selection.row, col: selection.col } : null}
+            direction={selection?.direction ?? "across"}
+            showAnswers={showAnswers}
+            userInputs={userInputs}
+            crossReferencedCells={crossReferencedCells}
+            onSelectCell={handleSelectCell}
+            onInputLetter={handleInputLetter}
+            onClearCell={handleClearCell}
+            excludeFromBlurRef={clueBarRef}
+            gridRef={gridRef}
+          />
+          {showClearConfirm && (
+            <div
+              className="absolute inset-0 flex flex-col items-center justify-center gap-8 p-6 z-10"
+              style={{
+                background: "rgba(234, 232, 225, 0.93)",
+                backdropFilter: "blur(2px)",
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="clear-confirm-title"
             >
-              Reset (dev only)
-            </button>
-          </div>
-        )}
+              <p
+                id="clear-confirm-title"
+                className="h6 text-stone-800 text-center leading-[1.2] tracking-[-0.96px] [font-feature-settings:'dlig'_on,'hlig'_on] max-w-[320px]"
+                style={{ fontSize: "32px" }}
+              >
+                Are you sure you want to clear the grid
+              </p>
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowClearConfirm(false)}
+                  className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700"
+                >
+                  Uh, no
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const word = getWordByClueNumber(data, 6, "across");
+                    const first = word?.cells[0];
+                    if (first) setSelection({ row: first.row, col: first.col, direction: "across" });
+                    setUserInputs({});
+                    setShowClearConfirm(false);
+                  }}
+                  className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700"
+                >
+                  Yeah, do it
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-        <div className="clue-lists w-full hidden md:flex flex-col lg:flex-row gap-6 border-b border-stone-800 md:max-h-[824px]">
+        <div className="hidden md:flex md:h-full flex-col w-full min-h-0 gap-[24px]">
+          <div className="clue-lists w-full h-full flex flex-col lg:flex-row gap-6 border-b border-stone-800 flex-1 min-h-0 overflow-hidden">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
@@ -607,7 +706,59 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
             />
           </div>
         </div>
+          <div className="flex justify-start items-center gap-[16px] pt-0 shrink-0">
+            <button
+              type="button"
+              onClick={handleRevealSquare}
+              disabled={!selection}
+              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
+            >
+              Reveal square
+            </button>
+            <button
+              type="button"
+              onClick={handleRevealWord}
+              disabled={!selection}
+              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
+            >
+              Reveal word
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowClearConfirm(true)}
+              disabled={Object.keys(userInputs).length === 0}
+              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
       </div>
+        {/* DEV ONLY: Show answers toggle and Reset - only visible in development mode */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="flex flex-wrap items-center gap-4 pt-0 w-full max-w-[1200px]">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={showAnswers}
+                  onChange={(e) => setShowAnswers(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
+                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+              </div>
+              <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
+            </label>
+            <button
+              type="button"
+              onClick={handleResetProgress}
+              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
+            >
+              Reset (dev only)
+            </button>
+          </div>
+        )}
     </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below sm) */}
       {clueContent && (

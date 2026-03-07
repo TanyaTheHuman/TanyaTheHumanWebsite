@@ -174,6 +174,7 @@ export function CrosswordGrid({
   const handleMobileKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (!selectedCell) return;
+      if (e.metaKey || e.ctrlKey) return;
       if (e.key === "Backspace") {
         e.preventDefault();
         const wasFilled = !!userInputs[`${selectedCell.row},${selectedCell.col}`];
@@ -199,6 +200,8 @@ export function CrosswordGrid({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!selectedCell || !gridRef.current) return;
       if (!gridRef.current.contains(document.activeElement)) return;
+      // Let browser shortcuts (e.g. Cmd+R, Ctrl+R) work - don't capture or preventDefault
+      if (e.metaKey || e.ctrlKey) return;
       // On mobile, the hidden input handles keyboard - skip to avoid double handling
       if (isMobile && document.activeElement === mobileInputRef.current) return;
 

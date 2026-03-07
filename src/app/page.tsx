@@ -169,7 +169,7 @@ export default function Home() {
         <CrosswordInteractive ref={crosswordRef} onFilledWordsChange={setFilledWords} />
       </div>
 
-      <section className="flex flex-col items-center self-stretch py-[200px] px-[56px]">
+      <section className="flex flex-col items-center self-stretch pt-[200px] pb-[320px] px-[56px]">
         <div className="flex flex-col items-center gap-2">
           <img
             src="/ok-bye.png"
