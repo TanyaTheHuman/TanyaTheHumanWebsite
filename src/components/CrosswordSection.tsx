@@ -485,7 +485,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   return (
     <div className="group">
       <section
-        className="w-full flex flex-col items-center px-8 pt-[120px] pb-[120px]"
+        className="w-full flex flex-col items-center px-6 sm:px-8 pt-[120px] pb-[120px]"
       >
         <div
           ref={crosswordRowRef}

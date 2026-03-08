@@ -159,7 +159,7 @@ export function CrosswordCell({
     return (
       <div
         id={`cell-${row}-${col}`}
-        className="shrink-0 !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] bg-ink bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)]"
+        className="shrink-0 !w-[31px] !h-[31px] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] bg-ink bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)]"
         aria-hidden
       />
     );
@@ -193,13 +193,13 @@ export function CrosswordCell({
           e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }}
-      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden no-underline text-inherit flex items-center justify-center ${bgClass}`}
+      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden no-underline text-inherit flex items-center justify-center ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
       {/* Grain overlay */}
       <svg 
-        className="absolute inset-0 pointer-events-none !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px]"
+        className="absolute inset-0 pointer-events-none !w-full !h-full"
         aria-hidden
       >
         {grainParticles.map((p) => (
@@ -220,7 +220,7 @@ export function CrosswordCell({
       )}
       {isClearingAnimation && userInput ? (
         <span
-          className="letter-dissolve-run relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]"
+          className="letter-dissolve-run relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[12px]"
           style={
             {
               "--dissolve-duration-ms": `${clearFlipDurationMs}ms`,
@@ -231,7 +231,7 @@ export function CrosswordCell({
           {userInput}
         </span>
       ) : (
-        <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]">
+        <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[12px]">
           {showAnswers ? letter : userInput ?? ""}
         </span>
       )}
