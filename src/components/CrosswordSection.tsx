@@ -213,14 +213,6 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     setSelection({ row, col, direction });
   }, []);
 
-  const handleResetProgress = useCallback(() => {
-    setUserInputs({});
-    const cell = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
-    const nextSelection = cell ? { row: cell.row, col: cell.col, direction: "across" as const } : null;
-    setSelection(nextSelection);
-    saveProgress({ userInputs: {}, selection: nextSelection });
-  }, [firstCell, data]);
-
   useImperativeHandle(ref, () => ({
     scrollToWord(clueNumber: number, direction: "across" | "down") {
       const word = getWordByClueNumber(data, clueNumber, direction);
@@ -743,7 +735,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         </div>
       </div>
-        {/* DEV ONLY: Show answers toggle, Fill grid, and Reset - only visible in development mode */}
+        {/* DEV ONLY: Show answers toggle and Fill grid - only visible in development mode */}
         {process.env.NODE_ENV === "development" && (
           <div className="flex flex-wrap items-center gap-4 pt-0 w-full max-w-[1200px]">
             <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -775,13 +767,6 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
               className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
             >
               Fill grid (dev only)
-            </button>
-            <button
-              type="button"
-              onClick={handleResetProgress}
-              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
-            >
-              Reset (dev only)
             </button>
           </div>
         )}
