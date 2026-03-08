@@ -489,10 +489,10 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       >
         <div
           ref={crosswordRowRef}
-          className="flex flex-col items-center md:items-stretch gap-8 md:flex-row w-full max-w-[1200px]"
+          className="flex flex-col items-center min-[850px]:items-stretch gap-8 min-[850px]:flex-row w-full max-w-[1200px]"
           style={gridColumnHeight != null ? { height: gridColumnHeight, minHeight: 0 } : undefined}
         >
-          <div ref={gridColumnRef} className="shrink-0 w-min md:self-start">
+          <div ref={gridColumnRef} className="shrink-0 w-min min-[850px]:self-start">
         {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
@@ -542,7 +542,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         {/* Mobile: tap hint when no cell selected */}
         {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
         {clueContent && (
-          <div className="hidden md:flex bg-mustard-100 rounded items-center justify-center gap-4 py-3 px-4 mb-6 z-10 w-full h-[88px]">
+          <div className="hidden min-[850px]:flex bg-mustard-100 rounded items-center justify-center gap-4 py-3 px-4 mb-6 z-10 w-full h-[88px]">
             {clueContent}
           </div>
         )}
@@ -620,12 +620,12 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         </div>
       </div>
 
-        <div className="hidden md:flex md:h-full flex-col w-full min-h-0 gap-[24px]">
+        <div className="hidden min-[850px]:flex min-[850px]:h-full flex-col w-full min-h-0 gap-[24px]">
           <div className="clue-lists w-full h-full flex flex-col lg:flex-row gap-6 border-b border-stone-800 flex-1 min-h-0 overflow-hidden">
           <div 
             ref={acrossListRef}
             onScroll={handleAcrossScroll}
-            className="across-clue-list clue-list-container max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative md:max-lg:border-b md:max-lg:border-stone-800"
+            className="across-clue-list clue-list-container max-h-[783px] min-[850px]:flex-1 min-[850px]:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative min-[850px]:max-lg:border-b min-[850px]:max-lg:border-stone-800"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Across
@@ -675,7 +675,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           <div 
             ref={downListRef}
             onScroll={handleDownScroll}
-            className="clue-list-container max-h-[783px] md:flex-1 md:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
+            className="clue-list-container max-h-[783px] min-[850px]:flex-1 min-[850px]:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
           >
             <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
               Down
@@ -786,9 +786,9 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         )}
     </section>
-      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below sm) */}
+      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
       {clueContent && (
-        <div className="hidden max-sm:group-focus-within:fixed max-sm:group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
+        <div className="hidden max-[849px]:group-focus-within:fixed max-[849px]:group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
           <div
             ref={clueBarRef}
             className="fixed bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
