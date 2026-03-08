@@ -361,13 +361,21 @@ a:focus-visible {
     font-family: var(--body-large-font-family);
     font-weight: 400;
     font-size: 1.125rem;
-    line-height: 1.3;
+    line-height: 1.5;
     letter-spacing: -0.01em;
   }
 
   @media (min-width: 768px) {
     .body-large {
-      line-height: 1.3;
+      font-size: 1.375rem;
+      line-height: 1.5;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .body-large {
+      font-size: 1.625rem;
+      line-height: 1.5;
     }
   }
 
@@ -376,14 +384,22 @@ a:focus-visible {
     font-weight: 400;
     font-style: italic;
     font-size: 1.125rem;
-    line-height: 1.3;
+    line-height: 1.5;
     letter-spacing: -0.01em;
     font-feature-settings: "liga" on, "dlig" on, "hlig" on, "kern" on;
   }
 
   @media (min-width: 768px) {
     .body-large-italic {
-      line-height: 1.3;
+      font-size: 1.375rem;
+      line-height: 1.5;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .body-large-italic {
+      font-size: 1.625rem;
+      line-height: 1.5;
     }
   }
 

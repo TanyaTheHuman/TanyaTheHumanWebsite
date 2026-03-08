@@ -72,13 +72,13 @@ export default function TypeTestPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-cream p-8 md:p-12">
-      <div className="mx-auto max-w-[720px]">
+    <main className="min-h-screen bg-cream px-0 py-8 md:px-0 md:py-12">
+      <div className="mx-auto max-w-[1000px]">
         <p className="body-default text-ink mb-12">
           Base font size: {BASE_PX}px. Each sample uses the sentence &ldquo;{SAMPLE}&rdquo;. Values below show the <strong>computed</strong> size (updates on resize).
         </p>
 
-        <div className="flex flex-col gap-12">
+        <div className="flex w-full flex-col gap-12">
           {styles.map((s, i) => (
             <section key={s.className} className="border-b border-stone-300 pb-10">
               <p className="caption text-stone-500 mb-2 font-sans font-semibold uppercase tracking-wide">{s.name}</p>

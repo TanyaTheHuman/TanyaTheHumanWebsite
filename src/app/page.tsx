@@ -5,7 +5,7 @@ import { CrosswordInteractive, type CrosswordInteractiveHandle } from "@/compone
 
 function displayWord(filledWords: Record<string, string>, key: string): string {
   const word = filledWords[key];
-  if (!word) return key;
+  if (!word) return key.replace(/-/g, "\u2011");
   if (key === "22-across" && word.toUpperCase() === "PRODUCTDESIGNER") {
     return "Product designer";
   }
@@ -102,7 +102,7 @@ export default function Home() {
                 </span>
               </h2>
               <p
-                className="h6 text-ink mt-6 min-w-0 break-words"
+                className="body-large text-ink mt-6 min-w-0 break-words [text-wrap:pretty]"
                 style={titleWidth > 0 ? { maxWidth: titleWidth } : undefined}
               >
                 <a

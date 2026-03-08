@@ -195,16 +195,6 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     });
   }, []);
 
-  const handleRevealSquare = useCallback(() => {
-    if (!selection) return;
-    const cell = data.cells[selection.row]?.[selection.col];
-    if (!cell || cell.type !== "letter" || !cell.letter) return;
-    setUserInputs(prev => ({
-      ...prev,
-      [`${selection.row},${selection.col}`]: cell.letter!.toUpperCase(),
-    }));
-  }, [data, selection]);
-
   const handleRevealWord = useCallback(() => {
     if (!selection) return;
     const word = getWordContaining(data, selection.row, selection.col, selection.direction);
@@ -734,14 +724,6 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         </div>
           <div className="flex justify-start items-center gap-[16px] pt-0 shrink-0">
-            <button
-              type="button"
-              onClick={handleRevealSquare}
-              disabled={!selection}
-              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
-            >
-              Reveal square
-            </button>
             <button
               type="button"
               onClick={handleRevealWord}
