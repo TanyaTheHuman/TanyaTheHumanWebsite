@@ -41,6 +41,11 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
 
   // Clear grid confirmation modal
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  // Clear ticker-tape animation: run flip wave then clear data
+  const [isClearingAnimation, setIsClearingAnimation] = useState(false);
+  const CLEAR_STAGGER_MS = 50;
+  const CLEAR_FLIP_DURATION_MS = 300;
   
   // User input state: maps "row,col" to the letter entered by user
   const [userInputs, setUserInputs] = useState<Record<string, string>>({});
@@ -56,6 +61,14 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   const crosswordRowRef = useRef<HTMLDivElement>(null);
   const [gridColumnHeight, setGridColumnHeight] = useState<number | null>(null);
   const saveEffectRunCount = useRef(0);
+  const clearAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear animation timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clearAnimationTimeoutRef.current) clearTimeout(clearAnimationTimeoutRef.current);
+    };
+  }, []);
 
   // Ensure a cell is always selected (e.g. after loading progress with no selection)
   useEffect(() => {
@@ -557,6 +570,9 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
             onClearCell={handleClearCell}
             excludeFromBlurRef={clueBarRef}
             gridRef={gridRef}
+            isClearingAnimation={isClearingAnimation}
+            clearStaggerMs={CLEAR_STAGGER_MS}
+            clearFlipDurationMs={CLEAR_FLIP_DURATION_MS}
           />
           {showClearConfirm && (
             <div
@@ -587,11 +603,22 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 <button
                   type="button"
                   onClick={() => {
-                    const word = getWordByClueNumber(data, 6, "across");
-                    const first = word?.cells[0];
-                    if (first) setSelection({ row: first.row, col: first.col, direction: "across" });
-                    setUserInputs({});
                     setShowClearConfirm(false);
+                    // Start animation after modal is gone so the grid is visible when flip runs
+                    requestAnimationFrame(() => {
+                      if (clearAnimationTimeoutRef.current) clearTimeout(clearAnimationTimeoutRef.current);
+                      setIsClearingAnimation(true);
+                      const maxStaggerIndex = (data.rows - 1) + (data.cols - 1);
+                      const totalMs = maxStaggerIndex * CLEAR_STAGGER_MS + CLEAR_FLIP_DURATION_MS;
+                      clearAnimationTimeoutRef.current = window.setTimeout(() => {
+                        const word = getWordByClueNumber(data, 6, "across");
+                        const first = word?.cells[0];
+                        if (first) setSelection({ row: first.row, col: first.col, direction: "across" });
+                        setUserInputs({});
+                        setIsClearingAnimation(false);
+                        clearAnimationTimeoutRef.current = null;
+                      }, totalMs);
+                    });
                   }}
                   className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700"
                 >
@@ -734,7 +761,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         </div>
       </div>
-        {/* DEV ONLY: Show answers toggle and Reset - only visible in development mode */}
+        {/* DEV ONLY: Show answers toggle, Fill grid, and Reset - only visible in development mode */}
         {process.env.NODE_ENV === "development" && (
           <div className="flex flex-wrap items-center gap-4 pt-0 w-full max-w-[1200px]">
             <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -750,6 +777,23 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
               </div>
               <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
             </label>
+            <button
+              type="button"
+              onClick={() => {
+                const filled: Record<string, string> = {};
+                data.cells.forEach((row) => {
+                  row.forEach((cell) => {
+                    if (cell.type === "letter" && cell.letter) {
+                      filled[`${cell.row},${cell.col}`] = cell.letter;
+                    }
+                  });
+                });
+                setUserInputs(filled);
+              }}
+              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
+            >
+              Fill grid (dev only)
+            </button>
             <button
               type="button"
               onClick={handleResetProgress}

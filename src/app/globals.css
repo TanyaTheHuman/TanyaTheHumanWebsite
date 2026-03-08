@@ -473,3 +473,19 @@ a:focus-visible {
     }
   }
 }
+
+/* Clear grid: filled letters dissolve in sequence (stagger by row+col), smooth fade */
+@keyframes letter-dissolve {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.letter-dissolve-run {
+  animation: letter-dissolve ease-out forwards;
+  animation-duration: var(--dissolve-duration-ms, 300ms);
+  animation-delay: var(--dissolve-delay-ms, 0ms);
+}

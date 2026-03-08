@@ -19,6 +19,9 @@ interface CrosswordGridProps {
   onMobileKeyboardClose?: () => void;
   excludeFromBlurRef?: React.RefObject<HTMLElement | null>;
   gridRef?: React.RefObject<HTMLDivElement | null>;
+  isClearingAnimation?: boolean;
+  clearStaggerMs?: number;
+  clearFlipDurationMs?: number;
 }
 
 export function CrosswordGrid({ 
@@ -35,6 +38,9 @@ export function CrosswordGrid({
   onMobileKeyboardClose,
   excludeFromBlurRef,
   gridRef: gridRefProp,
+  isClearingAnimation = false,
+  clearStaggerMs = 50,
+  clearFlipDurationMs = 300,
 }: CrosswordGridProps) {
   // Click handler with toggle behavior for already-selected cell
   const handleCellSelect = useCallback((row: number, col: number) => {
@@ -367,7 +373,7 @@ export function CrosswordGrid({
     <div
       ref={gridRef}
       tabIndex={0}
-      className="group inline-flex flex-col p-0 outline-none relative border-2 border-stone-800 bg-stone-600 gap-px"
+      className="group inline-flex flex-col p-0 outline-none relative border-2 border-stone-800 bg-stone-600 gap-px overflow-visible"
       role="grid"
       aria-label="Crossword grid. Use arrow keys to navigate."
     >
@@ -388,7 +394,7 @@ export function CrosswordGrid({
         className="absolute -left-[9999px] w-px h-px opacity-0 pointer-events-none"
       />
       {data.cells.map((rowCells, rowIndex) => (
-        <div key={rowIndex} className="flex gap-px">
+        <div key={rowIndex} className="flex gap-px overflow-visible">
           {rowCells.map((cell) => (
             <CrosswordCell
               key={`${cell.row}-${cell.col}`}
@@ -421,6 +427,9 @@ export function CrosswordGrid({
               }
               showAnswers={showAnswers}
               onSelect={handleCellSelect}
+              isClearingAnimation={isClearingAnimation}
+              clearAnimationDelayMs={(cell.row + cell.col) * clearStaggerMs}
+              clearFlipDurationMs={clearFlipDurationMs}
             />
           ))}
         </div>

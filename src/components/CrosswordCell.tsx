@@ -134,6 +134,9 @@ interface CrosswordCellProps {
   isCrossReferenced?: boolean;
   showAnswers: boolean;
   onSelect: (row: number, col: number) => void;
+  isClearingAnimation?: boolean;
+  clearAnimationDelayMs?: number;
+  clearFlipDurationMs?: number;
 }
 
 export function CrosswordCell({
@@ -148,6 +151,9 @@ export function CrosswordCell({
   isCrossReferenced,
   showAnswers,
   onSelect,
+  isClearingAnimation = false,
+  clearAnimationDelayMs = 0,
+  clearFlipDurationMs = 300,
 }: CrosswordCellProps) {
   if (cellType === "black") {
     return (
@@ -172,7 +178,7 @@ export function CrosswordCell({
   const cellId = row * 100 + col;
   const grainParticles = generateGrainParticles(cellId, 31);
 
-  return (
+  const button = (
     <button
       id={`cell-${row}-${col}`}
       // href={`#cell-${row}-${col}`}
@@ -212,9 +218,25 @@ export function CrosswordCell({
           {number}
         </span>
       )}
-      <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]">
-        {showAnswers ? letter : userInput ?? ""}
-      </span>
+      {isClearingAnimation && userInput ? (
+        <span
+          className="letter-dissolve-run relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]"
+          style={
+            {
+              "--dissolve-duration-ms": `${clearFlipDurationMs}ms`,
+              "--dissolve-delay-ms": `${clearAnimationDelayMs}ms`,
+            } as React.CSSProperties
+          }
+        >
+          {userInput}
+        </span>
+      ) : (
+        <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]">
+          {showAnswers ? letter : userInput ?? ""}
+        </span>
+      )}
     </button>
   );
+
+  return button;
 }
