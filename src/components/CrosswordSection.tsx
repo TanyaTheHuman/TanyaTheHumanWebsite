@@ -272,17 +272,7 @@ export const CrosswordInteractive = forwardRef<
         if (!word?.cells.length) return;
         const first = word.cells[0];
         setSelection({ row: first.row, col: first.col, direction });
-        setTimeout(() => {
-          const cellEl = document.getElementById(
-            `cell-${first.row}-${first.col}`,
-          ) as HTMLElement | null;
-          if (cellEl) {
-            cellEl.focus();
-            cellEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          } else {
-            gridRef.current?.focus();
-          }
-        }, 0);
+        // Focus handled by useLayoutEffect; scrolling left to the <a href="#crossword">
       },
     }),
     [data],
