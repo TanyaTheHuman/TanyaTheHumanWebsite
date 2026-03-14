@@ -1,10 +1,29 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect, useLayoutEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { CrosswordGrid } from "./CrosswordGrid";
-import { getCrosswordData, getWordContaining, getCrossReferencedCells, getWordByClueNumber, getFilledWordsMap } from "@/lib/crossword-data";
+import {
+  getCrosswordData,
+  getWordContaining,
+  getCrossReferencedCells,
+  getWordByClueNumber,
+  getFilledWordsMap,
+} from "@/lib/crossword-data";
 import { loadProgress, saveProgress } from "@/lib/crossword-storage";
-import { getFirstCell, getFirstEmptyCellInNextWord, getFirstEmptyCellInPreviousWord } from "@/lib/crossword-navigation";
+import {
+  getFirstCell,
+  getFirstEmptyCellInNextWord,
+  getFirstEmptyCellInPreviousWord,
+} from "@/lib/crossword-navigation";
 
 export interface CrosswordInteractiveHandle {
   scrollToWord(clueNumber: number, direction: "across" | "down"): void;
@@ -22,18 +41,21 @@ export interface CrosswordInteractiveProps {
    2. The preview block will appear above the crossword grid
    ============================================================================= */
 
-export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, CrosswordInteractiveProps>(function CrosswordInteractive({ onFilledWordsChange }, ref) {
+export const CrosswordInteractive = forwardRef<
+  CrosswordInteractiveHandle,
+  CrosswordInteractiveProps
+>(function CrosswordInteractive({ onFilledWordsChange }, ref) {
   const data = useMemo(() => getCrosswordData(), []);
   const firstCell = useMemo(() => getFirstCell(data), [data]);
-  
+
   // Selection state with direction tracking
   // Desktop: first cell selected on load. Mobile: cleared when we detect mobile.
   const [selection, setSelection] = useState<{
     row: number;
     col: number;
     direction: "across" | "down";
-  } | null>(() => firstCell ? { ...firstCell, direction: "across" } : null);
-  
+  } | null>(() => (firstCell ? { ...firstCell, direction: "across" } : null));
+
   const [isMobile, setIsMobile] = useState(false);
 
   // Toggle for showing/hiding answers (dev only, default off)
@@ -46,10 +68,10 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   const [isClearingAnimation, setIsClearingAnimation] = useState(false);
   const CLEAR_STAGGER_MS = 50;
   const CLEAR_FLIP_DURATION_MS = 300;
-  
+
   // User input state: maps "row,col" to the letter entered by user
   const [userInputs, setUserInputs] = useState<Record<string, string>>({});
-  
+
   // Scroll state for clue lists (to show border under sticky headers)
   const [acrossScrolled, setAcrossScrolled] = useState(false);
   const [downScrolled, setDownScrolled] = useState(false);
@@ -61,28 +83,36 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   const crosswordRowRef = useRef<HTMLDivElement>(null);
   const [gridColumnHeight, setGridColumnHeight] = useState<number | null>(null);
   const saveEffectRunCount = useRef(0);
-  const clearAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clearAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   // Clear animation timeout on unmount
   useEffect(() => {
     return () => {
-      if (clearAnimationTimeoutRef.current) clearTimeout(clearAnimationTimeoutRef.current);
+      if (clearAnimationTimeoutRef.current)
+        clearTimeout(clearAnimationTimeoutRef.current);
     };
   }, []);
 
   // Ensure a cell is always selected (e.g. after loading progress with no selection)
   useEffect(() => {
     if (selection == null) {
-      const cell = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
-      if (cell) setSelection({ row: cell.row, col: cell.col, direction: "across" });
+      const cell =
+        firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
+      if (cell)
+        setSelection({ row: cell.row, col: cell.col, direction: "across" });
     }
   }, [data, firstCell, selection]);
 
   // Focus the selected cell when selection changes (so a cell is always in focus)
   useLayoutEffect(() => {
     if (!selection) return;
-    const cellEl = document.getElementById(`cell-${selection.row}-${selection.col}`);
-    if (cellEl && typeof (cellEl as HTMLElement).focus === "function") (cellEl as HTMLElement).focus();
+    const cellEl = document.getElementById(
+      `cell-${selection.row}-${selection.col}`,
+    );
+    if (cellEl && typeof (cellEl as HTMLElement).focus === "function")
+      (cellEl as HTMLElement).focus();
     else gridRef.current?.focus();
   }, [selection?.row, selection?.col]);
 
@@ -95,8 +125,11 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       if (next != null && rowEl.contains(next)) return;
       if (!selection) return;
       requestAnimationFrame(() => {
-        const cellEl = document.getElementById(`cell-${selection.row}-${selection.col}`);
-        if (cellEl && typeof (cellEl as HTMLElement).focus === "function") (cellEl as HTMLElement).focus();
+        const cellEl = document.getElementById(
+          `cell-${selection.row}-${selection.col}`,
+        );
+        if (cellEl && typeof (cellEl as HTMLElement).focus === "function")
+          (cellEl as HTMLElement).focus();
         else gridRef.current?.focus();
       });
     };
@@ -120,7 +153,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       setAcrossScrolled(acrossListRef.current.scrollTop > 0);
     }
   }, []);
-  
+
   const handleDownScroll = useCallback(() => {
     if (downListRef.current) {
       setDownScrolled(downListRef.current.scrollTop > 0);
@@ -139,8 +172,11 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         !mobile && progress.selection
           ? progress.selection
           : (() => {
-              const c = firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
-              return c ? { row: c.row, col: c.col, direction: "across" as const } : null;
+              const c =
+                firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
+              return c
+                ? { row: c.row, col: c.col, direction: "across" as const }
+                : null;
             })();
       if (nextSelection) setSelection(nextSelection);
     }
@@ -155,7 +191,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
 
   const filledWordsMap = useMemo(
     () => getFilledWordsMap(data, userInputs),
-    [data, userInputs]
+    [data, userInputs],
   );
 
   useEffect(() => {
@@ -174,21 +210,24 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     const check = () =>
       setIsMobile(
         window.matchMedia("(max-width: 768px)").matches ||
-        window.matchMedia("(pointer: coarse)").matches
+          window.matchMedia("(pointer: coarse)").matches,
       );
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const handleInputLetter = useCallback((row: number, col: number, letter: string) => {
-    setUserInputs(prev => ({
-      ...prev,
-      [`${row},${col}`]: letter.toUpperCase()
-    }));
-  }, []);
-  
+  const handleInputLetter = useCallback(
+    (row: number, col: number, letter: string) => {
+      setUserInputs((prev) => ({
+        ...prev,
+        [`${row},${col}`]: letter.toUpperCase(),
+      }));
+    },
+    [],
+  );
+
   const handleClearCell = useCallback((row: number, col: number) => {
-    setUserInputs(prev => {
+    setUserInputs((prev) => {
       const next = { ...prev };
       delete next[`${row},${col}`];
       return next;
@@ -197,9 +236,14 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
 
   const handleRevealWord = useCallback(() => {
     if (!selection) return;
-    const word = getWordContaining(data, selection.row, selection.col, selection.direction);
+    const word = getWordContaining(
+      data,
+      selection.row,
+      selection.col,
+      selection.direction,
+    );
     if (!word?.cells.length) return;
-    setUserInputs(prev => {
+    setUserInputs((prev) => {
       const next = { ...prev };
       for (const c of word.cells) {
         const letter = data.cells[c.row]?.[c.col]?.letter;
@@ -209,27 +253,36 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     });
   }, [data, selection]);
 
-  const handleSelectCell = useCallback((row: number, col: number, direction: "across" | "down") => {
-    setSelection({ row, col, direction });
-  }, []);
-
-  useImperativeHandle(ref, () => ({
-    scrollToWord(clueNumber: number, direction: "across" | "down") {
-      const word = getWordByClueNumber(data, clueNumber, direction);
-      if (!word?.cells.length) return;
-      const first = word.cells[0];
-      setSelection({ row: first.row, col: first.col, direction });
-      setTimeout(() => {
-        const cellEl = document.getElementById(`cell-${first.row}-${first.col}`) as HTMLElement | null;
-        if (cellEl) {
-          cellEl.focus();
-          cellEl.scrollIntoView({ behavior: "smooth", block: "center" });
-        } else {
-          gridRef.current?.focus();
-        }
-      }, 0);
+  const handleSelectCell = useCallback(
+    (row: number, col: number, direction: "across" | "down") => {
+      setSelection({ row, col, direction });
     },
-  }), [data]);
+    [],
+  );
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToWord(clueNumber: number, direction: "across" | "down") {
+        const word = getWordByClueNumber(data, clueNumber, direction);
+        if (!word?.cells.length) return;
+        const first = word.cells[0];
+        setSelection({ row: first.row, col: first.col, direction });
+        setTimeout(() => {
+          const cellEl = document.getElementById(
+            `cell-${first.row}-${first.col}`,
+          ) as HTMLElement | null;
+          if (cellEl) {
+            cellEl.focus();
+            cellEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          } else {
+            gridRef.current?.focus();
+          }
+        }, 0);
+      },
+    }),
+    [data],
+  );
 
   // Mobile clue bar: prev/next cells for anchor hrefs
   const prevCell = useMemo(() => {
@@ -239,7 +292,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       selection.row,
       selection.col,
       selection.direction,
-      userInputs
+      userInputs,
     );
   }, [selection, data, userInputs]);
 
@@ -250,7 +303,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       selection.row,
       selection.col,
       selection.direction,
-      userInputs
+      userInputs,
     );
   }, [selection, data, userInputs]);
 
@@ -278,65 +331,79 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
       handleSelectCell(selection.row, selection.col, newDirection);
     }
   }, [selection, data, handleSelectCell]);
-  
+
   // Determine which word(s) the selected cell belongs to
   const activeWordIds = useMemo(() => {
-    if (!selection) return { acrossId: null as number | null, downId: null as number | null, activeType: "across" as const };
-    
+    if (!selection)
+      return {
+        acrossId: null as number | null,
+        downId: null as number | null,
+        activeType: "across" as const,
+      };
+
     const cell = data.cells[selection.row]?.[selection.col];
-    if (!cell || cell.type === "black") return { acrossId: null, downId: null, activeType: selection.direction };
-    
+    if (!cell || cell.type === "black")
+      return { acrossId: null, downId: null, activeType: selection.direction };
+
     const acrossId = cell.acrossWordId ?? null;
     const downId = cell.downWordId ?? null;
-    
+
     // Use the tracked direction from selection state
     return { acrossId, downId, activeType: selection.direction };
   }, [data, selection]);
-  
+
   // Find the crossing word at the currently selected cell (only one)
   const crossingWordIds = useMemo(() => {
     const crossingAcross = new Set<number>();
     const crossingDown = new Set<number>();
-    
+
     if (!selection) return { crossingAcross, crossingDown };
-    
+
     // Get the cell at the current selection
     const gridCell = data.cells[selection.row]?.[selection.col];
     if (!gridCell) return { crossingAcross, crossingDown };
-    
+
     // Find the crossing word at this specific cell (opposite direction)
     if (selection.direction === "across" && gridCell.downWordId !== undefined) {
       crossingDown.add(gridCell.downWordId);
-    } else if (selection.direction === "down" && gridCell.acrossWordId !== undefined) {
+    } else if (
+      selection.direction === "down" &&
+      gridCell.acrossWordId !== undefined
+    ) {
       crossingAcross.add(gridCell.acrossWordId);
     }
-    
+
     return { crossingAcross, crossingDown };
   }, [data, selection]);
-  
+
   // Refs for clue list items to enable scrolling
   const acrossClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
   const downClueRefs = useRef<Map<number, HTMLLIElement>>(new Map());
-  
+
   // Get the currently selected word for the highlighted clue display
   const selectedWord = useMemo(() => {
     if (!selection) return null;
-    return getWordContaining(data, selection.row, selection.col, selection.direction);
+    return getWordContaining(
+      data,
+      selection.row,
+      selection.col,
+      selection.direction,
+    );
   }, [data, selection]);
-  
+
   const crossReferencedCells = useMemo(
     () => getCrossReferencedCells(data, selectedWord),
-    [data, selectedWord]
+    [data, selectedWord],
   );
 
   // Sort words by clue number for display
   const sortedAcrossWords = useMemo(
     () => [...data.acrossWords].sort((a, b) => a.clueNumber - b.clueNumber),
-    [data.acrossWords]
+    [data.acrossWords],
   );
   const sortedDownWords = useMemo(
     () => [...data.downWords].sort((a, b) => a.clueNumber - b.clueNumber),
-    [data.downWords]
+    [data.downWords],
   );
 
   const showLargeClue = !!selectedWord;
@@ -346,7 +413,7 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
     const GRADIENT_HEIGHT = 32; // Height of the gradient fade at bottom (matches h-8)
 
     // Scroll crossing across clues into view
-    crossingWordIds.crossingAcross.forEach(wordId => {
+    crossingWordIds.crossingAcross.forEach((wordId) => {
       const element = acrossClueRefs.current.get(wordId);
       if (element && acrossListRef.current) {
         const container = acrossListRef.current;
@@ -354,24 +421,29 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         const elementBottom = elementTop + element.offsetHeight;
         const containerTop = container.scrollTop;
         const containerBottom = containerTop + container.clientHeight;
-        
+
         // Check if element is out of view (accounting for gradient)
         const visibleBottom = containerBottom - GRADIENT_HEIGHT;
-        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
-        
+        const isOutOfView =
+          elementTop < containerTop || elementBottom > visibleBottom;
+
         if (isOutOfView) {
           // Calculate scroll position to show clue above gradient
-          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          const scrollPosition =
+            elementTop +
+            element.offsetHeight -
+            container.clientHeight +
+            GRADIENT_HEIGHT;
           container.scrollTo({
             top: Math.max(0, scrollPosition),
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       }
     });
-    
+
     // Scroll crossing down clues into view
-    crossingWordIds.crossingDown.forEach(wordId => {
+    crossingWordIds.crossingDown.forEach((wordId) => {
       const element = downClueRefs.current.get(wordId);
       if (element && downListRef.current) {
         const container = downListRef.current;
@@ -379,17 +451,22 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         const elementBottom = elementTop + element.offsetHeight;
         const containerTop = container.scrollTop;
         const containerBottom = containerTop + container.clientHeight;
-        
+
         // Check if element is out of view (accounting for gradient)
         const visibleBottom = containerBottom - GRADIENT_HEIGHT;
-        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
-        
+        const isOutOfView =
+          elementTop < containerTop || elementBottom > visibleBottom;
+
         if (isOutOfView) {
           // Calculate scroll position to show clue above gradient
-          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          const scrollPosition =
+            elementTop +
+            element.offsetHeight -
+            container.clientHeight +
+            GRADIENT_HEIGHT;
           container.scrollTo({
             top: Math.max(0, scrollPosition),
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       }
@@ -400,8 +477,12 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
   useEffect(() => {
     if (!selectedWord) return;
 
-    const isAcross = activeWordIds.activeType === "across" && activeWordIds.acrossId === selectedWord.id;
-    const isDown = activeWordIds.activeType === "down" && activeWordIds.downId === selectedWord.id;
+    const isAcross =
+      activeWordIds.activeType === "across" &&
+      activeWordIds.acrossId === selectedWord.id;
+    const isDown =
+      activeWordIds.activeType === "down" &&
+      activeWordIds.downId === selectedWord.id;
     const GRADIENT_HEIGHT = 32; // Height of the gradient fade at bottom (matches h-8)
 
     // Handle across clues
@@ -413,18 +494,23 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         const elementBottom = elementTop + element.offsetHeight;
         const containerTop = container.scrollTop;
         const containerBottom = containerTop + container.clientHeight;
-        
+
         // Check if element is out of view (accounting for gradient)
         const visibleBottom = containerBottom - GRADIENT_HEIGHT;
-        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
-        
+        const isOutOfView =
+          elementTop < containerTop || elementBottom > visibleBottom;
+
         if (isOutOfView) {
           // Calculate scroll position to show clue above gradient
           // Position element so its bottom is above the gradient area
-          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          const scrollPosition =
+            elementTop +
+            element.offsetHeight -
+            container.clientHeight +
+            GRADIENT_HEIGHT;
           container.scrollTo({
             top: Math.max(0, scrollPosition),
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       }
@@ -439,53 +525,64 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
         const elementBottom = elementTop + element.offsetHeight;
         const containerTop = container.scrollTop;
         const containerBottom = containerTop + container.clientHeight;
-        
+
         // Check if element is out of view (accounting for gradient)
         const visibleBottom = containerBottom - GRADIENT_HEIGHT;
-        const isOutOfView = elementTop < containerTop || elementBottom > visibleBottom;
-        
+        const isOutOfView =
+          elementTop < containerTop || elementBottom > visibleBottom;
+
         if (isOutOfView) {
           // Calculate scroll position to show clue above gradient
           // Position element so its bottom is above the gradient area
-          const scrollPosition = elementTop + element.offsetHeight - container.clientHeight + GRADIENT_HEIGHT;
+          const scrollPosition =
+            elementTop +
+            element.offsetHeight -
+            container.clientHeight +
+            GRADIENT_HEIGHT;
           container.scrollTo({
             top: Math.max(0, scrollPosition),
-            behavior: "smooth"
+            behavior: "smooth",
           });
         }
       }
     }
   }, [selectedWord, sortedAcrossWords, sortedDownWords, activeWordIds]);
-  
+
   // UNCOMMENT TO ENABLE GRAIN PREVIEW:
   // const [dotSpacing, setDotSpacing] = useState(4);
   // const [dotSize, setDotSize] = useState(0.5);
   // const [dotOpacity, setDotOpacity] = useState(0.3);
   // const [dotCount, setDotCount] = useState(8);
 
-  const clueContent = showLargeClue && selectedWord ? (
-    <>
-      <span className="text-stone-800 text-right font-serif text-[26px] font-bold leading-normal tracking-[-0.52px] min-w-[32px]">
-        {selectedWord.clueNumber}
-      </span>
-      <span className="text-stone-800 text-left font-serif text-[20px] font-normal leading-normal tracking-[-0.4px] mt-1 flex-1 min-w-0 [font-feature-settings:'dlig'_on,'hlig'_on]">
-        {selectedWord.clue}
-      </span>
-    </>
-  ) : null;
+  const clueContent =
+    showLargeClue && selectedWord ? (
+      <>
+        <span className="min-w-[32px] text-right font-serif text-[26px] leading-normal font-bold tracking-[-0.52px] text-stone-800">
+          {selectedWord.clueNumber}
+        </span>
+        <span className="mt-1 min-w-0 flex-1 text-left font-serif text-[20px] leading-normal font-normal tracking-[-0.4px] text-stone-800 [font-feature-settings:'dlig'_on,'hlig'_on]">
+          {selectedWord.clue}
+        </span>
+      </>
+    ) : null;
 
   return (
     <div className="group">
-      <section
-        className="w-full flex flex-col items-center px-6 sm:px-8 pt-[120px] pb-[120px]"
-      >
+      <section className="flex w-full flex-col items-center px-6 pt-[120px] pb-[120px] sm:px-8">
         <div
           ref={crosswordRowRef}
-          className="flex flex-col items-center min-[850px]:items-stretch gap-8 min-[850px]:flex-row w-full max-w-[1200px]"
-          style={gridColumnHeight != null ? { height: gridColumnHeight, minHeight: 0 } : undefined}
+          className="flex w-full max-w-[1200px] flex-col items-center gap-8 min-[850px]:flex-row min-[850px]:items-stretch"
+          style={
+            gridColumnHeight != null
+              ? { height: gridColumnHeight, minHeight: 0 }
+              : undefined
+          }
         >
-          <div ref={gridColumnRef} className="shrink-0 w-min min-[850px]:self-start">
-        {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
+          <div
+            ref={gridColumnRef}
+            className="w-min shrink-0 min-[850px]:self-start"
+          >
+            {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
         <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
           <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
           <div className="mb-3">
@@ -530,226 +627,294 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
           </div>
         </div>
         */}
-        
-        {/* Mobile: tap hint when no cell selected */}
-        {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
-        {clueContent && (
-          <div className="hidden min-[850px]:flex bg-mustard-100 rounded items-center justify-center gap-4 py-3 px-4 mb-6 z-10 w-full h-[88px]">
-            {clueContent}
-          </div>
-        )}
-        
-        <div className="relative inline-flex flex-col">
-          <CrosswordGrid 
-            data={data} 
-            selectedCell={selection ? { row: selection.row, col: selection.col } : null}
-            direction={selection?.direction ?? "across"}
-            showAnswers={showAnswers}
-            userInputs={userInputs}
-            crossReferencedCells={crossReferencedCells}
-            onSelectCell={handleSelectCell}
-            onInputLetter={handleInputLetter}
-            onClearCell={handleClearCell}
-            excludeFromBlurRef={clueBarRef}
-            gridRef={gridRef}
-            isClearingAnimation={isClearingAnimation}
-            clearStaggerMs={CLEAR_STAGGER_MS}
-            clearFlipDurationMs={CLEAR_FLIP_DURATION_MS}
-          />
-          {showClearConfirm && (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-8 p-6 z-10"
-              style={{
-                background: "rgba(234, 232, 225, 0.93)",
-                backdropFilter: "blur(2px)",
-              }}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="clear-confirm-title"
-            >
-              <p
-                id="clear-confirm-title"
-                className="h6 text-stone-800 text-center leading-[1.2] tracking-[-0.96px] [font-feature-settings:'dlig'_on,'hlig'_on] max-w-[320px]"
-                style={{ fontSize: "32px" }}
-              >
-                Are you sure you want to clear the grid
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setShowClearConfirm(false)}
-                  className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700"
-                >
-                  Uh, no
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowClearConfirm(false);
-                    // Start animation after modal is gone so the grid is visible when flip runs
-                    requestAnimationFrame(() => {
-                      if (clearAnimationTimeoutRef.current) clearTimeout(clearAnimationTimeoutRef.current);
-                      setIsClearingAnimation(true);
-                      const maxStaggerIndex = (data.rows - 1) + (data.cols - 1);
-                      const totalMs = maxStaggerIndex * CLEAR_STAGGER_MS + CLEAR_FLIP_DURATION_MS;
-                      clearAnimationTimeoutRef.current = window.setTimeout(() => {
-                        const word = getWordByClueNumber(data, 6, "across");
-                        const first = word?.cells[0];
-                        if (first) setSelection({ row: first.row, col: first.col, direction: "across" });
-                        setUserInputs({});
-                        setIsClearingAnimation(false);
-                        clearAnimationTimeoutRef.current = null;
-                      }, totalMs);
-                    });
+
+            {/* Mobile: tap hint when no cell selected */}
+            {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
+            {clueContent && (
+              <div className="bg-mustard-100 z-10 mb-6 hidden h-[88px] w-full items-center justify-center gap-4 rounded px-4 py-3 min-[850px]:flex">
+                {clueContent}
+              </div>
+            )}
+
+            <div className="relative inline-flex flex-col">
+              <CrosswordGrid
+                data={data}
+                selectedCell={
+                  selection ? { row: selection.row, col: selection.col } : null
+                }
+                direction={selection?.direction ?? "across"}
+                showAnswers={showAnswers}
+                userInputs={userInputs}
+                crossReferencedCells={crossReferencedCells}
+                onSelectCell={handleSelectCell}
+                onInputLetter={handleInputLetter}
+                onClearCell={handleClearCell}
+                excludeFromBlurRef={clueBarRef}
+                gridRef={gridRef}
+                isClearingAnimation={isClearingAnimation}
+                clearStaggerMs={CLEAR_STAGGER_MS}
+                clearFlipDurationMs={CLEAR_FLIP_DURATION_MS}
+              />
+              {showClearConfirm && (
+                <div
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 p-6"
+                  style={{
+                    background: "rgba(234, 232, 225, 0.93)",
+                    backdropFilter: "blur(2px)",
                   }}
-                  className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="clear-confirm-title"
                 >
-                  Yeah, do it
-                </button>
+                  <p
+                    id="clear-confirm-title"
+                    className="h6 max-w-[320px] text-center leading-[1.2] tracking-[-0.96px] text-stone-800 [font-feature-settings:'dlig'_on,'hlig'_on]"
+                    style={{ fontSize: "32px" }}
+                  >
+                    Are you sure you want to clear the grid
+                  </p>
+                  <div className="flex items-center justify-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowClearConfirm(false)}
+                      className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none"
+                    >
+                      Uh, no
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowClearConfirm(false);
+                        // Start animation after modal is gone so the grid is visible when flip runs
+                        requestAnimationFrame(() => {
+                          if (clearAnimationTimeoutRef.current)
+                            clearTimeout(clearAnimationTimeoutRef.current);
+                          setIsClearingAnimation(true);
+                          const maxStaggerIndex =
+                            data.rows - 1 + (data.cols - 1);
+                          const totalMs =
+                            maxStaggerIndex * CLEAR_STAGGER_MS +
+                            CLEAR_FLIP_DURATION_MS;
+                          clearAnimationTimeoutRef.current = window.setTimeout(
+                            () => {
+                              const word = getWordByClueNumber(
+                                data,
+                                6,
+                                "across",
+                              );
+                              const first = word?.cells[0];
+                              if (first)
+                                setSelection({
+                                  row: first.row,
+                                  col: first.col,
+                                  direction: "across",
+                                });
+                              setUserInputs({});
+                              setIsClearingAnimation(false);
+                              clearAnimationTimeoutRef.current = null;
+                            },
+                            totalMs,
+                          );
+                        });
+                      }}
+                      className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none"
+                    >
+                      Yeah, do it
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="hidden min-h-0 w-full flex-col gap-[24px] min-[850px]:flex min-[850px]:h-full">
+            <div className="clue-lists flex h-full min-h-0 w-full flex-1 flex-col gap-6 overflow-hidden border-b border-stone-800 lg:flex-row">
+              <div
+                ref={acrossListRef}
+                onScroll={handleAcrossScroll}
+                className="across-clue-list clue-list-container relative max-h-[783px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 min-[850px]:max-lg:border-b min-[850px]:max-lg:border-stone-800 [&::-webkit-scrollbar]:hidden"
+              >
+                <h3
+                  className={`bg-cream sticky top-0 z-[1] mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
+                >
+                  Across
+                </h3>
+                <ul>
+                  {sortedAcrossWords.map((word) => {
+                    const isActive =
+                      activeWordIds.acrossId === word.id &&
+                      activeWordIds.activeType === "across";
+                    const isCrossing = crossingWordIds.crossingAcross.has(
+                      word.id,
+                    );
+                    const firstCell = word.cells[0];
+                    const isComplete = word.cells.every(
+                      (c) => userInputs[`${c.row},${c.col}`],
+                    );
+                    const textColorClass = isComplete
+                      ? "text-stone-400"
+                      : "text-stone-800";
+                    return (
+                      <li
+                        key={word.id}
+                        ref={(el) => {
+                          if (el) acrossClueRefs.current.set(word.id, el);
+                          else acrossClueRefs.current.delete(word.id);
+                        }}
+                        className={`flex cursor-pointer items-start gap-3 px-[6px] py-2 ${isActive ? "bg-mustard-100 rounded" : ""}`}
+                        onClick={() => {
+                          if (firstCell) {
+                            handleSelectCell(
+                              firstCell.row,
+                              firstCell.col,
+                              "across",
+                            );
+                            gridRef.current?.focus();
+                            document
+                              .getElementById(
+                                `cell-${firstCell.row}-${firstCell.col}`,
+                              )
+                              ?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                          }
+                        }}
+                      >
+                        <span
+                          className={`min-w-[20px] pl-0.5 text-left font-serif text-[14px] leading-normal font-bold tracking-[-0.28px] [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
+                        >
+                          {word.clueNumber}
+                        </span>
+                        <span
+                          className={`text-left font-serif text-[16px] leading-normal font-normal tracking-[-0.32px] ${textColorClass}`}
+                        >
+                          {word.clue}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div
+                  className="list-bottom-gradient pointer-events-none sticky right-0 bottom-0 left-0 h-8"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
+                  }}
+                />
+              </div>
+              <div
+                ref={downListRef}
+                onScroll={handleDownScroll}
+                className="clue-list-container relative max-h-[783px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 [&::-webkit-scrollbar]:hidden"
+              >
+                <h3
+                  className={`bg-cream sticky top-0 z-[1] mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
+                >
+                  Down
+                </h3>
+                <ul>
+                  {sortedDownWords.map((word) => {
+                    const isActive =
+                      activeWordIds.downId === word.id &&
+                      activeWordIds.activeType === "down";
+                    const isCrossing = crossingWordIds.crossingDown.has(
+                      word.id,
+                    );
+                    const firstCell = word.cells[0];
+                    const isComplete = word.cells.every(
+                      (c) => userInputs[`${c.row},${c.col}`],
+                    );
+                    const textColorClass = isComplete
+                      ? "text-stone-400"
+                      : "text-stone-800";
+                    return (
+                      <li
+                        key={word.id}
+                        ref={(el) => {
+                          if (el) downClueRefs.current.set(word.id, el);
+                          else downClueRefs.current.delete(word.id);
+                        }}
+                        className={`flex cursor-pointer items-start gap-3 px-[6px] py-2 ${isActive ? "bg-mustard-100 rounded" : ""}`}
+                        onClick={() => {
+                          if (firstCell) {
+                            handleSelectCell(
+                              firstCell.row,
+                              firstCell.col,
+                              "down",
+                            );
+                            gridRef.current?.focus();
+                            document
+                              .getElementById(
+                                `cell-${firstCell.row}-${firstCell.col}`,
+                              )
+                              ?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "center",
+                              });
+                          }
+                        }}
+                      >
+                        <span
+                          className={`min-w-[20px] pl-0.5 text-left font-serif text-[14px] leading-normal font-bold tracking-[-0.28px] [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
+                        >
+                          {word.clueNumber}
+                        </span>
+                        <span
+                          className={`text-left font-serif text-[16px] leading-normal font-normal tracking-[-0.32px] ${textColorClass}`}
+                        >
+                          {word.clue}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div
+                  className="list-bottom-gradient pointer-events-none sticky right-0 bottom-0 left-0 h-8"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
+                  }}
+                />
               </div>
             </div>
-          )}
-        </div>
-      </div>
-
-        <div className="hidden min-[850px]:flex min-[850px]:h-full flex-col w-full min-h-0 gap-[24px]">
-          <div className="clue-lists w-full h-full flex flex-col lg:flex-row gap-6 border-b border-stone-800 flex-1 min-h-0 overflow-hidden">
-          <div 
-            ref={acrossListRef}
-            onScroll={handleAcrossScroll}
-            className="across-clue-list clue-list-container max-h-[783px] min-[850px]:flex-1 min-[850px]:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative min-[850px]:max-lg:border-b min-[850px]:max-lg:border-stone-800"
-          >
-            <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
-              Across
-            </h3>
-            <ul>
-              {sortedAcrossWords.map((word) => {
-                const isActive = activeWordIds.acrossId === word.id && activeWordIds.activeType === "across";
-                const isCrossing = crossingWordIds.crossingAcross.has(word.id);
-                const firstCell = word.cells[0];
-                const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
-                const textColorClass = isComplete ? "text-stone-400" : "text-stone-800";
-                return (
-                  <li 
-                    key={word.id}
-                    ref={(el) => {
-                      if (el) acrossClueRefs.current.set(word.id, el);
-                      else acrossClueRefs.current.delete(word.id);
-                    }}
-                    className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
-                    onClick={() => {
-                      if (firstCell) {
-                        handleSelectCell(firstCell.row, firstCell.col, "across");
-                        gridRef.current?.focus();
-                        document.getElementById(`cell-${firstCell.row}-${firstCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }
-                    }}
-                  >
-                    <span 
-                      className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
-                    >
-                      {word.clueNumber}
-                    </span>
-                    <span className={`text-left font-serif text-[16px] font-normal leading-normal tracking-[-0.32px] ${textColorClass}`}>
-                      {word.clue}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            <div
-              className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 pointer-events-none"
-              style={{
-                background: "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
-              }}
-            />
-          </div>
-          <div 
-            ref={downListRef}
-            onScroll={handleDownScroll}
-            className="clue-list-container max-h-[783px] min-[850px]:flex-1 min-[850px]:min-h-0 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
-          >
-            <h3 className={`sticky top-0 bg-cream text-stone-800 font-serif text-[20px] italic font-medium leading-normal tracking-[-0.4px] pb-4 pl-[6px] mb-0 z-[1] [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] transition-shadow duration-150 ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}>
-              Down
-            </h3>
-            <ul>
-              {sortedDownWords.map((word) => {
-                const isActive = activeWordIds.downId === word.id && activeWordIds.activeType === "down";
-                const isCrossing = crossingWordIds.crossingDown.has(word.id);
-                const firstCell = word.cells[0];
-                const isComplete = word.cells.every(c => userInputs[`${c.row},${c.col}`]);
-                const textColorClass = isComplete ? "text-stone-400" : "text-stone-800";
-                return (
-                  <li 
-                    key={word.id}
-                    ref={(el) => {
-                      if (el) downClueRefs.current.set(word.id, el);
-                      else downClueRefs.current.delete(word.id);
-                    }}
-                    className={`flex items-start gap-3 cursor-pointer py-2 px-[6px] ${isActive ? "bg-mustard-100 rounded" : ""}`}
-                    onClick={() => {
-                      if (firstCell) {
-                        handleSelectCell(firstCell.row, firstCell.col, "down");
-                        gridRef.current?.focus();
-                        document.getElementById(`cell-${firstCell.row}-${firstCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      }
-                    }}
-                  >
-                    <span 
-                      className={`text-left font-serif text-[14px] font-bold leading-normal tracking-[-0.28px] min-w-[20px] pl-0.5 [font-feature-settings:'dlig'_on,'hlig'_on] ${textColorClass} ${isCrossing && !isActive ? "bg-mustard-100 rounded" : ""}`}
-                    >
-                      {word.clueNumber}
-                    </span>
-                    <span className={`text-left font-serif text-[16px] font-normal leading-normal tracking-[-0.32px] ${textColorClass}`}>
-                      {word.clue}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-            <div
-              className="list-bottom-gradient sticky bottom-0 left-0 right-0 h-8 pointer-events-none"
-              style={{
-                background: "linear-gradient(180deg, rgba(234, 232, 225, 0.00) -109.3%, rgba(234, 232, 225, 0.90) 100%)",
-              }}
-            />
+            <div className="flex shrink-0 items-center justify-start gap-[16px] pt-0">
+              <button
+                type="button"
+                onClick={handleRevealWord}
+                disabled={!selection}
+                className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
+              >
+                Reveal word
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowClearConfirm(true)}
+                disabled={Object.keys(userInputs).length === 0}
+                className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
-          <div className="flex justify-start items-center gap-[16px] pt-0 shrink-0">
-            <button
-              type="button"
-              onClick={handleRevealWord}
-              disabled={!selection}
-              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
-            >
-              Reveal word
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowClearConfirm(true)}
-              disabled={Object.keys(userInputs).length === 0}
-              className="flex items-center gap-[6px] py-[6px] px-[12px] border border-stone-500 bg-transparent body-default-bold font-bold text-base tracking-[-0.16px] text-ink [font-feature-settings:'dlig'_on] cursor-pointer focus:outline-none focus:ring-1 focus:ring-mustard-300 focus:ring-offset-2 focus:ring-offset-cream hover:bg-stone-300 hover:border-stone-400 hover:text-stone-700 disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:cursor-default disabled:hover:bg-transparent disabled:hover:border-stone-400 disabled:hover:text-stone-500"
-            >
-              Clear
-            </button>
-          </div>
-        </div>
-      </div>
         {/* DEV ONLY: Show answers toggle and Fill grid - only visible in development mode */}
         {process.env.NODE_ENV === "development" && (
-          <div className="flex flex-wrap items-center gap-4 pt-0 w-full max-w-[1200px]">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
+          <div className="flex w-full max-w-[1200px] flex-wrap items-center gap-4 pt-0">
+            <label className="flex cursor-pointer items-center gap-2 select-none">
               <div className="relative">
                 <input
                   type="checkbox"
                   checked={showAnswers}
                   onChange={(e) => setShowAnswers(e.target.checked)}
-                  className="sr-only peer"
+                  className="peer sr-only"
                 />
-                <div className="w-9 h-5 bg-stone-300 rounded-full peer peer-checked:bg-mustard-400 transition-colors" />
-                <div className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4" />
+                <div className="peer peer-checked:bg-mustard-400 h-5 w-9 rounded-full bg-stone-300 transition-colors" />
+                <div className="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform peer-checked:translate-x-4" />
               </div>
-              <span className="font-serif text-sm text-ink">Show answers (dev only)</span>
+              <span className="text-ink font-serif text-sm">
+                Show answers (dev only)
+              </span>
             </label>
             <button
               type="button"
@@ -764,19 +929,19 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 });
                 setUserInputs(filled);
               }}
-              className="font-serif text-sm text-ink underline focus:outline-none focus:ring-2 focus:ring-stone-400 rounded hover:text-stone-600"
+              className="text-ink rounded font-serif text-sm underline hover:text-stone-600 focus:ring-2 focus:ring-stone-400 focus:outline-none"
             >
               Fill grid (dev only)
             </button>
           </div>
         )}
-    </section>
+      </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
       {clueContent && (
-        <div className="hidden max-[849px]:group-focus-within:fixed max-[849px]:group-focus-within:block h-dvh top-0 inset-x-0 pointer-events-none z-50">
+        <div className="pointer-events-none inset-x-0 top-0 z-50 hidden h-dvh max-[849px]:group-focus-within:fixed max-[849px]:group-focus-within:block">
           <div
             ref={clueBarRef}
-            className="fixed bottom-0 left-0 right-0 flex items-center justify-between py-3 px-2 bg-mustard-100 w-full text-ink rounded-none pointer-events-auto touch-manipulation"
+            className="bg-mustard-100 text-ink pointer-events-auto fixed right-0 bottom-0 left-0 flex w-full touch-manipulation items-center justify-between rounded-none px-2 py-3"
           >
             {prevCell ? (
               <a
@@ -784,13 +949,28 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 onClick={(e) => {
                   e.preventDefault();
                   handlePrevWord();
-                  document.getElementById(`cell-${prevCell.row}-${prevCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  document
+                    .getElementById(`cell-${prevCell.row}-${prevCell.col}`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
-                className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent no-underline text-inherit"
+                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
                 aria-label="Previous word"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                  <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M15 18L9 12L15 6"
+                    stroke="#292524"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="bevel"
+                  />
                 </svg>
               </a>
             ) : (
@@ -798,11 +978,24 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 role="button"
                 tabIndex={-1}
                 onClick={() => {}}
-                className="w-10 shrink-0 flex items-center justify-center cursor-default touch-manipulation p-0 border-0 bg-transparent opacity-40"
+                className="flex w-10 shrink-0 cursor-default touch-manipulation items-center justify-center border-0 bg-transparent p-0 opacity-40"
                 aria-label="Previous word"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                  <path d="M15 18L9 12L15 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M15 18L9 12L15 6"
+                    stroke="#292524"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="bevel"
+                  />
                 </svg>
               </div>
             )}
@@ -811,14 +1004,14 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
               tabIndex={-1}
               onClick={handleToggleDirection}
               onKeyDown={(e) => e.key === "Enter" && handleToggleDirection()}
-              className="flex-1 min-w-0 flex items-start gap-4 px-2 touch-manipulation"
+              className="flex min-w-0 flex-1 touch-manipulation items-start gap-4 px-2"
             >
               {selectedWord && (
                 <>
-                  <span className="text-stone-800 text-right font-serif text-[20px] font-bold leading-normal tracking-[-0.4px] min-w-[28px] shrink-0">
+                  <span className="min-w-[28px] shrink-0 text-right font-serif text-[20px] leading-normal font-bold tracking-[-0.4px] text-stone-800">
                     {selectedWord.clueNumber}
                   </span>
-                  <span className="text-stone-800 text-justify font-serif text-[18px] font-normal leading-normal tracking-[-0.32px] w-full [font-feature-settings:'dlig'_on,'hlig'_on]">
+                  <span className="w-full text-justify font-serif text-[18px] leading-normal font-normal tracking-[-0.32px] text-stone-800 [font-feature-settings:'dlig'_on,'hlig'_on]">
                     {selectedWord.clue}
                   </span>
                 </>
@@ -830,13 +1023,28 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 onClick={(e) => {
                   handleNextWord();
                   e.preventDefault();
-                  document.getElementById(`cell-${nextCell.row}-${nextCell.col}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  document
+                    .getElementById(`cell-${nextCell.row}-${nextCell.col}`)
+                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
-                className="w-10 shrink-0 flex items-center justify-center cursor-pointer touch-manipulation p-0 border-0 bg-transparent no-underline text-inherit"
+                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
                 aria-label="Next word"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                  <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="#292524"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="bevel"
+                  />
                 </svg>
               </a>
             ) : (
@@ -844,11 +1052,24 @@ export const CrosswordInteractive = forwardRef<CrosswordInteractiveHandle, Cross
                 role="button"
                 tabIndex={-1}
                 onClick={() => {}}
-                className="w-10 shrink-0 flex items-center justify-center cursor-default touch-manipulation p-0 border-0 bg-transparent opacity-40"
+                className="flex w-10 shrink-0 cursor-default touch-manipulation items-center justify-center border-0 bg-transparent p-0 opacity-40"
                 aria-label="Next word"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="shrink-0">
-                  <path d="M9 18L15 12L9 6" stroke="#292524" strokeWidth="2" strokeLinecap="square" strokeLinejoin="bevel" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="shrink-0"
+                >
+                  <path
+                    d="M9 18L15 12L9 6"
+                    stroke="#292524"
+                    strokeWidth="2"
+                    strokeLinecap="square"
+                    strokeLinejoin="bevel"
+                  />
                 </svg>
               </div>
             )}

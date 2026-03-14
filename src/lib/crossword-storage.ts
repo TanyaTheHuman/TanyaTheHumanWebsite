@@ -38,7 +38,7 @@ function parseStored(raw: string | null): CrosswordProgress | null {
  */
 function validateUserInputs(
   data: CrosswordData,
-  userInputs: Record<string, string>
+  userInputs: Record<string, string>,
 ): Record<string, string> {
   const out: Record<string, string> = {};
   for (const key of Object.keys(userInputs)) {
@@ -58,7 +58,7 @@ function validateUserInputs(
  */
 function validateSelection(
   data: CrosswordData,
-  selection: CrosswordProgress["selection"]
+  selection: CrosswordProgress["selection"],
 ): CrosswordProgress["selection"] {
   if (selection == null) return null;
   const { row, col, direction } = selection;
@@ -92,7 +92,9 @@ export function loadProgress(data: CrosswordData): CrosswordProgress | null {
 /**
  * Save progress to localStorage. Call only in the browser (e.g. in useEffect).
  */
-export function saveProgress(progress: Omit<CrosswordProgress, "version">): void {
+export function saveProgress(
+  progress: Omit<CrosswordProgress, "version">,
+): void {
   if (typeof window === "undefined") return;
   const payload: CrosswordProgress = {
     version: CROSSWORD_VERSION,

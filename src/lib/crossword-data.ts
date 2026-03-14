@@ -74,7 +74,11 @@ function isBlackInLayout(row: number, col: number, layout: string[]): boolean {
   return rowStr[col] === ".";
 }
 
-function getLetterFromLayout(row: number, col: number, layout: string[]): string | undefined {
+function getLetterFromLayout(
+  row: number,
+  col: number,
+  layout: string[],
+): string | undefined {
   if (row < 0 || row >= layout.length) return undefined;
   const rowStr = layout[row];
   if (col < 0 || col >= rowStr.length) return undefined;
@@ -107,47 +111,183 @@ interface ClueEntry {
 }
 
 const ACROSS_CLUES: ClueEntry[] = [
-  { clueNumber: 6, answer: "SYSTEMSTHINKER", clue: "Always looking at the whole picture" },
-  { clueNumber: 8, answer: "ITALIA", clue: "Boot-shaped country that makes up half my heritage" },
-  { clueNumber: 9, answer: "SOUTH", clue: "With 17-across, the sunny country where I was born and raised" },
-  { clueNumber: 10, answer: "DELIVEROO", clue: "Food delivery company that started in the UK" },
-  { clueNumber: 12, answer: "JA", clue: "Joburg affirmative that still lingers in my lexicon" },
+  {
+    clueNumber: 6,
+    answer: "SYSTEMSTHINKER",
+    clue: "Always looking at the whole picture",
+  },
+  {
+    clueNumber: 8,
+    answer: "ITALIA",
+    clue: "Boot-shaped country that makes up half my heritage",
+  },
+  {
+    clueNumber: 9,
+    answer: "SOUTH",
+    clue: "With 17-across, the sunny country where I was born and raised",
+  },
+  {
+    clueNumber: 10,
+    answer: "DELIVEROO",
+    clue: "Food delivery company that started in the UK",
+  },
+  {
+    clueNumber: 12,
+    answer: "JA",
+    clue: "Joburg affirmative that still lingers in my lexicon",
+  },
   { clueNumber: 14, answer: "RUSK", clue: "Like a biscotti, but Afrikaans" },
-  { clueNumber: 16, answer: "OPINION", clue: "I'll offer a strong one of these, loosely held" },
+  {
+    clueNumber: 16,
+    answer: "OPINION",
+    clue: "I'll offer a strong one of these, loosely held",
+  },
   { clueNumber: 17, answer: "AFRICA", clue: "See 9-across" },
-  { clueNumber: 22, answer: "PRODUCTDESIGNER", clue: "Automator of layouts, drawer of rectangles" },
-  { clueNumber: 24, answer: "CROSSWORDS", clue: "My favourite type of puzzle (in case you haven't noticed)" },
-  { clueNumber: 27, answer: "UIKIT", clue: "Usually creating and maintaining this to make rest of my work consistent" },
-  { clueNumber: 28, answer: "SKI", clue: "Despite 5 snowy winters, I still can't do this very well" },
-  { clueNumber: 31, answer: "VIPPS", clue: "Before 10-across, you could find me at Scandinavia's most succesfful fintech" },
-  { clueNumber: 33, answer: "NORWEGIAN", clue: "Jeg snakker litt av dette språket fordi jeg bodd i 1-down for fem år" },
-  { clueNumber: 37, answer: "AUTOLAYOUT", clue: "Fills containers or hugs contents depending on your needs" },
-  { clueNumber: 38, answer: "KAYAK", clue: "I once paddled one of these (unknowingly) across a shipping lane in Ha long bay" },
+  {
+    clueNumber: 22,
+    answer: "PRODUCTDESIGNER",
+    clue: "Automator of layouts, drawer of rectangles",
+  },
+  {
+    clueNumber: 24,
+    answer: "CROSSWORDS",
+    clue: "My favourite type of puzzle (in case you haven't noticed)",
+  },
+  {
+    clueNumber: 27,
+    answer: "UIKIT",
+    clue: "Usually creating and maintaining this to make rest of my work consistent",
+  },
+  {
+    clueNumber: 28,
+    answer: "SKI",
+    clue: "Despite 5 snowy winters, I still can't do this very well",
+  },
+  {
+    clueNumber: 31,
+    answer: "VIPPS",
+    clue: "Before 10-across, you could find me at Scandinavia's most succesfful fintech",
+  },
+  {
+    clueNumber: 33,
+    answer: "NORWEGIAN",
+    clue: "Jeg snakker litt av dette språket fordi jeg bodd i 1-down for fem år",
+  },
+  {
+    clueNumber: 37,
+    answer: "AUTOLAYOUT",
+    clue: "Fills containers or hugs contents depending on your needs",
+  },
+  {
+    clueNumber: 38,
+    answer: "KAYAK",
+    clue: "I once paddled one of these (unknowingly) across a shipping lane in Ha long bay",
+  },
 ];
 
 const DOWN_CLUES: ClueEntry[] = [
-  { clueNumber: 1, answer: "OSLONORWAY", clue: "My first ever international flight was a one-way ticket here" },
-  { clueNumber: 2, answer: "BEKIND", clue: "If you can be anything in this world..." },
-  { clueNumber: 3, answer: "HTML", clue: "What 7-down assures me this website is rendered to" },
-  { clueNumber: 4, answer: "UNO", clue: "The cause of more family feuds in my house than Monopoly" },
-  { clueNumber: 5, answer: "DASH", clue: "10-across was acquired by Door-this in 2024" },
-  { clueNumber: 7, answer: "CURSOR", clue: "The AI tool I fought with to create what you see here" },
-  { clueNumber: 9, answer: "SCORPIO", clue: "Being born in November makes me one of these, I guess" },
-  { clueNumber: 11, answer: "VHS", clue: "Folks my age fondly remember renting movies in this format" },
-  { clueNumber: 13, answer: "ABOUTME", clue: "You could say this puzzle replaces this section of my site" },
-  { clueNumber: 15, answer: "HADEDA", clue: 'A large Ibis known locally as a "flying vuvuzela"' },
-  { clueNumber: 18, answer: "BLACKCAT", clue: "Furry, panther-like animal that insists on sleeping on my keyboard" },
-  { clueNumber: 19, answer: "ANDROID", clue: "Might be rare to meet a 22-across that prefers this" },
-  { clueNumber: 20, answer: "NEGRONI", clue: "The Sbagliato version is indeed a mistake" },
-  { clueNumber: 21, answer: "APPS", clue: "Makes up most of my portfolio, with some tooling and web in-between" },
-  { clueNumber: 23, answer: "GRIDS", clue: "This puzzle's construction relies on these" },
-  { clueNumber: 25, answer: "SISTER", clue: "I'm a big one of these by 4 years" },
-  { clueNumber: 26, answer: "SEW", clue: "Taught myself to do this, found myself in stitches" },
+  {
+    clueNumber: 1,
+    answer: "OSLONORWAY",
+    clue: "My first ever international flight was a one-way ticket here",
+  },
+  {
+    clueNumber: 2,
+    answer: "BEKIND",
+    clue: "If you can be anything in this world...",
+  },
+  {
+    clueNumber: 3,
+    answer: "HTML",
+    clue: "What 7-down assures me this website is rendered to",
+  },
+  {
+    clueNumber: 4,
+    answer: "UNO",
+    clue: "The cause of more family feuds in my house than Monopoly",
+  },
+  {
+    clueNumber: 5,
+    answer: "DASH",
+    clue: "10-across was acquired by Door-this in 2024",
+  },
+  {
+    clueNumber: 7,
+    answer: "CURSOR",
+    clue: "The AI tool I fought with to create what you see here",
+  },
+  {
+    clueNumber: 9,
+    answer: "SCORPIO",
+    clue: "Being born in November makes me one of these, I guess",
+  },
+  {
+    clueNumber: 11,
+    answer: "VHS",
+    clue: "Folks my age fondly remember renting movies in this format",
+  },
+  {
+    clueNumber: 13,
+    answer: "ABOUTME",
+    clue: "You could say this puzzle replaces this section of my site",
+  },
+  {
+    clueNumber: 15,
+    answer: "HADEDA",
+    clue: 'A large Ibis known locally as a "flying vuvuzela"',
+  },
+  {
+    clueNumber: 18,
+    answer: "BLACKCAT",
+    clue: "Furry, panther-like animal that insists on sleeping on my keyboard",
+  },
+  {
+    clueNumber: 19,
+    answer: "ANDROID",
+    clue: "Might be rare to meet a 22-across that prefers this",
+  },
+  {
+    clueNumber: 20,
+    answer: "NEGRONI",
+    clue: "The Sbagliato version is indeed a mistake",
+  },
+  {
+    clueNumber: 21,
+    answer: "APPS",
+    clue: "Makes up most of my portfolio, with some tooling and web in-between",
+  },
+  {
+    clueNumber: 23,
+    answer: "GRIDS",
+    clue: "This puzzle's construction relies on these",
+  },
+  {
+    clueNumber: 25,
+    answer: "SISTER",
+    clue: "I'm a big one of these by 4 years",
+  },
+  {
+    clueNumber: 26,
+    answer: "SEW",
+    clue: "Taught myself to do this, found myself in stitches",
+  },
   { clueNumber: 29, answer: "FIGMA", clue: "One of the tools of my trade" },
-  { clueNumber: 30, answer: "LONDON", clue: "A capital city thought of as rainy and grey" },
-  { clueNumber: 32, answer: "PASTA", clue: "The noodle of my people over at 8-across" },
+  {
+    clueNumber: 30,
+    answer: "LONDON",
+    clue: "A capital city thought of as rainy and grey",
+  },
+  {
+    clueNumber: 32,
+    answer: "PASTA",
+    clue: "The noodle of my people over at 8-across",
+  },
   { clueNumber: 34, answer: "IDEAS", clue: "Mind set?" },
-  { clueNumber: 35, answer: "COLD", clue: "My controversial personal preference when it comes to toast" },
+  {
+    clueNumber: 35,
+    answer: "COLD",
+    clue: "My controversial personal preference when it comes to toast",
+  },
   { clueNumber: 36, answer: "BAKE", clue: "I'd rather cook than do this" },
 ];
 
@@ -175,8 +315,7 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
       const cell = cells[r][c];
       if (cell.type !== "letter") continue;
 
-      const isStartOfAcross =
-        c === 0 || cells[r][c - 1].type === "black";
+      const isStartOfAcross = c === 0 || cells[r][c - 1].type === "black";
       const hasRightNeighbor =
         c < COLS - 1 && cells[r][c + 1].type === "letter";
 
@@ -205,10 +344,8 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
       const cell = cells[r][c];
       if (cell.type !== "letter") continue;
 
-      const isStartOfDown =
-        r === 0 || cells[r - 1][c].type === "black";
-      const hasDownNeighbor =
-        r < ROWS - 1 && cells[r + 1][c].type === "letter";
+      const isStartOfDown = r === 0 || cells[r - 1][c].type === "black";
+      const hasDownNeighbor = r < ROWS - 1 && cells[r + 1][c].type === "letter";
 
       if (isStartOfDown && hasDownNeighbor) {
         const wordCells: { row: number; col: number }[] = [];
@@ -233,10 +370,11 @@ function buildWordsFromGrid(cells: CrosswordCell[][]): {
 }
 
 // Remnant words to remove: RU (down col 13), WHITE (32 down), DLA/ONT (across row 9)
-function isRemovedDownWord(w: CrosswordWord, cells: CrosswordCell[][]): boolean {
-  const wordStr = w.cells
-    .map((c) => cells[c.row][c.col].letter ?? "")
-    .join("");
+function isRemovedDownWord(
+  w: CrosswordWord,
+  cells: CrosswordCell[][],
+): boolean {
+  const wordStr = w.cells.map((c) => cells[c.row][c.col].letter ?? "").join("");
   if (wordStr === "WHITE") return true;
   return (
     w.cells.length === 2 &&
@@ -293,14 +431,20 @@ export function getCrosswordData(): CrosswordData {
   const keptDown = downWords.filter((w) => !isRemovedDownWord(w, cells));
   const keptAcross = acrossWords.filter((w) => !isRemovedAcrossWord(w));
 
-  const newDownWords: CrosswordWord[] = keptDown.map((w, i) => ({ ...w, id: i }));
-  const newAcrossWords: CrosswordWord[] = keptAcross.map((w, i) => ({ ...w, id: i }));
+  const newDownWords: CrosswordWord[] = keptDown.map((w, i) => ({
+    ...w,
+    id: i,
+  }));
+  const newAcrossWords: CrosswordWord[] = keptAcross.map((w, i) => ({
+    ...w,
+    id: i,
+  }));
 
   const removedDownIds = new Set(
-    downWords.filter((w) => isRemovedDownWord(w, cells)).map((w) => w.id)
+    downWords.filter((w) => isRemovedDownWord(w, cells)).map((w) => w.id),
   );
   const removedAcrossIds = new Set(
-    acrossWords.filter(isRemovedAcrossWord).map((w) => w.id)
+    acrossWords.filter(isRemovedAcrossWord).map((w) => w.id),
   );
   const oldDownToNew = new Map<number, number>();
   keptDown.forEach((w, i) => oldDownToNew.set(w.id, i));
@@ -384,7 +528,7 @@ export function getCrosswordData(): CrosswordData {
 export function getCellAt(
   data: CrosswordData,
   row: number,
-  col: number
+  col: number,
 ): CrosswordCell | null {
   if (row < 0 || row >= data.rows || col < 0 || col >= data.cols) {
     return null;
@@ -396,7 +540,7 @@ export function getCellAt(
 export function isLetterCell(
   data: CrosswordData,
   row: number,
-  col: number
+  col: number,
 ): boolean {
   const cell = getCellAt(data, row, col);
   return cell !== null && cell.type === "letter";
@@ -406,27 +550,24 @@ export function getWordContaining(
   data: CrosswordData,
   row: number,
   col: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): CrosswordWord | null {
   const cell = getCellAt(data, row, col);
   if (!cell || cell.type === "black") return null;
 
-  const wordId =
-    direction === "across" ? cell.acrossWordId : cell.downWordId;
+  const wordId = direction === "across" ? cell.acrossWordId : cell.downWordId;
   if (wordId === undefined) return null;
 
-  const words =
-    direction === "across" ? data.acrossWords : data.downWords;
+  const words = direction === "across" ? data.acrossWords : data.downWords;
   return words[wordId] ?? null;
 }
 
 export function getWordByClueNumber(
   data: CrosswordData,
   clueNumber: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): CrosswordWord | null {
-  const words =
-    direction === "across" ? data.acrossWords : data.downWords;
+  const words = direction === "across" ? data.acrossWords : data.downWords;
   return words.find((w) => w.clueNumber === clueNumber) ?? null;
 }
 
@@ -437,7 +578,7 @@ export function getWordByClueNumber(
 export function getCorrectWord(
   data: CrosswordData,
   clueNumber: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): string {
   const word = getWordByClueNumber(data, clueNumber, direction);
   if (!word?.cells.length) return "";
@@ -453,7 +594,7 @@ export function isWordCorrect(
   data: CrosswordData,
   userInputs: Record<string, string>,
   clueNumber: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): boolean {
   const filled = getFilledWord(data, userInputs, clueNumber, direction);
   if (filled == null) return false;
@@ -469,7 +610,7 @@ export function getFilledWord(
   data: CrosswordData,
   userInputs: Record<string, string>,
   clueNumber: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): string | null {
   const word = getWordByClueNumber(data, clueNumber, direction);
   if (!word?.cells.length) return null;
@@ -489,7 +630,7 @@ export function getFilledWord(
  */
 export function getFilledWordsMap(
   data: CrosswordData,
-  userInputs: Record<string, string>
+  userInputs: Record<string, string>,
 ): Record<string, string> {
   const out: Record<string, string> = {};
   for (const w of data.acrossWords) {
@@ -511,19 +652,17 @@ export function getActiveWordCells(
   data: CrosswordData,
   selectedRow: number,
   selectedCol: number,
-  direction: "across" | "down"
+  direction: "across" | "down",
 ): Set<string> {
   const word = getWordContaining(data, selectedRow, selectedCol, direction);
   if (!word) return new Set();
-  return new Set(
-    word.cells.map((c) => `${c.row},${c.col}`)
-  );
+  return new Set(word.cells.map((c) => `${c.row},${c.col}`));
 }
 
 const CROSS_REF_PATTERN = /(\d+)-(across|down)/gi;
 
 export function parseCrossReferences(
-  clue: string
+  clue: string,
 ): { clueNumber: number; direction: "across" | "down" }[] {
   const refs: { clueNumber: number; direction: "across" | "down" }[] = [];
   let match;
@@ -539,7 +678,7 @@ export function parseCrossReferences(
 
 export function getCrossReferencedCells(
   data: CrosswordData,
-  word: CrosswordWord | null
+  word: CrosswordWord | null,
 ): Set<string> {
   if (!word) return new Set();
   const refs = parseCrossReferences(word.clue);
@@ -547,7 +686,8 @@ export function getCrossReferencedCells(
 
   const cells = new Set<string>();
   for (const ref of refs) {
-    const words = ref.direction === "across" ? data.acrossWords : data.downWords;
+    const words =
+      ref.direction === "across" ? data.acrossWords : data.downWords;
     const target = words.find((w) => w.clueNumber === ref.clueNumber);
     if (target) {
       for (const c of target.cells) {

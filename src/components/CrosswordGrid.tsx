@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
-import { getNextCell, getNextCellInWord, getNextWordCell, getWordDirection, getFirstEmptyCellInNextWord } from "@/lib/crossword-navigation";
+import {
+  getNextCell,
+  getNextCellInWord,
+  getNextWordCell,
+  getWordDirection,
+  getFirstEmptyCellInNextWord,
+} from "@/lib/crossword-navigation";
 import { CrosswordCell } from "./CrosswordCell";
 
 interface CrosswordGridProps {
@@ -12,7 +18,11 @@ interface CrosswordGridProps {
   showAnswers: boolean;
   userInputs: Record<string, string>;
   crossReferencedCells?: Set<string>;
-  onSelectCell: (row: number, col: number, direction: "across" | "down") => void;
+  onSelectCell: (
+    row: number,
+    col: number,
+    direction: "across" | "down",
+  ) => void;
   onInputLetter: (row: number, col: number, letter: string) => void;
   onClearCell: (row: number, col: number) => void;
   onMobileKeyboardOpen?: () => void;
@@ -24,11 +34,11 @@ interface CrosswordGridProps {
   clearFlipDurationMs?: number;
 }
 
-export function CrosswordGrid({ 
-  data, 
-  selectedCell, 
-  direction, 
-  showAnswers, 
+export function CrosswordGrid({
+  data,
+  selectedCell,
+  direction,
+  showAnswers,
   userInputs,
   crossReferencedCells,
   onSelectCell,
@@ -43,51 +53,58 @@ export function CrosswordGrid({
   clearFlipDurationMs = 300,
 }: CrosswordGridProps) {
   // Click handler with toggle behavior for already-selected cell
-  const handleCellSelect = useCallback((row: number, col: number) => {
-    const isAlreadySelected = selectedCell?.row === row && selectedCell?.col === col;
-    
-    if (isAlreadySelected) {
-      // Toggle direction if cell belongs to both word types
-      const cell = data.cells[row]?.[col];
-      if (cell) {
-        const hasAcross = cell.acrossWordId !== undefined;
-        const hasDown = cell.downWordId !== undefined;
-        
-        if (hasAcross && hasDown) {
-          const newDirection = direction === "across" ? "down" : "across";
-          onSelectCell(row, col, newDirection);
-          return;
+  const handleCellSelect = useCallback(
+    (row: number, col: number) => {
+      const isAlreadySelected =
+        selectedCell?.row === row && selectedCell?.col === col;
+
+      if (isAlreadySelected) {
+        // Toggle direction if cell belongs to both word types
+        const cell = data.cells[row]?.[col];
+        if (cell) {
+          const hasAcross = cell.acrossWordId !== undefined;
+          const hasDown = cell.downWordId !== undefined;
+
+          if (hasAcross && hasDown) {
+            const newDirection = direction === "across" ? "down" : "across";
+            onSelectCell(row, col, newDirection);
+            return;
+          }
         }
+        // Cell only has one word type - keep current direction
+        onSelectCell(row, col, direction);
+      } else {
+        // New cell selected - use current direction if available, otherwise switch
+        const cell = data.cells[row]?.[col];
+        if (cell) {
+          const hasAcross = cell.acrossWordId !== undefined;
+          const hasDown = cell.downWordId !== undefined;
+
+          // If current direction is available, use it
+          if (
+            (direction === "across" && hasAcross) ||
+            (direction === "down" && hasDown)
+          ) {
+            onSelectCell(row, col, direction);
+            return;
+          }
+
+          // Otherwise, switch to the available direction
+          if (hasAcross) {
+            onSelectCell(row, col, "across");
+            return;
+          }
+          if (hasDown) {
+            onSelectCell(row, col, "down");
+            return;
+          }
+        }
+        // Fallback
+        onSelectCell(row, col, direction);
       }
-      // Cell only has one word type - keep current direction
-      onSelectCell(row, col, direction);
-    } else {
-      // New cell selected - use current direction if available, otherwise switch
-      const cell = data.cells[row]?.[col];
-      if (cell) {
-        const hasAcross = cell.acrossWordId !== undefined;
-        const hasDown = cell.downWordId !== undefined;
-        
-        // If current direction is available, use it
-        if ((direction === "across" && hasAcross) || (direction === "down" && hasDown)) {
-          onSelectCell(row, col, direction);
-          return;
-        }
-        
-        // Otherwise, switch to the available direction
-        if (hasAcross) {
-          onSelectCell(row, col, "across");
-          return;
-        }
-        if (hasDown) {
-          onSelectCell(row, col, "down");
-          return;
-        }
-      }
-      // Fallback
-      onSelectCell(row, col, direction);
-    }
-  }, [selectedCell, direction, data, onSelectCell]);
+    },
+    [selectedCell, direction, data, onSelectCell],
+  );
 
   const internalGridRef = useRef<HTMLDivElement>(null);
   const gridRef = gridRefProp ?? internalGridRef;
@@ -99,7 +116,7 @@ export function CrosswordGrid({
     const checkMobile = () => {
       setIsMobile(
         window.matchMedia("(max-width: 768px)").matches ||
-        window.matchMedia("(pointer: coarse)").matches
+          window.matchMedia("(pointer: coarse)").matches,
       );
     };
     checkMobile();
@@ -132,7 +149,10 @@ export function CrosswordGrid({
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (!gridRef.current || !mobileInputRef.current) return;
       const target = e.target as Node;
-      if (!gridRef.current.contains(target) && !excludeFromBlurRef?.current?.contains(target)) {
+      if (
+        !gridRef.current.contains(target) &&
+        !excludeFromBlurRef?.current?.contains(target)
+      ) {
         mobileInputRef.current.blur();
       }
     };
@@ -152,7 +172,12 @@ export function CrosswordGrid({
       if (value.length > 0) {
         const letter = value[0]; // First character (handles single key and paste)
         onInputLetter(selectedCell.row, selectedCell.col, letter);
-        const next = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction);
+        const next = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+        );
         if (next) {
           onSelectCell(next.row, next.col, direction);
         } else {
@@ -165,7 +190,7 @@ export function CrosswordGrid({
             selectedCell.row,
             selectedCell.col,
             direction,
-            updatedInputs
+            updatedInputs,
           );
           if (nextWordCell) {
             onSelectCell(nextWordCell.row, nextWordCell.col, direction);
@@ -174,7 +199,7 @@ export function CrosswordGrid({
       }
       e.target.value = "";
     },
-    [selectedCell, data, direction, userInputs, onInputLetter, onSelectCell]
+    [selectedCell, data, direction, userInputs, onInputLetter, onSelectCell],
   );
 
   const handleMobileKeyDown = useCallback(
@@ -183,9 +208,22 @@ export function CrosswordGrid({
       if (e.metaKey || e.ctrlKey) return;
       if (e.key === "Backspace") {
         e.preventDefault();
-        const wasFilled = !!userInputs[`${selectedCell.row},${selectedCell.col}`];
-        const prevInWord = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
-        const nextInWord = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, false);
+        const wasFilled =
+          !!userInputs[`${selectedCell.row},${selectedCell.col}`];
+        const prevInWord = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+          true,
+        );
+        const nextInWord = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+          false,
+        );
         const isFirstCell = !prevInWord;
         const isLastCell = !nextInWord;
 
@@ -199,7 +237,7 @@ export function CrosswordGrid({
         }
       }
     },
-    [selectedCell, data, direction, userInputs, onClearCell, onSelectCell]
+    [selectedCell, data, direction, userInputs, onClearCell, onSelectCell],
   );
 
   useEffect(() => {
@@ -219,20 +257,33 @@ export function CrosswordGrid({
           selectedCell.row,
           selectedCell.col,
           direction,
-          e.shiftKey // reverse if Shift+Tab
+          e.shiftKey, // reverse if Shift+Tab
         );
         if (result) {
           onSelectCell(result.row, result.col, result.newDirection);
         }
         return;
       }
-      
+
       // Handle Backspace: first/last cell of word → clear and keep focus; middle → clear (if filled) and move to previous
       if (e.key === "Backspace") {
         e.preventDefault();
-        const wasFilled = !!userInputs[`${selectedCell.row},${selectedCell.col}`];
-        const prevInWord = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, true);
-        const nextInWord = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction, false);
+        const wasFilled =
+          !!userInputs[`${selectedCell.row},${selectedCell.col}`];
+        const prevInWord = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+          true,
+        );
+        const nextInWord = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+          false,
+        );
         const isFirstCell = !prevInWord;
         const isLastCell = !nextInWord;
 
@@ -253,14 +304,19 @@ export function CrosswordGrid({
         }
         return;
       }
-      
+
       // Handle letter input (A-Z)
       if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
         e.preventDefault();
         onInputLetter(selectedCell.row, selectedCell.col, e.key);
-        
+
         // Move to next cell within the same word
-        const next = getNextCellInWord(data, selectedCell.row, selectedCell.col, direction);
+        const next = getNextCellInWord(
+          data,
+          selectedCell.row,
+          selectedCell.col,
+          direction,
+        );
         if (next) {
           onSelectCell(next.row, next.col, direction);
         } else {
@@ -275,7 +331,7 @@ export function CrosswordGrid({
             selectedCell.row,
             selectedCell.col,
             direction,
-            updatedInputs
+            updatedInputs,
           );
           if (nextWordCell) {
             onSelectCell(nextWordCell.row, nextWordCell.col, direction);
@@ -300,15 +356,16 @@ export function CrosswordGrid({
 
       // Determine word direction based on arrow key
       const newWordDirection = getWordDirection(arrowDirection);
-      
+
       // Check if direction is changing
       if (newWordDirection !== direction) {
         // Check if current cell has a word in the new direction
         const cell = data.cells[selectedCell.row]?.[selectedCell.col];
-        const hasWordInNewDirection = newWordDirection === "across" 
-          ? cell?.acrossWordId !== undefined 
-          : cell?.downWordId !== undefined;
-        
+        const hasWordInNewDirection =
+          newWordDirection === "across"
+            ? cell?.acrossWordId !== undefined
+            : cell?.downWordId !== undefined;
+
         if (hasWordInNewDirection) {
           // Just change direction, don't move
           onSelectCell(selectedCell.row, selectedCell.col, newWordDirection);
@@ -321,40 +378,49 @@ export function CrosswordGrid({
         data,
         selectedCell.row,
         selectedCell.col,
-        arrowDirection
+        arrowDirection,
       );
       if (next) {
         // Check if destination cell has a word in the desired direction
         const nextCell = data.cells[next.row]?.[next.col];
         const hasAcross = nextCell?.acrossWordId !== undefined;
         const hasDown = nextCell?.downWordId !== undefined;
-        
+
         let effectiveDirection = newWordDirection;
         if (newWordDirection === "across" && !hasAcross && hasDown) {
           effectiveDirection = "down";
         } else if (newWordDirection === "down" && !hasDown && hasAcross) {
           effectiveDirection = "across";
         }
-        
+
         onSelectCell(next.row, next.col, effectiveDirection);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [data, selectedCell, direction, userInputs, onSelectCell, onInputLetter, onClearCell, isMobile]);
+  }, [
+    data,
+    selectedCell,
+    direction,
+    userInputs,
+    onSelectCell,
+    onInputLetter,
+    onClearCell,
+    isMobile,
+  ]);
 
   const activeWordCells = useMemo(() => {
     if (!selectedCell) return new Set<string>();
-    
+
     // Use the tracked direction to determine which word to highlight
     const cells = getActiveWordCells(
       data,
       selectedCell.row,
       selectedCell.col,
-      direction
+      direction,
     );
-    
+
     // If no word exists in the current direction, fall back to the other direction
     if (cells.size === 0) {
       const fallbackDirection = direction === "across" ? "down" : "across";
@@ -362,10 +428,10 @@ export function CrosswordGrid({
         data,
         selectedCell.row,
         selectedCell.col,
-        fallbackDirection
+        fallbackDirection,
       );
     }
-    
+
     return cells;
   }, [data, selectedCell, direction]);
 
@@ -373,7 +439,7 @@ export function CrosswordGrid({
     <div
       ref={gridRef}
       tabIndex={0}
-      className="group inline-flex flex-col p-0 outline-none relative border-2 border-stone-800 bg-stone-600 gap-px overflow-visible"
+      className="group relative inline-flex flex-col gap-px overflow-visible border-2 border-stone-800 bg-stone-600 p-0 outline-none"
       role="grid"
       aria-label="Crossword grid. Use arrow keys to navigate."
     >
@@ -391,7 +457,7 @@ export function CrosswordGrid({
         onKeyDown={handleMobileKeyDown}
         onFocus={handleMobileInputFocus}
         onBlur={handleMobileInputBlur}
-        className="absolute -left-[9999px] w-px h-px opacity-0 pointer-events-none"
+        className="pointer-events-none absolute -left-[9999px] h-px w-px opacity-0"
       />
       {data.cells.map((rowCells, rowIndex) => (
         <div key={rowIndex} className="flex gap-px overflow-visible">
@@ -405,8 +471,7 @@ export function CrosswordGrid({
               userInput={userInputs[`${cell.row},${cell.col}`]}
               number={cell.number}
               isSelected={
-                selectedCell?.row === cell.row &&
-                selectedCell?.col === cell.col
+                selectedCell?.row === cell.row && selectedCell?.col === cell.col
               }
               isInActiveWord={
                 cell.type === "letter" &&

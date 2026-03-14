@@ -1,23 +1,24 @@
 export default function TestPage() {
   return (
-    <div className="bg-cream relative [-webkit-overflow-scrolling:touch] group">
+    <div className="bg-cream group relative [-webkit-overflow-scrolling:touch]">
       <div className="p-6 pb-[120px]">
-        <p className="text-lg text-ink mb-6">
-          Scroll down and focus the input to test the hint docking above the keyboard.
+        <p className="text-ink mb-6 text-lg">
+          Scroll down and focus the input to test the hint docking above the
+          keyboard.
         </p>
-        <div className="h-[150vh] bg-gradient-to-b from-mustard-50 to-transparent" />
-        <label className="flex flex-col gap-2 text-base text-ink">
+        <div className="from-mustard-50 h-[150vh] bg-gradient-to-b to-transparent" />
+        <label className="text-ink flex flex-col gap-2 text-base">
           <span>Type here (keyboard will open on mobile):</span>
           <input
             type="text"
-            className="px-4 py-3 text-base font-serif border-2 border-border rounded-lg bg-white"
+            className="border-border rounded-lg border-2 bg-white px-4 py-3 font-serif text-base"
             placeholder="Focus me on mobile"
           />
         </label>
-        <div className="h-[150vh] bg-gradient-to-b from-mustard-50 to-transparent" />
+        <div className="from-mustard-50 h-[150vh] bg-gradient-to-b to-transparent" />
       </div>
-      <div className="hidden group-focus-within:fixed group-focus-within:block h-svh top-0 inset-x-0 pointer-events-none">
-        <div className="absolute bottom-0 left-0 right-0 py-3 px-6 bg-mustard-100 text-base text-ink">
+      <div className="pointer-events-none inset-x-0 top-0 hidden h-svh group-focus-within:fixed group-focus-within:block">
+        <div className="bg-mustard-100 text-ink absolute right-0 bottom-0 left-0 px-6 py-3 text-base">
           Hint docked to bottom of keyboard — pure CSS, no JavaScript
         </div>
       </div>
