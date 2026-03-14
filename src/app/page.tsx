@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  // useLayoutEffect,
-  useCallback,
-  useRef,
-} from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   CrosswordInteractive,
   type CrosswordInteractiveHandle,
@@ -24,8 +18,6 @@ function displayWord(filledWords: Record<string, string>, key: string): string {
 
 export default function Home() {
   const crosswordRef = useRef<CrosswordInteractiveHandle>(null);
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
-  // const [titleWidth, setTitleWidth] = useState<number>(0);
   const [filledWords, setFilledWords] = useState<Record<string, string>>({});
 
   const scrollToCrosswordWord = useCallback(
@@ -63,31 +55,13 @@ export default function Home() {
     return `default (<640px)`;
   }, [windowWidth]);
 
-  // const measureTitleWidth = useCallback(() => {
-  //   const el = heroTitleRef.current;
-  //   if (el) setTitleWidth(el.offsetWidth);
-  // }, []);
-
-  // useLayoutEffect(() => {
-  //   measureTitleWidth();
-  //   const observer = new ResizeObserver(measureTitleWidth);
-  //   const el = heroTitleRef.current;
-  //   if (el) observer.observe(el);
-  //   return () => observer.disconnect();
-  // }, [measureTitleWidth]);
-
-  // useEffect(() => {
-  //   window.addEventListener("resize", measureTitleWidth);
-  //   return () => window.removeEventListener("resize", measureTitleWidth);
-  // }, [measureTitleWidth]);
-
   return (
     <>
       <section
         className="flex h-fit flex-col items-center gap-[104px] self-stretch"
         aria-label="Hero"
       >
-        <div className="flex h-svh w-dvw items-center justify-center px-[56px] py-[32px]">
+        <div className="flex h-svh w-dvw items-center justify-center px-14 py-8 max-sm:px-4 max-sm:py-4">
           <div className="relative flex h-full w-full items-center border border-stone-700">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-end gap-2 text-center sm:flex-row sm:items-center sm:text-left">
               <p className="caption bg-cream absolute top-0 right-0 left-0 mx-auto w-fit -translate-y-1/2 px-4 py-2 text-center text-stone-600">
@@ -112,7 +86,7 @@ export default function Home() {
                       </span>
                     </span>
                   </h2>
-                  <p className="body-large text-ink wrap-break-words mt-6 max-w-sm min-w-0 text-pretty">
+                  <p className="body-large text-ink wrap-break-words mt-6 max-w-xs min-w-0 text-pretty sm:max-w-sm">
                     A{" "}
                     <a
                       href="#crossword"
@@ -194,8 +168,8 @@ export default function Home() {
           />
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
             <div className="h-px w-16 bg-stone-400"></div>
-            <p className="body-large">
-              Ok, <span className="body-large-italic">bye</span>
+            <p className="body-default">
+              Ok, <span className="body-default-italic">bye</span>
             </p>
             <div className="h-px w-16 bg-stone-400"></div>
           </div>
