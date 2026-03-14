@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   CrosswordInteractive,
   type CrosswordInteractiveHandle,
@@ -20,40 +20,12 @@ export default function Home() {
   const crosswordRef = useRef<CrosswordInteractiveHandle>(null);
   const [filledWords, setFilledWords] = useState<Record<string, string>>({});
 
-  const scrollToCrosswordWord = useCallback(
+  const activateCrosswordWord = useCallback(
     (clueNumber: number, direction: "across" | "down") => {
-      document
-        .getElementById("crossword")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
       crosswordRef.current?.scrollToWord(clueNumber, direction);
     },
     [],
   );
-
-  // TEMPORARY: Breakpoint indicator for responsive debugging
-  const [windowWidth, setWindowWidth] = useState<number>(0);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    // Set initial width
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const getCurrentBreakpoint = useCallback(() => {
-    if (windowWidth === 0) return "Loading...";
-    if (windowWidth >= 1536) return "2xl (≥1536px)";
-    if (windowWidth >= 1280) return "xl (≥1280px)";
-    if (windowWidth >= 1024) return "lg (≥1024px)";
-    if (windowWidth >= 768) return "md (≥768px)";
-    if (windowWidth >= 640) return "sm (≥640px)";
-    return `default (<640px)`;
-  }, [windowWidth]);
 
   return (
     <>
@@ -91,8 +63,8 @@ export default function Home() {
                     <a
                       href="#crossword"
                       onClick={(e) => {
-                        e.preventDefault();
-                        scrollToCrosswordWord(22, "across");
+                        // e.preventDefault();
+                        activateCrosswordWord(22, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
@@ -103,8 +75,8 @@ export default function Home() {
                     <a
                       href="#crossword"
                       onClick={(e) => {
-                        e.preventDefault();
-                        scrollToCrosswordWord(30, "down");
+                        // e.preventDefault();
+                        activateCrosswordWord(30, "down");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
@@ -114,8 +86,8 @@ export default function Home() {
                     <a
                       href="#crossword"
                       onClick={(e) => {
-                        e.preventDefault();
-                        scrollToCrosswordWord(10, "across");
+                        // e.preventDefault();
+                        activateCrosswordWord(10, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
@@ -125,8 +97,8 @@ export default function Home() {
                     <a
                       href="#crossword"
                       onClick={(e) => {
-                        e.preventDefault();
-                        scrollToCrosswordWord(31, "across");
+                        // e.preventDefault();
+                        activateCrosswordWord(31, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
@@ -143,14 +115,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* TEMPORARY: Breakpoint indicator - remove when done */}
-      {/* <div className="flex w-full justify-center px-8 pt-8">
-        <div className="rounded border-2 border-stone-600 bg-stone-200 p-3 text-center font-mono text-sm font-semibold text-stone-800">
-          Breakpoint: {getCurrentBreakpoint()} | Width: {windowWidth}px
-        </div>
-      </div> */}
-
-      <div id="crossword" className="crossword-section">
+      <div className="crossword-section">
         <CrosswordInteractive
           ref={crosswordRef}
           onFilledWordsChange={setFilledWords}

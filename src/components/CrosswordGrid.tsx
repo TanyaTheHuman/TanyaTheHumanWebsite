@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
 import {
   getNextCell,
@@ -109,20 +110,7 @@ export function CrosswordGrid({
   const internalGridRef = useRef<HTMLDivElement>(null);
   const gridRef = gridRefProp ?? internalGridRef;
   const mobileInputRef = useRef<HTMLInputElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detect mobile/touch device for keyboard handling
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(
-        window.matchMedia("(max-width: 768px)").matches ||
-          window.matchMedia("(pointer: coarse)").matches,
-      );
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  const isMobile = useIsMobile();
 
   // Focus hidden input when cell selected on mobile (shows keyboard)
   // Only focus when input doesn't already have focus - avoids keyboard flicker when typing

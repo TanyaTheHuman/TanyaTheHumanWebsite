@@ -19,6 +19,7 @@ import {
   getFilledWordsMap,
 } from "@/lib/crossword-data";
 import { loadProgress, saveProgress } from "@/lib/crossword-storage";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import {
   getFirstCell,
   getFirstEmptyCellInNextWord,
@@ -56,7 +57,7 @@ export const CrosswordInteractive = forwardRef<
     direction: "across" | "down";
   } | null>(() => (firstCell ? { ...firstCell, direction: "across" } : null));
 
-  const [isMobile, setIsMobile] = useState(false);
+  const isMobile = useIsMobile();
 
   // Toggle for showing/hiding answers (dev only, default off)
   const [showAnswers, setShowAnswers] = useState(false);
@@ -81,11 +82,10 @@ export const CrosswordInteractive = forwardRef<
   const gridRef = useRef<HTMLDivElement>(null);
   const gridColumnRef = useRef<HTMLDivElement>(null);
   const crosswordRowRef = useRef<HTMLDivElement>(null);
+  const userClickedOutsideRef = useRef(false);
   const [gridColumnHeight, setGridColumnHeight] = useState<number | null>(null);
   const saveEffectRunCount = useRef(0);
-  const clearAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const clearAnimationTimeoutRef = useRef<number | null>(null);
 
   // Clear animation timeout on unmount
   useEffect(() => {
@@ -106,17 +106,35 @@ export const CrosswordInteractive = forwardRef<
   }, [data, firstCell, selection]);
 
   // Focus the selected cell when selection changes (so a cell is always in focus)
+  // preventScroll: true avoids scrolling the page to the crossword on initial load
   useLayoutEffect(() => {
     if (!selection) return;
     const cellEl = document.getElementById(
       `cell-${selection.row}-${selection.col}`,
     );
     if (cellEl && typeof (cellEl as HTMLElement).focus === "function")
-      (cellEl as HTMLElement).focus();
-    else gridRef.current?.focus();
+      (cellEl as HTMLElement).focus({ preventScroll: true });
+    else gridRef.current?.focus({ preventScroll: true });
   }, [selection?.row, selection?.col]);
 
-  // When focus leaves the crossword area, put it back on the selected cell
+  // Track when user clicks/taps outside crossword (skip refocus in that case)
+  useEffect(() => {
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      const rowEl = crosswordRowRef.current;
+      if (rowEl && !rowEl.contains(target)) {
+        userClickedOutsideRef.current = true;
+      }
+    };
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+    };
+  }, []);
+
+  // When focus leaves the crossword area, put it back on the selected cell (unless user clicked outside)
   useEffect(() => {
     const rowEl = crosswordRowRef.current;
     if (!rowEl) return;
@@ -124,13 +142,17 @@ export const CrosswordInteractive = forwardRef<
       const next = e.relatedTarget as Node | null;
       if (next != null && rowEl.contains(next)) return;
       if (!selection) return;
+      if (userClickedOutsideRef.current) {
+        userClickedOutsideRef.current = false;
+        return;
+      }
       requestAnimationFrame(() => {
         const cellEl = document.getElementById(
           `cell-${selection.row}-${selection.col}`,
         );
         if (cellEl && typeof (cellEl as HTMLElement).focus === "function")
-          (cellEl as HTMLElement).focus();
-        else gridRef.current?.focus();
+          (cellEl as HTMLElement).focus({ preventScroll: true });
+        else gridRef.current?.focus({ preventScroll: true });
       });
     };
     rowEl.addEventListener("focusout", handleFocusOut, true);
@@ -197,24 +219,6 @@ export const CrosswordInteractive = forwardRef<
   useEffect(() => {
     onFilledWordsChange?.(filledWordsMap);
   }, [onFilledWordsChange, filledWordsMap]);
-
-  // Detect mobile on mount (selection is kept so a cell is always in focus)
-  useLayoutEffect(() => {
-    const mobile =
-      window.matchMedia("(max-width: 768px)").matches ||
-      window.matchMedia("(pointer: coarse)").matches;
-    setIsMobile(mobile);
-  }, []);
-
-  useEffect(() => {
-    const check = () =>
-      setIsMobile(
-        window.matchMedia("(max-width: 768px)").matches ||
-          window.matchMedia("(pointer: coarse)").matches,
-      );
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   const handleInputLetter = useCallback(
     (row: number, col: number, letter: string) => {
@@ -636,7 +640,7 @@ export const CrosswordInteractive = forwardRef<
               </div>
             )}
 
-            <div className="relative inline-flex flex-col">
+            <div className="relative inline-flex flex-col" id="crossword">
               <CrosswordGrid
                 data={data}
                 selectedCell={
@@ -756,12 +760,13 @@ export const CrosswordInteractive = forwardRef<
                       : "text-stone-800";
                     return (
                       <li
+                        data-active={isActive}
                         key={word.id}
                         ref={(el) => {
                           if (el) acrossClueRefs.current.set(word.id, el);
                           else acrossClueRefs.current.delete(word.id);
                         }}
-                        className={`flex cursor-pointer items-start gap-3 px-[6px] py-2 ${isActive ? "bg-mustard-100 rounded" : ""}`}
+                        className="hover:bg-mustard-50 focus:bg-mustard-100 data-[active='true']:bg-mustard-100 flex cursor-pointer items-start gap-3 rounded px-[6px] py-2 transition-colors duration-100"
                         onClick={() => {
                           if (firstCell) {
                             handleSelectCell(
@@ -770,13 +775,12 @@ export const CrosswordInteractive = forwardRef<
                               "across",
                             );
                             gridRef.current?.focus();
+                            // Desktop: only scroll to crossword if it's out of view
                             document
-                              .getElementById(
-                                `cell-${firstCell.row}-${firstCell.col}`,
-                              )
+                              .getElementById("crossword")
                               ?.scrollIntoView({
                                 behavior: "smooth",
-                                block: "center",
+                                block: "nearest",
                               });
                           }
                         }}
@@ -809,7 +813,7 @@ export const CrosswordInteractive = forwardRef<
                 className="clue-list-container relative max-h-[783px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 [&::-webkit-scrollbar]:hidden"
               >
                 <h3
-                  className={`bg-cream sticky top-0 z-[1] mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
+                  className={`bg-cream sticky top-0 z-1 mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
                 >
                   Down
                 </h3>
@@ -830,12 +834,13 @@ export const CrosswordInteractive = forwardRef<
                       : "text-stone-800";
                     return (
                       <li
+                        data-active={isActive}
                         key={word.id}
                         ref={(el) => {
                           if (el) downClueRefs.current.set(word.id, el);
                           else downClueRefs.current.delete(word.id);
                         }}
-                        className={`flex cursor-pointer items-start gap-3 px-[6px] py-2 ${isActive ? "bg-mustard-100 rounded" : ""}`}
+                        className="hover:bg-mustard-50 focus:bg-mustard-100 data-[active='true']:bg-mustard-100 flex cursor-pointer items-start gap-3 rounded px-[6px] py-2 transition-colors duration-100"
                         onClick={() => {
                           if (firstCell) {
                             handleSelectCell(
@@ -844,13 +849,12 @@ export const CrosswordInteractive = forwardRef<
                               "down",
                             );
                             gridRef.current?.focus();
+                            // Desktop: only scroll to crossword if it's out of view
                             document
-                              .getElementById(
-                                `cell-${firstCell.row}-${firstCell.col}`,
-                              )
+                              .getElementById("crossword")
                               ?.scrollIntoView({
                                 behavior: "smooth",
-                                block: "center",
+                                block: "nearest",
                               });
                           }
                         }}
