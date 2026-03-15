@@ -576,52 +576,6 @@ export const CrosswordInteractive = forwardRef<
             ref={gridColumnRef}
             className="w-min shrink-0 min-[850px]:self-start"
           >
-            {/* GRAIN PREVIEW - UNCOMMENT TO ENABLE
-        <div className="mb-4 p-4 bg-stone-100 rounded text-sm font-sans w-[300px]">
-          <h4 className="font-semibold mb-3">Dot Pattern Controls</h4>
-          <div className="mb-3">
-            <label className="block text-xs text-stone-600 mb-1">Dot Spacing: {dotSpacing}px</label>
-            <input type="range" min="2" max="20" step="1" value={dotSpacing}
-              onChange={(e) => setDotSpacing(parseInt(e.target.value))} className="w-full"/>
-          </div>
-          <div className="mb-3">
-            <label className="block text-xs text-stone-600 mb-1">Dot Size: {dotSize.toFixed(2)}px</label>
-            <input type="range" min="0.1" max="3" step="0.1" value={dotSize}
-              onChange={(e) => setDotSize(parseFloat(e.target.value))} className="w-full"/>
-          </div>
-          <div className="mb-3">
-            <label className="block text-xs text-stone-600 mb-1">Dot Opacity: {(dotOpacity * 100).toFixed(0)}%</label>
-            <input type="range" min="0.05" max="1" step="0.05" value={dotOpacity}
-              onChange={(e) => setDotOpacity(parseFloat(e.target.value))} className="w-full"/>
-          </div>
-          <div className="mb-3">
-            <label className="block text-xs text-stone-600 mb-1">Dots per Tile: {dotCount}</label>
-            <input type="range" min="2" max="20" step="1" value={dotCount}
-              onChange={(e) => setDotCount(parseInt(e.target.value))} className="w-full"/>
-          </div>
-          <div className="text-xs text-stone-500 mt-2 p-2 bg-white rounded font-mono">
-            dotSpacing: {dotSpacing}, dotSize: {dotSize}, dotOpacity: {dotOpacity}, dotCount: {dotCount}
-          </div>
-        </div>
-        <div className="mb-4">
-          <div className="w-[200px] h-[200px] relative border border-[#ccc]">
-            <svg width="200" height="200" className="absolute inset-0">
-              <rect width="200" height="200" fill="#EAE8E1"/>
-              {Array.from({ length: dotCount * 50 }, (_, i) => {
-                const hash = (n: number, seed: number) => { const x = Math.sin(n * seed) * 10000; return x - Math.floor(x); };
-                const px = hash(i, 1.1) * 200, py = hash(i, 2.3) * 200, isWhite = hash(i, 3.7) < 0.3;
-                const sizeMultiplier = 0.1 + hash(i, 4.9) * 2;
-                const rx = dotSize * sizeMultiplier * (dotSpacing / 3), ry = rx * (0.2 + hash(i, 5.3) * 1.6);
-                return <ellipse key={i} cx={px} cy={py} rx={Math.max(0.15, rx)} ry={Math.max(0.15, ry)}
-                  fill={isWhite ? "#ffffff" : "#57534e"} 
-                  opacity={dotOpacity * (isWhite ? 0.3 + hash(i, 7.1) * 0.3 : 0.4 + hash(i, 8.9) * 0.6)}
-                  transform={`rotate(${hash(i, 6.7) * 180} ${px} ${py})`}/>;
-              })}
-            </svg>
-          </div>
-        </div>
-        */}
-
             {/* Mobile: tap hint when no cell selected */}
             {/* Highlighted clue: above grid on desktop, fixed above keyboard on mobile (focus-within) */}
             {clueContent && (
@@ -649,6 +603,25 @@ export const CrosswordInteractive = forwardRef<
                 clearStaggerMs={CLEAR_STAGGER_MS}
                 clearFlipDurationMs={CLEAR_FLIP_DURATION_MS}
               />
+              <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={handleRevealWord}
+                  disabled={!selection}
+                  className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
+                >
+                  Reveal word
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowClearConfirm(true)}
+                  disabled={Object.keys(userInputs).length === 0}
+                  className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
+                >
+                  Clear
+                </button>
+              </div>
+
               {showClearConfirm && (
                 <div
                   className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-8 p-6"
@@ -726,7 +699,7 @@ export const CrosswordInteractive = forwardRef<
               <div
                 ref={acrossListRef}
                 onScroll={handleAcrossScroll}
-                className="across-clue-list clue-list-container relative max-h-[783px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 min-[850px]:max-lg:border-b min-[850px]:max-lg:border-stone-800 [&::-webkit-scrollbar]:hidden"
+                className="across-clue-list clue-list-container relative overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 min-[850px]:max-lg:border-b min-[850px]:max-lg:border-stone-800 [&::-webkit-scrollbar]:hidden"
               >
                 <h3
                   className={`bg-cream sticky top-0 z-[1] mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${acrossScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
@@ -800,7 +773,7 @@ export const CrosswordInteractive = forwardRef<
               <div
                 ref={downListRef}
                 onScroll={handleDownScroll}
-                className="clue-list-container relative max-h-[783px] overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 [&::-webkit-scrollbar]:hidden"
+                className="clue-list-container relative overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] min-[850px]:min-h-0 min-[850px]:flex-1 [&::-webkit-scrollbar]:hidden"
               >
                 <h3
                   className={`bg-cream sticky top-0 z-1 mb-0 pb-4 pl-[6px] font-serif text-[20px] leading-normal font-medium tracking-[-0.4px] text-stone-800 italic transition-shadow duration-150 [font-feature-settings:'dlig'_on,'hlig'_on,'fina'_on,'kern'_on,'rlig'_on,'swsh'_on,'cswh'_on] ${downScrolled ? "shadow-[0_1px_0_0_#292524]" : "shadow-[0_1px_0_0_transparent]"}`}
@@ -872,28 +845,11 @@ export const CrosswordInteractive = forwardRef<
                 />
               </div>
             </div>
-            <div className="flex shrink-0 items-center justify-start gap-[16px] pt-0">
-              <button
-                type="button"
-                onClick={handleRevealWord}
-                disabled={!selection}
-                className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
-              >
-                Reveal word
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowClearConfirm(true)}
-                disabled={Object.keys(userInputs).length === 0}
-                className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
-              >
-                Clear
-              </button>
-            </div>
           </div>
         </div>
+
         {/* DEV ONLY: Show answers toggle and Fill grid - only visible in development mode */}
-        {process.env.NODE_ENV === "development" && (
+        {/* {process.env.NODE_ENV === "development" && (
           <div className="flex w-full max-w-[1200px] flex-wrap items-center gap-4 pt-0">
             <label className="flex cursor-pointer items-center gap-2 select-none">
               <div className="relative">
@@ -928,7 +884,7 @@ export const CrosswordInteractive = forwardRef<
               Fill grid (dev only)
             </button>
           </div>
-        )}
+        )} */}
       </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
       {clueContent && (

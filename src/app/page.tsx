@@ -36,18 +36,19 @@ export default function Home() {
         <div className="flex h-svh w-dvw items-center justify-center px-14 py-8 max-sm:px-4 max-sm:py-4">
           <div className="relative flex h-full w-full items-center border border-stone-700">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-end gap-2 text-center sm:flex-row sm:items-center sm:text-left">
-              <p className="caption bg-cream absolute top-0 right-0 left-0 mx-auto w-fit -translate-y-1/2 px-4 py-2 text-center text-stone-600">
+              <p className="caption bg-cream absolute inset-x-0 top-0 mx-auto w-fit -translate-y-1/2 px-4 py-2 text-center text-stone-600">
                 Designer of things
               </p>
-              <Image
-                src="/header-back.png"
-                alt="Tanya profile picture"
-                height={1144}
-                width={777}
-                className="mx-auto aspect-285/566 h-auto w-[140px] object-contain sm:mx-0 sm:w-[220px] md:w-[260px] lg:w-[280px] xl:w-[320px] 2xl:w-[480px]"
-              />
-              <div className="flex w-full min-w-0 flex-col items-center gap-8 text-center sm:w-[598px] sm:items-start sm:text-left">
-                <div className="flex flex-col items-center self-center text-center sm:items-start sm:self-start sm:text-left">
+
+              <div className="grid min-w-0 items-center justify-items-center sm:grid-cols-[1fr_auto] sm:gap-8">
+                <Image
+                  src="/header-back.png"
+                  alt="Tanya profile picture"
+                  height={1144}
+                  width={777}
+                  className="aspect-285/566 w-full object-contain max-sm:w-1/2"
+                />
+                <div className="flex flex-col items-center self-center text-center sm:items-start sm:text-left">
                   <h2 className="h2 text-stone-800">
                     <span className="-ml-3">Tanya,</span>
                     <br />
@@ -107,10 +108,10 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <p className="caption bg-cream absolute right-0 bottom-0 left-0 mx-auto w-fit translate-y-1/2 px-4 py-2 text-center text-stone-600">
-                Enjoyer of puzzles
-              </p>
             </div>
+            <p className="caption bg-cream absolute right-0 bottom-0 left-0 mx-auto w-fit translate-y-1/2 px-4 py-2 text-center text-stone-600">
+              Enjoyer of puzzles
+            </p>
           </div>
         </div>
       </section>
