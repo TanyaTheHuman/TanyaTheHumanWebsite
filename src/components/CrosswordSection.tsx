@@ -17,6 +17,8 @@ import {
   getCrossReferencedCells,
   getWordByClueNumber,
   getFilledWordsMap,
+  getFilledWord,
+  isWordCorrect,
 } from "@/lib/crossword-data";
 import { loadProgress, saveProgress } from "@/lib/crossword-storage";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -220,15 +222,40 @@ export const CrosswordInteractive = forwardRef<
     onFilledWordsChange?.(filledWordsMap);
   }, [onFilledWordsChange, filledWordsMap]);
 
+  const completionSoundRef = useRef<"/success.mp3" | "/error.mp3" | null>(null);
+
   const handleInputLetter = useCallback(
     (row: number, col: number, letter: string) => {
-      setUserInputs((prev) => ({
-        ...prev,
-        [`${row},${col}`]: letter.toUpperCase(),
-      }));
+      const dir = selection?.direction ?? "across";
+      const word = getWordContaining(data, row, col, dir);
+
+      setUserInputs((prev) => {
+        const next = {
+          ...prev,
+          [`${row},${col}`]: letter.toUpperCase(),
+        };
+        if (word) {
+          const wasComplete = getFilledWord(data, prev, word.clueNumber, dir) != null;
+          const nowComplete = getFilledWord(data, next, word.clueNumber, dir) != null;
+          if (!wasComplete && nowComplete) {
+            const correct = isWordCorrect(data, next, word.clueNumber, dir);
+            completionSoundRef.current = correct ? "/success.mp3" : "/error.mp3";
+          }
+        }
+        return next;
+      });
     },
-    [],
+    [data, selection?.direction],
   );
+
+  useEffect(() => {
+    const src = completionSoundRef.current;
+    completionSoundRef.current = null;
+    if (src) {
+      const audio = new Audio(src);
+      audio.play().catch(() => {});
+    }
+  }, [userInputs]);
 
   const handleClearCell = useCallback((row: number, col: number) => {
     setUserInputs((prev) => {
@@ -247,6 +274,7 @@ export const CrosswordInteractive = forwardRef<
       selection.direction,
     );
     if (!word?.cells.length) return;
+    new Audio("/reveal.mp3").play().catch(() => {});
     setUserInputs((prev) => {
       const next = { ...prev };
       for (const c of word.cells) {
@@ -652,6 +680,7 @@ export const CrosswordInteractive = forwardRef<
                       type="button"
                       onClick={() => {
                         setShowClearConfirm(false);
+                        new Audio("/clear.mp3").play().catch(() => {});
                         // Start animation after modal is gone so the grid is visible when flip runs
                         requestAnimationFrame(() => {
                           if (clearAnimationTimeoutRef.current)
