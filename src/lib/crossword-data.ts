@@ -31,7 +31,7 @@ export interface CrosswordData {
 }
 
 /** Bump when grid or clues change so old localStorage progress is ignored. */
-export const CROSSWORD_VERSION = 7;
+export const CROSSWORD_VERSION = 8;
 
 const COLS = 17;
 const ROWS = 19;
@@ -55,7 +55,7 @@ const GRID_LAYOUT = [
   "..P..A...R...R...", // Row 10
   "VHS.G..CROSSWORDS", // Row 11
   "....R....I.I.N..E", // Row 12: E of SEW
-  "...UIKIT.D.SKI..W", // Row 13: SKI (was SKIING), W of SEW
+  "..SKI....D.S.I..W", // Row 13
   ".F..D...L..T.....", // Row 14
   "VIPPS..NORWEGIAN.", // Row 15
   ".G.A.C..N..R.D..B", // Row 16
