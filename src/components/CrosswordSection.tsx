@@ -878,7 +878,7 @@ export const CrosswordInteractive = forwardRef<
         </div>
 
         {/* DEV ONLY: Show answers toggle and Fill grid - only visible in development mode */}
-        {/* {process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === "development" && (
           <div className="flex w-full max-w-[1200px] flex-wrap items-center gap-4 pt-0">
             <label className="flex cursor-pointer items-center gap-2 select-none">
               <div className="relative">
@@ -913,7 +913,7 @@ export const CrosswordInteractive = forwardRef<
               Fill grid (dev only)
             </button>
           </div>
-        )} */}
+        )}
       </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
       {clueContent && (

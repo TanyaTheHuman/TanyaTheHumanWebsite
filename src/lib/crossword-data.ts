@@ -31,40 +31,37 @@ export interface CrosswordData {
 }
 
 /** Bump when grid or clues change so old localStorage progress is ignored. */
-export const CROSSWORD_VERSION = 1;
+export const CROSSWORD_VERSION = 7;
 
 const COLS = 17;
-const ROWS = 22;
+const ROWS = 19;
 
 /**
  * Grid layout from the actual crossword design.
  * Each string represents a row: letters = letter cells, '.' = black cells
- * Grid is 17 columns × 23 rows
+ * Grid is 17 columns × 19 rows
  */
 // Grid: 7 cells blacked (ARGUE/DELTA/OWNIT); 4-down FIXATE removed, UNO added at col 10 (1-based)
 const GRID_LAYOUT = [
-  "O...B..H..U....D.", // Row 1 (1-based): U starts UNO down at col 10
-  "SYSTEMSTHINKER.A.", // Row 2
-  "L...K..M..O....S.", // Row 3: O at col 11 (index 10) for UNO
-  "O.C.ITALIA.SOUTH.", // Row 4
-  "N.U.N......C.....", // Row 5
-  "O.R.DELIVEROO.JA.", // Row 6
-  "RUSK....H..R...B.", // Row 7: H of VHS
-  "W.O..H..S.OPINION", // Row 8: S of VHS
-  "AFRICA.B...I...U.", // Row 9
-  "Y....D.L.A.O.N.T.", // Row 10
-  "..A..E.A.N...E.M.", // Row 10
-  "..PRODUCTDESIGNER", // Row 11
-  "..P..A.K.R...R...", // Row 12
-  "..S.G..CROSSWORDS", // Row 13: last S starts SEW down
-  "....R..A.I.I.N..E", // Row 14: E of SEW
-  "...UIKIT.D.SKI..W", // Row 15: SKI (was SKIING), W of SEW
-  ".F..D...L..T.....", // Row 17
-  "VIPPS..NORWEGIAN.", // Row 18
-  ".G.A.C..N..R.D..B", // Row 19
-  ".M.S.O..D....E..A", // Row 20
-  ".AUTOLAYOUT.KAYAK", // Row 21
-  "...A.D..N....S..E", // Row 22
+  "..C.......A......", // Row 1
+  "N.U.......F.S....", // Row 2
+  "O.R.DELIVEROO.CAT", // Row 3
+  "RUSK...T..I.U..B.", // Row 4
+  "W.O..H.A..C.T..O.", // Row 5
+  "A.R..A.L..A.H..U.", // Row 6
+  "Y....D.Y.A...N.T.", // Row 7
+  "..A..E...N...E.M.", // Row 8
+  "..PRODUCTDESIGNER", // Row 9
+  "..P..A...R...R...", // Row 10
+  "VHS.G..CROSSWORDS", // Row 11
+  "....R....I.I.N..E", // Row 12: E of SEW
+  "...UIKIT.D.SKI..W", // Row 13: SKI (was SKIING), W of SEW
+  ".F..D...L..T.....", // Row 14
+  "VIPPS..NORWEGIAN.", // Row 15
+  ".G.A.C..N..R.D..B", // Row 16
+  ".M.S.O..D....E..A", // Row 17
+  ".AUTOLAYOUT.KAYAK", // Row 18
+  "...A.D..N....S..E", // Row 19
 ];
 
 function isBlackInLayout(row: number, col: number, layout: string[]): boolean {
