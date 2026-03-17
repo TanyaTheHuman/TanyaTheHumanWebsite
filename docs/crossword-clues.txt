@@ -1,36 +1,35 @@
 
 ACROSS
 
-5  | DELIVEROO | Currently here, doing IC stuff and leading a small team
-7  | CAT | 
-9  | RUSK | Like a biscotti, but Afrikaans
-14 | PRODUCTDESIGNER | Automator or layouts and drawer of rectangles
-15 | VHS | 
-17 | CROSSWORDS | My favourite word puzzles (in case you haven't noticed)
-20 | SKIING | 
-23 | VIPPS | Before 5-across, I was at one of Scandinavia's leading fintechs
-25 | NORWEGIAN | Jeg snakker litt av dette språket fordi jeg bodd i 3-down for fem år
+2  | KAYAK | Once paddled one of these (unknowingly) across a shipping lane in Hạ Long Bay
+6  | DELIVEROO | Food delivery company, founded in the UK
+8  | CAT | A small, black one of these likes to sit on my keyboard
+10 | RUSK | Like a biscotti, but Afrikaans
+15 | PRODUCTDESIGNER | Automator or layouts and drawer of rectangles
+16 | VHS | I'm old enough to remember renting movies in this format
+18 | CROSSWORDS | My favourite word puzzles (in case you haven't noticed)
+21 | SKIING | Still bad at this despite 5 snowy winters in 4-down
+25 | VIPPS | Before 6-across, I was at one of Scandinavia's most successful fintechs
+27 | NORWEGIAN | Jeg snakker litt av dette språket fordi jeg bodd i 4-down for fem år
 29 | AUTOLAYOUT | It definitely fills my container, if you know what I mean
-30 | KAYAK | Once paddled one of these (unknowingly) across a shipping lane in Ha long bay
 
 DOWN
 
-1  | CURSOR | The tool I fought with to create what you see here
-2  | AFRICA | 
-3  | NORWAY | 
-4  | SOUTH | 
-6  | ITALY | 
-8  | ABOUTME | The theme of this puzzle
-10 | HADEDA | A large Ibis known locally as a "flying vuvuzela"
-11 | ANDROID | Might be rare to meet a 14-across that prefers this
-12 | NEGRONI | The Sbagliato version is indeed a mistake
-13 | APPS | Makes up most of my portfolio, with some tooling and web in-between
-16 | GRIDS | This puzzle's construction relies on these
-18 | SISTER | I'm a big one of these by 4 years
-19 | SEW | Taught myself to do this
-21 | FIGMA | One of the tools of my trade
-22 | LONDON | Currently living here
-24 | PASTA | The noodle of my people over at 6-down
-26 | IDEAS | Mind set?
-27 | COLD | My unusual personal preference when it comes to toast
-28 | BAKE | I'd rather cook than do this
+1  | CURSOR | Tool I fought with to create what you see here
+3  | AFRICA | See 4-across
+4  | NORWAY | My first overseas trip was a one-way ticket to the fjords
+5  | SOUTH | With 3-down, born and raised in this sunny country
+7  | ITALY | Boot-shaped country that makes up half of my heritage
+9  | ABOUTME | Theme of this puzzle
+11 | HADEDA | Large Ibis known local to my home country
+12 | ANDROID | Rare to meet a 15-across that uses this mobile OS
+13 | NEGRONI | The Sbagliato version is a mistake
+14 | APPS | This plus tooling and web design make up my portfolio
+17 | GRIDS | This puzzle's construction relies on this structure
+19 | SISTER | I'm a big one of these by 4 years
+20 | SEW | Taught myself to do this so I could make my own clothes
+22 | FIGMA | One of the tools of my trade
+23 | LONDON | Currently living in this stereotypically grey capital city
+24 | BAKING | Not a fan of doing this, tsps and cups are too fiddly
+26 | PASTA | The noodle of my people over at 6-down
+28 | COLD | My unusual personal preference when it comes to toast

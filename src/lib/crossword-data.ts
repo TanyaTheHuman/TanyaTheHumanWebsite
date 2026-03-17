@@ -31,7 +31,7 @@ export interface CrosswordData {
 }
 
 /** Bump when grid or clues change so old localStorage progress is ignored. */
-export const CROSSWORD_VERSION = 9;
+export const CROSSWORD_VERSION = 10;
 
 const COLS = 17;
 const ROWS = 19;
@@ -43,7 +43,7 @@ const ROWS = 19;
  */
 // Grid: 7 cells blacked (ARGUE/DELTA/OWNIT); 4-down FIXATE removed, UNO added at col 10 (1-based)
 const GRID_LAYOUT = [
-  "..C.......A......", // Row 1
+  "..C....KAYAK.....", // Row 1
   "N.U.......F.S....", // Row 2
   "O.R.DELIVEROO.CAT", // Row 3
   "RUSK...T..I.U..B.", // Row 4
@@ -56,12 +56,12 @@ const GRID_LAYOUT = [
   "VHS.G..CROSSWORDS", // Row 11
   "....R....I.I.N..E", // Row 12: E of SEW
   "..SKIING.D.S.I..W", // Row 13
-  ".F..D...L..T.....", // Row 14
+  ".F..D...L..T..B..", // Row 14
   "VIPPS..NORWEGIAN.", // Row 15
-  ".G.A.C..N..R.D..B", // Row 16
-  ".M.S.O..D....E..A", // Row 17
-  ".AUTOLAYOUT.KAYAK", // Row 18
-  "...A.D..N....S..E", // Row 19
+  ".G.A.C..N..R..K..", // Row 16
+  ".M.S.O..D.....I..", // Row 17
+  ".AUTOLAYOUT...N..", // Row 18
+  "...A.D..N.....G..", // Row 19
 ];
 
 function isBlackInLayout(row: number, col: number, layout: string[]): boolean {
@@ -109,183 +109,129 @@ interface ClueEntry {
 
 const ACROSS_CLUES: ClueEntry[] = [
   {
+    clueNumber: 2,
+    answer: "KAYAK",
+    clue: "Once paddled one of these (unknowingly) across a shipping lane in Hạ Long Bay",
+  },
+  {
     clueNumber: 6,
-    answer: "SYSTEMSTHINKER",
-    clue: "Always looking at the whole picture",
+    answer: "DELIVEROO",
+    clue: "Food delivery company, founded in the UK",
   },
   {
     clueNumber: 8,
-    answer: "ITALIA",
-    clue: "Boot-shaped country that makes up half my heritage",
+    answer: "CAT",
+    clue: "A small, black one of these likes to sit on my keyboard",
   },
+  { clueNumber: 10, answer: "RUSK", clue: "Like a biscotti, but Afrikaans" },
   {
-    clueNumber: 9,
-    answer: "SOUTH",
-    clue: "With 17-across, the sunny country where I was born and raised",
+    clueNumber: 15,
+    answer: "PRODUCTDESIGNER",
+    clue: "Automator or layouts and drawer of rectangles",
   },
-  {
-    clueNumber: 10,
-    answer: "DELIVEROO",
-    clue: "Food delivery company that started in the UK",
-  },
-  {
-    clueNumber: 12,
-    answer: "JA",
-    clue: "Joburg affirmative that still lingers in my lexicon",
-  },
-  { clueNumber: 14, answer: "RUSK", clue: "Like a biscotti, but Afrikaans" },
   {
     clueNumber: 16,
-    answer: "OPINION",
-    clue: "I'll offer a strong one of these, loosely held",
-  },
-  { clueNumber: 17, answer: "AFRICA", clue: "See 9-across" },
-  {
-    clueNumber: 22,
-    answer: "PRODUCTDESIGNER",
-    clue: "Automator of layouts, drawer of rectangles",
+    answer: "VHS",
+    clue: "I'm old enough to remember renting movies in this format",
   },
   {
-    clueNumber: 24,
+    clueNumber: 18,
     answer: "CROSSWORDS",
-    clue: "My favourite type of puzzle (in case you haven't noticed)",
+    clue: "My favourite word puzzles (in case you haven't noticed)",
+  },
+  {
+    clueNumber: 21,
+    answer: "SKIING",
+    clue: "Still bad at this despite 5 snowy winters in 4-down",
+  },
+  {
+    clueNumber: 25,
+    answer: "VIPPS",
+    clue: "Before 6-across, I was at one of Scandinavia's most successful fintechs",
   },
   {
     clueNumber: 27,
-    answer: "UIKIT",
-    clue: "Usually creating and maintaining this to make rest of my work consistent",
-  },
-  {
-    clueNumber: 28,
-    answer: "SKI",
-    clue: "Despite 5 snowy winters, I still can't do this very well",
-  },
-  {
-    clueNumber: 31,
-    answer: "VIPPS",
-    clue: "Before 5-across, you could find me at Scandinavia's most succesfful fintech",
-  },
-  {
-    clueNumber: 33,
     answer: "NORWEGIAN",
-    clue: "Jeg snakker litt av dette språket fordi jeg bodd i 3-down for fem år",
+    clue: "Jeg snakker litt av dette språket fordi jeg bodd i 4-down for fem år",
   },
   {
-    clueNumber: 37,
+    clueNumber: 29,
     answer: "AUTOLAYOUT",
-    clue: "Fills containers or hugs contents depending on your needs",
-  },
-  {
-    clueNumber: 38,
-    answer: "KAYAK",
-    clue: "I once paddled one of these (unknowingly) across a shipping lane in Ha long bay",
+    clue: "It definitely fills my container, if you know what I mean",
   },
 ];
 
 const DOWN_CLUES: ClueEntry[] = [
-  {
-    clueNumber: 1,
-    answer: "OSLONORWAY",
-    clue: "My first ever international flight was a one-way ticket here",
-  },
-  {
-    clueNumber: 2,
-    answer: "BEKIND",
-    clue: "If you can be anything in this world...",
-  },
-  {
-    clueNumber: 3,
-    answer: "HTML",
-    clue: "What 7-down assures me this website is rendered to",
-  },
+  { clueNumber: 1, answer: "CURSOR", clue: "Tool I fought with to create what you see here" },
+  { clueNumber: 3, answer: "AFRICA", clue: "See 4-across" },
   {
     clueNumber: 4,
-    answer: "UNO",
-    clue: "The cause of more family feuds in my house than Monopoly",
+    answer: "NORWAY",
+    clue: "My first overseas trip was a one-way ticket to the fjords",
   },
   {
     clueNumber: 5,
-    answer: "DASH",
-    clue: "10-across was acquired by Door-this in 2024",
+    answer: "SOUTH",
+    clue: "With 3-down, born and raised in this sunny country",
   },
   {
     clueNumber: 7,
-    answer: "CURSOR",
-    clue: "The AI tool I fought with to create what you see here",
+    answer: "ITALY",
+    clue: "Boot-shaped country that makes up half of my heritage",
   },
-  {
-    clueNumber: 9,
-    answer: "SCORPIO",
-    clue: "Being born in November makes me one of these, I guess",
-  },
+  { clueNumber: 9, answer: "ABOUTME", clue: "Theme of this puzzle" },
   {
     clueNumber: 11,
-    answer: "VHS",
-    clue: "Folks my age fondly remember renting movies in this format",
+    answer: "HADEDA",
+    clue: "Large Ibis known local to my home country",
+  },
+  {
+    clueNumber: 12,
+    answer: "ANDROID",
+    clue: "Rare to meet a 15-across that uses this mobile OS",
   },
   {
     clueNumber: 13,
-    answer: "ABOUTME",
-    clue: "You could say this puzzle replaces this section of my site",
+    answer: "NEGRONI",
+    clue: "The Sbagliato version is a mistake",
   },
   {
-    clueNumber: 15,
-    answer: "HADEDA",
-    clue: 'A large Ibis known locally as a "flying vuvuzela"',
+    clueNumber: 14,
+    answer: "APPS",
+    clue: "This plus tooling and web design make up my portfolio",
   },
   {
-    clueNumber: 18,
-    answer: "BLACKCAT",
-    clue: "Furry, panther-like animal that insists on sleeping on my keyboard",
+    clueNumber: 17,
+    answer: "GRIDS",
+    clue: "This puzzle's construction relies on this structure",
   },
-  {
-    clueNumber: 19,
-    answer: "ANDROID",
-    clue: "Might be rare to meet a 14-across that prefers this",
-  },
+  { clueNumber: 19, answer: "SISTER", clue: "I'm a big one of these by 4 years" },
   {
     clueNumber: 20,
-    answer: "NEGRONI",
-    clue: "The Sbagliato version is indeed a mistake",
+    answer: "SEW",
+    clue: "Taught myself to do this so I could make my own clothes",
   },
-  {
-    clueNumber: 21,
-    answer: "APPS",
-    clue: "Makes up most of my portfolio, with some tooling and web in-between",
-  },
+  { clueNumber: 22, answer: "FIGMA", clue: "One of the tools of my trade" },
   {
     clueNumber: 23,
-    answer: "GRIDS",
-    clue: "This puzzle's construction relies on these",
-  },
-  {
-    clueNumber: 25,
-    answer: "SISTER",
-    clue: "I'm a big one of these by 4 years",
+    answer: "LONDON",
+    clue: "Currently living in this stereotypically grey capital city",
   },
   {
     clueNumber: 26,
-    answer: "SEW",
-    clue: "Taught myself to do this, found myself in stitches",
-  },
-  { clueNumber: 29, answer: "FIGMA", clue: "One of the tools of my trade" },
-  {
-    clueNumber: 30,
-    answer: "LONDON",
-    clue: "A capital city thought of as rainy and grey",
-  },
-  {
-    clueNumber: 32,
     answer: "PASTA",
     clue: "The noodle of my people over at 6-down",
   },
-  { clueNumber: 34, answer: "IDEAS", clue: "Mind set?" },
   {
-    clueNumber: 35,
+    clueNumber: 28,
     answer: "COLD",
-    clue: "My controversial personal preference when it comes to toast",
+    clue: "My unusual personal preference when it comes to toast",
   },
-  { clueNumber: 36, answer: "BAKE", clue: "I'd rather cook than do this" },
+  {
+    clueNumber: 24,
+    answer: "BAKING",
+    clue: "Not a fan of doing this, tsps and cups are too fiddly",
+  },
 ];
 
 function buildClueMap(entries: ClueEntry[]): Record<string, string> {
