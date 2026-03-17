@@ -31,7 +31,7 @@ export interface CrosswordData {
 }
 
 /** Bump when grid or clues change so old localStorage progress is ignored. */
-export const CROSSWORD_VERSION = 8;
+export const CROSSWORD_VERSION = 9;
 
 const COLS = 17;
 const ROWS = 19;
@@ -55,7 +55,7 @@ const GRID_LAYOUT = [
   "..P..A...R...R...", // Row 10
   "VHS.G..CROSSWORDS", // Row 11
   "....R....I.I.N..E", // Row 12: E of SEW
-  "..SKI....D.S.I..W", // Row 13
+  "..SKIING.D.S.I..W", // Row 13
   ".F..D...L..T.....", // Row 14
   "VIPPS..NORWEGIAN.", // Row 15
   ".G.A.C..N..R.D..B", // Row 16
@@ -163,12 +163,12 @@ const ACROSS_CLUES: ClueEntry[] = [
   {
     clueNumber: 31,
     answer: "VIPPS",
-    clue: "Before 10-across, you could find me at Scandinavia's most succesfful fintech",
+    clue: "Before 5-across, you could find me at Scandinavia's most succesfful fintech",
   },
   {
     clueNumber: 33,
     answer: "NORWEGIAN",
-    clue: "Jeg snakker litt av dette språket fordi jeg bodd i 1-down for fem år",
+    clue: "Jeg snakker litt av dette språket fordi jeg bodd i 3-down for fem år",
   },
   {
     clueNumber: 37,
@@ -241,7 +241,7 @@ const DOWN_CLUES: ClueEntry[] = [
   {
     clueNumber: 19,
     answer: "ANDROID",
-    clue: "Might be rare to meet a 22-across that prefers this",
+    clue: "Might be rare to meet a 14-across that prefers this",
   },
   {
     clueNumber: 20,
@@ -277,7 +277,7 @@ const DOWN_CLUES: ClueEntry[] = [
   {
     clueNumber: 32,
     answer: "PASTA",
-    clue: "The noodle of my people over at 8-across",
+    clue: "The noodle of my people over at 6-down",
   },
   { clueNumber: 34, answer: "IDEAS", clue: "Mind set?" },
   {

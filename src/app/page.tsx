@@ -10,7 +10,7 @@ import Image from "next/image";
 function displayWord(filledWords: Record<string, string>, key: string): string {
   const word = filledWords[key];
   if (!word) return key.replace(/-/g, "\u2011");
-  if (key === "22-across" && word.toUpperCase() === "PRODUCTDESIGNER") {
+  if (key === "14-across" && word.toUpperCase() === "PRODUCTDESIGNER") {
     return "Product designer";
   }
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -65,11 +65,11 @@ export default function Home() {
                       href="#crossword"
                       onClick={(e) => {
                         // e.preventDefault();
-                        activateCrosswordWord(22, "across");
+                        activateCrosswordWord(14, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
-                      {displayWord(filledWords, "22-across")}
+                      {displayWord(filledWords, "14-across")}
                       {"    "}
                     </a>
                     based in{" "}
@@ -77,33 +77,33 @@ export default function Home() {
                       href="#crossword"
                       onClick={(e) => {
                         // e.preventDefault();
-                        activateCrosswordWord(30, "down");
+                        activateCrosswordWord(22, "down");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
-                      {displayWord(filledWords, "30-down")}
+                      {displayWord(filledWords, "22-down")}
                     </a>
                     , currently at{" "}
                     <a
                       href="#crossword"
                       onClick={(e) => {
                         // e.preventDefault();
-                        activateCrosswordWord(10, "across");
+                        activateCrosswordWord(5, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
-                      {displayWord(filledWords, "10-across")}
+                      {displayWord(filledWords, "5-across")}
                     </a>
                     , previously at{" "}
                     <a
                       href="#crossword"
                       onClick={(e) => {
                         // e.preventDefault();
-                        activateCrosswordWord(31, "across");
+                        activateCrosswordWord(23, "across");
                       }}
                       className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
-                      {displayWord(filledWords, "31-across")}
+                      {displayWord(filledWords, "23-across")}
                     </a>
                   </p>
                 </div>
