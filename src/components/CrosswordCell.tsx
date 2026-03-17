@@ -13,20 +13,20 @@ import type { CellType } from "@/lib/crossword-data";
 
 // GRAIN CONFIGURATION - adjust these values:
 const GRAIN_CONFIG = {
-  particleCount: 60,        // Number of grain particles per cell (higher = denser)
-  minSize: 0.15,            // Minimum particle base size in pixels
-  maxSize: 0.5,             // Maximum particle base size in pixels
-  whiteRatio: 0.3,          // Ratio of white vs dark particles (0-1)
+  particleCount: 60, // Number of grain particles per cell (higher = denser)
+  minSize: 0.15, // Minimum particle base size in pixels
+  maxSize: 0.5, // Maximum particle base size in pixels
+  whiteRatio: 0.3, // Ratio of white vs dark particles (0-1)
   opacity: {
-    whiteMin: 0.05,         // White particle min opacity
-    whiteMax: 0.45,         // White particle max opacity  
-    darkMin: 0.1,           // Dark particle min opacity
-    darkMax: 0.6,           // Dark particle max opacity
+    whiteMin: 0.05, // White particle min opacity
+    whiteMax: 0.45, // White particle max opacity
+    darkMin: 0.1, // Dark particle min opacity
+    darkMax: 0.6, // Dark particle max opacity
   },
-  holeChance: 0.2,          // Chance a particle has a hole (0-1)
+  holeChance: 0.2, // Chance a particle has a hole (0-1)
   colors: {
-    dark: "#57534e",        // stone-600
-    light: "#ffffff",       // white
+    dark: "#57534e", // stone-600
+    light: "#ffffff", // white
   },
 };
 
@@ -39,10 +39,15 @@ function hash(n: number, seed: number): number {
 }
 
 // Generate irregular blob path with sharp edges
-function generateBlobPath(cx: number, cy: number, baseSize: number, uniqueId: number): string {
+function generateBlobPath(
+  cx: number,
+  cy: number,
+  baseSize: number,
+  uniqueId: number,
+): string {
   const points = 5 + Math.floor(hash(uniqueId, 9.1) * 4); // 5-8 vertices
   const vertices: string[] = [];
-  
+
   for (let j = 0; j < points; j++) {
     const angle = (j / points) * Math.PI * 2;
     // Random radius variation for each vertex
@@ -52,24 +57,29 @@ function generateBlobPath(cx: number, cy: number, baseSize: number, uniqueId: nu
     const y = cy + Math.sin(angle) * r;
     vertices.push(`${x.toFixed(2)},${y.toFixed(2)}`);
   }
-  
-  return `M${vertices.join('L')}Z`;
+
+  return `M${vertices.join("L")}Z`;
 }
 
 // Generate hole path inside blob
-function generateHolePath(cx: number, cy: number, blobSize: number, uniqueId: number): string | null {
+function generateHolePath(
+  cx: number,
+  cy: number,
+  blobSize: number,
+  uniqueId: number,
+): string | null {
   // Check against configured hole chance
   if (hash(uniqueId, 11.7) > GRAIN_CONFIG.holeChance) return null;
-  
+
   const holeSize = blobSize * (0.2 + hash(uniqueId, 12.3) * 0.3);
   const offsetX = (hash(uniqueId, 13.1) - 0.5) * blobSize * 0.5;
   const offsetY = (hash(uniqueId, 14.7) - 0.5) * blobSize * 0.5;
   const holeCx = cx + offsetX;
   const holeCy = cy + offsetY;
-  
+
   const points = 3 + Math.floor(hash(uniqueId, 15.9) * 3); // 3-5 vertices for hole
   const vertices: string[] = [];
-  
+
   for (let j = 0; j < points; j++) {
     const angle = (j / points) * Math.PI * 2;
     const r = holeSize * (0.6 + hash(uniqueId * 100 + j + 50, 4.4) * 0.8);
@@ -77,39 +87,49 @@ function generateHolePath(cx: number, cy: number, blobSize: number, uniqueId: nu
     const y = holeCy + Math.sin(angle) * r;
     vertices.push(`${x.toFixed(2)},${y.toFixed(2)}`);
   }
-  
-  return `M${vertices.join('L')}Z`;
+
+  return `M${vertices.join("L")}Z`;
 }
 
 // Generate grain particles for a cell (scaled for cell size)
 function generateGrainParticles(cellId: number, cellSize: number) {
-  const { particleCount, minSize, maxSize, whiteRatio, opacity, holeChance, colors } = GRAIN_CONFIG;
+  const {
+    particleCount,
+    minSize,
+    maxSize,
+    whiteRatio,
+    opacity,
+    holeChance,
+    colors,
+  } = GRAIN_CONFIG;
   const size = cellSize;
   const particles = [];
-  
+
   for (let i = 0; i < particleCount; i++) {
     const uniqueId = cellId * 1000 + i;
-    
+
     // Random position across the cell
     const px = hash(uniqueId, 1.1) * size;
     const py = hash(uniqueId, 2.3) * size;
     const isWhite = hash(uniqueId, 3.7) < whiteRatio;
-    
+
     // Random size within configured range
     const baseSize = minSize + hash(uniqueId, 4.9) * (maxSize - minSize);
-    
+
     // Generate blob path
     const blobPath = generateBlobPath(px, py, baseSize, uniqueId);
     const holePath = generateHolePath(px, py, baseSize, uniqueId);
-    
+
     // Combine paths (hole cuts out from blob using fill-rule)
     const fullPath = holePath ? `${blobPath} ${holePath}` : blobPath;
-    
+
     // Opacity with wide variation - round to 4 decimal places to avoid hydration mismatch
-    const particleOpacity = isWhite 
-      ? opacity.whiteMin + hash(uniqueId, 7.1) * (opacity.whiteMax - opacity.whiteMin)
-      : opacity.darkMin + hash(uniqueId, 8.9) * (opacity.darkMax - opacity.darkMin);
-    
+    const particleOpacity = isWhite
+      ? opacity.whiteMin +
+        hash(uniqueId, 7.1) * (opacity.whiteMax - opacity.whiteMin)
+      : opacity.darkMin +
+        hash(uniqueId, 8.9) * (opacity.darkMax - opacity.darkMin);
+
     particles.push({
       key: i,
       path: fullPath,
@@ -118,7 +138,7 @@ function generateGrainParticles(cellId: number, cellSize: number) {
       hasHole: !!holePath,
     });
   }
-  
+
   return particles;
 }
 
@@ -134,6 +154,9 @@ interface CrosswordCellProps {
   isCrossReferenced?: boolean;
   showAnswers: boolean;
   onSelect: (row: number, col: number) => void;
+  isClearingAnimation?: boolean;
+  clearAnimationDelayMs?: number;
+  clearFlipDurationMs?: number;
 }
 
 export function CrosswordCell({
@@ -148,12 +171,15 @@ export function CrosswordCell({
   isCrossReferenced,
   showAnswers,
   onSelect,
+  isClearingAnimation = false,
+  clearAnimationDelayMs = 0,
+  clearFlipDurationMs = 300,
 }: CrosswordCellProps) {
   if (cellType === "black") {
     return (
       <div
         id={`cell-${row}-${col}`}
-        className="shrink-0 !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] bg-ink bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)]"
+        className="bg-ink !h-[31px] !w-[31px] shrink-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)] max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))]"
         aria-hidden
       />
     );
@@ -172,7 +198,7 @@ export function CrosswordCell({
   const cellId = row * 100 + col;
   const grainParticles = generateGrainParticles(cellId, 31);
 
-  return (
+  const button = (
     <button
       id={`cell-${row}-${col}`}
       // href={`#cell-${row}-${col}`}
@@ -184,16 +210,19 @@ export function CrosswordCell({
           window.matchMedia("(max-width: 768px)").matches ||
           window.matchMedia("(pointer: coarse)").matches;
         if (isMobile) {
-          e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+          e.currentTarget.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         }
       }}
-      className={`shrink-0 cursor-pointer relative font-serif font-medium uppercase !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px] max-sm:touch-manipulation max-sm:[-webkit-tap-highlight-color:transparent] max-sm:transition-transform max-sm:duration-75 max-sm:active:scale-[0.92] focus:outline-none overflow-hidden no-underline text-inherit flex items-center justify-center ${bgClass}`}
+      className={`relative flex !h-[31px] !w-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
       {/* Grain overlay */}
-      <svg 
-        className="absolute inset-0 pointer-events-none !w-[31px] !h-[31px] max-sm:!w-[23px] max-sm:!h-[23px]"
+      <svg
+        className="pointer-events-none absolute inset-0 !h-full !w-full"
         aria-hidden
       >
         {grainParticles.map((p) => (
@@ -206,15 +235,31 @@ export function CrosswordCell({
           />
         ))}
       </svg>
-      
+
       {number && (
-        <span className="absolute top-px left-px font-serif text-stone-600 text-[10px] font-semibold leading-none z-[1] max-sm:text-[8px]">
+        <span className="absolute top-px left-px z-[1] font-serif text-[10px] leading-none font-semibold text-stone-600 max-sm:text-[8px]">
           {number}
         </span>
       )}
-      <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[13px]">
-        {showAnswers ? letter : userInput ?? ""}
-      </span>
+      {isClearingAnimation && userInput ? (
+        <span
+          className="letter-dissolve-run relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[12px]"
+          style={
+            {
+              "--dissolve-duration-ms": `${clearFlipDurationMs}ms`,
+              "--dissolve-delay-ms": `${clearAnimationDelayMs}ms`,
+            } as React.CSSProperties
+          }
+        >
+          {userInput}
+        </span>
+      ) : (
+        <span className="relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[12px]">
+          {showAnswers ? letter : (userInput ?? "")}
+        </span>
+      )}
     </button>
   );
+
+  return button;
 }

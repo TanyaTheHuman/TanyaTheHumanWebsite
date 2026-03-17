@@ -12,7 +12,7 @@
    - Find the word with that clue number (e.g. in `data.downWords`, the word where `word.clueNumber === 15`).
    - That word has `word.cells` (the list of `{ row, col }` for that run).
    - The word string is: for each cell in `word.cells`, read the letter from the grid at that cell, then concatenate. In code: `word.cells.map(c => data.cells[c.row][c.col].letter || '').join('')`.  
-   Do **not** re-derive "which cell has which number" from scan order; the word objects already tie clue number to cells.
+     Do **not** re-derive "which cell has which number" from scan order; the word objects already tie clue number to cells.
 
 4. **Full list of down words**  
    Sort `data.downWords` by `clueNumber`, then for each word compute the string as above. Do not infer words from clue text or from a separate "number → cell" mapping; use the existing word objects and grid letters.
