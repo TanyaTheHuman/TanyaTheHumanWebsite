@@ -101,46 +101,59 @@ export default function Home() {
                   <p className="body-large text-ink wrap-break-words mt-6 max-w-xs min-w-0 text-pretty sm:max-w-sm">
                     A{" "}
                     <a
-                      href="#crossword"
+                      // href="#crossword"
                       onClick={(e) => {
-                        // e.preventDefault();
+                        e.preventDefault();
                         activateCrosswordWord(15, "across");
+                        document.getElementById("crossword")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                       }}
-                      className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "15-across")}
                       {"    "}
                     </a>
                     based in{" "}
                     <a
-                      href="#crossword"
                       onClick={(e) => {
-                        // e.preventDefault();
+                        e.preventDefault();
                         activateCrosswordWord(23, "down");
+                        document.getElementById("crossword")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                       }}
-                      className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "23-down")}
                     </a>
                     , currently at{" "}
                     <a
-                      href="#crossword"
                       onClick={(e) => {
-                        // e.preventDefault();
+                        e.preventDefault();
                         activateCrosswordWord(6, "across");
+                        document.getElementById("crossword")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                       }}
-                      className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "6-across")}
                     </a>
                     , previously at{" "}
                     <a
-                      href="#crossword"
                       onClick={(e) => {
-                        // e.preventDefault();
+                        e.preventDefault();
                         activateCrosswordWord(25, "across");
+                        document.getElementById("crossword")?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
                       }}
-                      className="hover:bg-mustard-100 focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "25-across")}
                     </a>

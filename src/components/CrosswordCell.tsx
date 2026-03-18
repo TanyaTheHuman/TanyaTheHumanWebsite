@@ -179,7 +179,7 @@ export function CrosswordCell({
     return (
       <div
         id={`cell-${row}-${col}`}
-        className="bg-ink !h-[31px] !w-[31px] shrink-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)] max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))]"
+        className="bg-ink aspect-square size-[31px] shrink-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)] max-sm:size-[min(31px,max(16px,calc((100vw-52px)/17)))]"
         aria-hidden
       />
     );
@@ -198,31 +198,18 @@ export function CrosswordCell({
   const cellId = row * 100 + col;
   const grainParticles = generateGrainParticles(cellId, 31);
 
-  const button = (
-    <button
+  const cellLink = (
+    <a
       id={`cell-${row}-${col}`}
-      // href={`#cell-${row}-${col}`}
-      onClick={(e) => {
-        e.preventDefault();
-        onSelect(row, col);
-        // Mobile only: scroll to cell so it stays visible above keyboard
-        const isMobile =
-          window.matchMedia("(max-width: 768px)").matches ||
-          window.matchMedia("(pointer: coarse)").matches;
-        if (isMobile) {
-          e.currentTarget.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-        }
-      }}
-      className={`relative flex !h-[31px] !w-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
+      href="#crossword"
+      onClick={() => onSelect(row, col)}
+      className={`relative flex aspect-square size-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:size-[min(31px,max(16px,calc((100vw-52px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >
       {/* Grain overlay */}
       <svg
-        className="pointer-events-none absolute inset-0 !h-full !w-full"
+        className="pointer-events-none absolute inset-0 size-full"
         aria-hidden
       >
         {grainParticles.map((p) => (
@@ -237,13 +224,13 @@ export function CrosswordCell({
       </svg>
 
       {number && (
-        <span className="absolute top-px left-px z-[1] font-serif text-[10px] leading-none font-semibold text-stone-600 max-sm:text-[8px]">
+        <span className="absolute top-px left-px z-1 font-serif text-[10px] leading-none font-semibold text-stone-600 max-sm:text-[8px]">
           {number}
         </span>
       )}
       {isClearingAnimation && userInput ? (
         <span
-          className="letter-dissolve-run relative z-[1] text-[14px] leading-[18px] font-semibold max-sm:text-[12px]"
+          className="letter-dissolve-run relative z-1 text-[14px] leading-[18px] font-semibold max-sm:text-[12px]"
           style={
             {
               "--dissolve-duration-ms": `${clearFlipDurationMs}ms`,
@@ -258,8 +245,8 @@ export function CrosswordCell({
           {showAnswers ? letter : (userInput ?? "")}
         </span>
       )}
-    </button>
+    </a>
   );
 
-  return button;
+  return cellLink;
 }

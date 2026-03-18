@@ -16,7 +16,7 @@ html {
   scroll-padding-bottom: 80px;
 }
 
-a {
+.link {
   color: var(--color-stone-600, #44403c);
   text-decoration-line: underline;
   text-decoration-style: dotted;
@@ -25,8 +25,8 @@ a {
   text-underline-position: from-font;
 }
 
-a:hover,
-a:focus-visible {
+.link:hover,
+.link:focus-visible {
   text-decoration-color: var(--color-mustard-500);
   text-underline-position: from-font;
 }
@@ -48,16 +48,7 @@ a:focus-visible {
   }
 }
 
-[id^="cell-"] {
-  scroll-margin-top: 8px;
-  scroll-margin-bottom: 80px;
-}
-
-@media (max-width: 768px) {
-  [id^="cell-"] {
-    scroll-margin-bottom: 320px;
-  }
-} */
+*/
 
 @theme {
   --color-cream: #eae8e1;

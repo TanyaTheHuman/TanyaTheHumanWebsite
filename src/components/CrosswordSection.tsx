@@ -23,7 +23,6 @@ import {
 import { loadProgress, saveProgress } from "@/lib/crossword-storage";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import {
-  getFirstCell,
   getFirstEmptyCellInNextWord,
   getFirstEmptyCellInPreviousWord,
 } from "@/lib/crossword-navigation";
@@ -49,15 +48,13 @@ export const CrosswordInteractive = forwardRef<
   CrosswordInteractiveProps
 >(function CrosswordInteractive({ onFilledWordsChange }, ref) {
   const data = useMemo(() => getCrosswordData(), []);
-  const firstCell = useMemo(() => getFirstCell(data), [data]);
 
-  // Selection state with direction tracking
-  // Desktop: first cell selected on load. Mobile: cleared when we detect mobile.
+  // Selection state with direction tracking (null until user selects a clue)
   const [selection, setSelection] = useState<{
     row: number;
     col: number;
     direction: "across" | "down";
-  } | null>(() => (firstCell ? { ...firstCell, direction: "across" } : null));
+  } | null>(null);
 
   const isMobile = useIsMobile();
 
@@ -96,16 +93,6 @@ export const CrosswordInteractive = forwardRef<
         clearTimeout(clearAnimationTimeoutRef.current);
     };
   }, []);
-
-  // Ensure a cell is always selected (e.g. after loading progress with no selection)
-  useEffect(() => {
-    if (selection == null) {
-      const cell =
-        firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
-      if (cell)
-        setSelection({ row: cell.row, col: cell.col, direction: "across" });
-    }
-  }, [data, firstCell, selection]);
 
   // Focus the selected cell when selection changes (so a cell is always in focus)
   // preventScroll: true avoids scrolling the page to the crossword on initial load
@@ -192,19 +179,12 @@ export const CrosswordInteractive = forwardRef<
       const mobile =
         window.matchMedia("(max-width: 768px)").matches ||
         window.matchMedia("(pointer: coarse)").matches;
+      // Only restore selection from saved progress; don't auto-select on load
       const nextSelection =
-        !mobile && progress.selection
-          ? progress.selection
-          : (() => {
-              const c =
-                firstCell ?? getWordByClueNumber(data, 6, "across")?.cells[0];
-              return c
-                ? { row: c.row, col: c.col, direction: "across" as const }
-                : null;
-            })();
+        !mobile && progress.selection ? progress.selection : null;
       if (nextSelection) setSelection(nextSelection);
     }
-  }, [data, firstCell]);
+  }, [data]);
 
   // Persist progress to localStorage when userInputs or selection change (skip first run to avoid overwriting before load)
   useEffect(() => {
@@ -304,7 +284,7 @@ export const CrosswordInteractive = forwardRef<
         if (!word?.cells.length) return;
         const first = word.cells[0];
         setSelection({ row: first.row, col: first.col, direction });
-        // Focus handled by useLayoutEffect; scrolling left to the <a href="#crossword">
+        // Scroll is handled by <a href="#crossword"> on hero links; focus by useLayoutEffect
       },
     }),
     [data],
@@ -594,7 +574,7 @@ export const CrosswordInteractive = forwardRef<
 
   return (
     <div className="group">
-      <section className="flex w-full flex-col items-center px-6 pt-[120px] pb-[120px] sm:px-8">
+      <section className="flex w-full flex-col items-center pt-[120px] pb-[120px] max-sm:h-screen max-sm:justify-center sm:px-8">
         <div
           ref={crosswordRowRef}
           className="flex w-full max-w-[1200px] flex-col items-center gap-8 min-[850px]:flex-row min-[850px]:items-stretch"
@@ -771,13 +751,6 @@ export const CrosswordInteractive = forwardRef<
                               "across",
                             );
                             gridRef.current?.focus();
-                            // Desktop: only scroll to crossword if it's out of view
-                            document
-                              .getElementById("crossword")
-                              ?.scrollIntoView({
-                                behavior: "smooth",
-                                block: "nearest",
-                              });
                           }
                         }}
                       >
@@ -845,13 +818,6 @@ export const CrosswordInteractive = forwardRef<
                               "down",
                             );
                             gridRef.current?.focus();
-                            // Desktop: only scroll to crossword if it's out of view
-                            document
-                              .getElementById("crossword")
-                              ?.scrollIntoView({
-                                behavior: "smooth",
-                                block: "nearest",
-                              });
                           }
                         }}
                       >
@@ -928,14 +894,8 @@ export const CrosswordInteractive = forwardRef<
           >
             {prevCell ? (
               <a
-                href={`#cell-${prevCell.row}-${prevCell.col}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handlePrevWord();
-                  document
-                    .getElementById(`cell-${prevCell.row}-${prevCell.col}`)
-                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }}
+                href="#crossword"
+                onClick={() => handlePrevWord()}
                 className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
                 aria-label="Previous word"
               >
@@ -1002,14 +962,8 @@ export const CrosswordInteractive = forwardRef<
             </div>
             {nextCell ? (
               <a
-                href={`#cell-${nextCell.row}-${nextCell.col}`}
-                onClick={(e) => {
-                  handleNextWord();
-                  e.preventDefault();
-                  document
-                    .getElementById(`cell-${nextCell.row}-${nextCell.col}`)
-                    ?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }}
+                href="#crossword"
+                onClick={() => handleNextWord()}
                 className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
                 aria-label="Next word"
               >
