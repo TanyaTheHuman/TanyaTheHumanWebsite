@@ -6,6 +6,7 @@ import { CrosswordData, getActiveWordCells } from "@/lib/crossword-data";
 import {
   getNextCell,
   getNextCellInWord,
+  getNextEmptyCellInWord,
   getNextWordCell,
   getWordDirection,
   getFirstEmptyCellInNextWord,
@@ -158,21 +159,24 @@ export function CrosswordGrid({
       if (!selectedCell) return;
       const value = e.target.value.toUpperCase().replace(/[^A-Z]/g, "");
       if (value.length > 0) {
-        const letter = value[0]; // First character (handles single key and paste)
+        const letter = value[0];
         onInputLetter(selectedCell.row, selectedCell.col, letter);
-        const next = getNextCellInWord(
+
+        const updatedInputs = {
+          ...userInputs,
+          [`${selectedCell.row},${selectedCell.col}`]: letter,
+        };
+
+        const next = getNextEmptyCellInWord(
           data,
           selectedCell.row,
           selectedCell.col,
           direction,
+          updatedInputs,
         );
         if (next) {
           onSelectCell(next.row, next.col, direction);
         } else {
-          const updatedInputs = {
-            ...userInputs,
-            [`${selectedCell.row},${selectedCell.col}`]: letter,
-          };
           const nextWordCell = getFirstEmptyCellInNextWord(
             data,
             selectedCell.row,
@@ -298,22 +302,23 @@ export function CrosswordGrid({
         e.preventDefault();
         onInputLetter(selectedCell.row, selectedCell.col, e.key);
 
-        // Move to next cell within the same word
-        const next = getNextCellInWord(
+        const updatedInputs = {
+          ...userInputs,
+          [`${selectedCell.row},${selectedCell.col}`]: e.key.toUpperCase(),
+        };
+
+        // Move to next empty cell in the word, skipping already-filled cells
+        const next = getNextEmptyCellInWord(
           data,
           selectedCell.row,
           selectedCell.col,
           direction,
+          updatedInputs,
         );
         if (next) {
           onSelectCell(next.row, next.col, direction);
         } else {
-          // At end of word - jump to first empty cell of next word in same direction
-          // We need to account for the letter we just typed by including it in userInputs
-          const updatedInputs = {
-            ...userInputs,
-            [`${selectedCell.row},${selectedCell.col}`]: e.key.toUpperCase(),
-          };
+          // No empty cells left in this word — jump to first empty cell of next word
           const nextWordCell = getFirstEmptyCellInNextWord(
             data,
             selectedCell.row,
