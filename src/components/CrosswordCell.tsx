@@ -202,7 +202,14 @@ export function CrosswordCell({
     <a
       id={`cell-${row}-${col}`}
       href="#crossword"
-      onClick={() => onSelect(row, col)}
+      onClick={(e) => {
+        e.preventDefault();
+        onSelect(row, col);
+        document.getElementById("crossword")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }}
       className={`relative flex !h-[31px] !w-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}

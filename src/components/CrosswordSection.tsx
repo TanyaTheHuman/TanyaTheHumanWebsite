@@ -94,17 +94,39 @@ export const CrosswordInteractive = forwardRef<
     };
   }, []);
 
-  // Focus the selected cell when selection changes (so a cell is always in focus)
-  // preventScroll: true avoids scrolling the page to the crossword on initial load
+  // Visual Viewport API: set --keyboard-inset-bottom so the mobile clue bar stays above the keyboard
+  // without using interactiveWidget: "resizes-content" (which causes jump on keyboard close).
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const setInset = () => {
+      const inset = window.innerHeight - (vv.offsetTop + vv.height);
+      document.documentElement.style.setProperty(
+        "--keyboard-inset-bottom",
+        `${Math.max(0, inset)}px`,
+      );
+    };
+    setInset();
+    vv.addEventListener("resize", setInset);
+    vv.addEventListener("scroll", setInset);
+    return () => {
+      vv.removeEventListener("resize", setInset);
+      vv.removeEventListener("scroll", setInset);
+      document.documentElement.style.removeProperty("--keyboard-inset-bottom");
+    };
+  }, []);
+
+  // Focus the selected cell when selection changes (desktop). On mobile, CrosswordGrid
+  // focuses the hidden input so the keyboard opens; don't focus the cell there.
   useLayoutEffect(() => {
-    if (!selection) return;
+    if (!selection || isMobile) return;
     const cellEl = document.getElementById(
       `cell-${selection.row}-${selection.col}`,
     );
     if (cellEl && typeof (cellEl as HTMLElement).focus === "function")
       (cellEl as HTMLElement).focus({ preventScroll: true });
     else gridRef.current?.focus({ preventScroll: true });
-  }, [selection?.row, selection?.col]);
+  }, [selection?.row, selection?.col, isMobile]);
 
   // Track when user clicks/taps outside crossword (skip refocus in that case)
   useEffect(() => {
@@ -885,18 +907,21 @@ export const CrosswordInteractive = forwardRef<
           </div>
         )} */}
       </section>
-      {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
+      {/* Mobile clue: fixed overlay when input focused, docks above keyboard via Visual Viewport (only below 850px) */}
       {clueContent && (
         <div className="pointer-events-none inset-x-0 top-0 z-50 hidden h-dvh max-[849px]:group-focus-within:fixed max-[849px]:group-focus-within:block">
           <div
             ref={clueBarRef}
-            className="bg-mustard-100 text-ink pointer-events-auto fixed right-0 bottom-0 left-0 flex w-full touch-manipulation items-center justify-between rounded-none px-2 py-3"
+            className="bg-mustard-100 text-ink pointer-events-auto fixed right-0 left-0 flex w-full touch-manipulation items-center justify-between rounded-none px-2 py-3"
+            style={{ bottom: "var(--keyboard-inset-bottom, 0px)" }}
           >
             {prevCell ? (
-              <a
-                href="#crossword"
+              <div
+                role="button"
+                tabIndex={-1}
                 onClick={() => handlePrevWord()}
-                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
+                onKeyDown={(e) => e.key === "Enter" && handlePrevWord()}
+                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit"
                 aria-label="Previous word"
               >
                 <svg
@@ -915,7 +940,7 @@ export const CrosswordInteractive = forwardRef<
                     strokeLinejoin="bevel"
                   />
                 </svg>
-              </a>
+              </div>
             ) : (
               <div
                 role="button"
@@ -961,10 +986,12 @@ export const CrosswordInteractive = forwardRef<
               )}
             </div>
             {nextCell ? (
-              <a
-                href="#crossword"
+              <div
+                role="button"
+                tabIndex={-1}
                 onClick={() => handleNextWord()}
-                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit no-underline"
+                onKeyDown={(e) => e.key === "Enter" && handleNextWord()}
+                className="flex w-10 shrink-0 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0 text-inherit"
                 aria-label="Next word"
               >
                 <svg
@@ -983,7 +1010,7 @@ export const CrosswordInteractive = forwardRef<
                     strokeLinejoin="bevel"
                   />
                 </svg>
-              </a>
+              </div>
             ) : (
               <div
                 role="button"

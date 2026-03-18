@@ -6,14 +6,19 @@ body {
 }
 
 html {
-  /* scroll-padding-top: 8px;
-  scroll-padding-bottom: 80px; */
   scroll-behavior: smooth;
 }
 
 #crossword {
   scroll-margin-top: 120px;
   scroll-padding-bottom: 80px;
+}
+
+@media (max-width: 768px) {
+  #crossword {
+    scroll-margin-top: 40px;
+    /* scroll-padding-bottom: 0px; */
+  }
 }
 
 .link {

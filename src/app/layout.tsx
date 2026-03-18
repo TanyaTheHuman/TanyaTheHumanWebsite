@@ -28,8 +28,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  interactiveWidget: "resizes-content",
-  viewportFit: "cover",
+  // interactiveWidget: "resizes-visual",
+  // viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -43,7 +43,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" type="image/png" />
       </head>
       <body
-        className={`${ebGaramond.variable} bg-cream text-ink min-h-screen font-serif [font-feature-settings:"dlig"_1,"hlig"_1,"fina"_1,"kern"_1,"rlig"_1]`}
+        className={`${ebGaramond.variable} bg-cream min-h-screen font-serif [font-feature-settings:"dlig"_1,"hlig"_1,"fina"_1,"kern"_1,"rlig"_1]`}
       >
         {children}
       </body>
