@@ -46,16 +46,55 @@ export default function Home() {
                   alt="Tanya profile picture"
                   height={1144}
                   width={777}
-                  className="aspect-285/566 w-full object-contain max-sm:w-1/2"
+                  className="aspect-285/566 w-1/2 object-contain filter-[url(#pixelate)] sm:w-full"
                 />
+
+                <svg className="sr-only">
+                  <defs>
+                    <filter id="pixelate" x="0" y="0">
+                      <feMorphology
+                        result="b"
+                        in="SourceGraphic"
+                        operator="erode"
+                        radius="10"
+                      >
+                        <animate
+                          attributeName="radius"
+                          values="10;0"
+                          calcMode="linear"
+                          dur="2s"
+                          fill="freeze"
+                          begin=".25s"
+                          repeatCount="1"
+                        />
+                      </feMorphology>
+                      <feComponentTransfer in="b" result="aFaded">
+                        <feFuncA type="gamma" exponent="1" amplitude="0">
+                          <animate
+                            attributeName="amplitude"
+                            calcMode="spline"
+                            values="0;0.15;0.3;0.9;1"
+                            keySplines="0 0 1 1;0 0 1 1;0 0 1 1;0 0 1 1"
+                            keyTimes="0;0.25;0.5;0.75;1"
+                            dur="2s"
+                            fill="freeze"
+                            begin="0.25s"
+                            repeatCount="1"
+                          />
+                        </feFuncA>
+                      </feComponentTransfer>
+                    </filter>
+                  </defs>
+                </svg>
                 <div className="flex flex-col items-center self-center text-center sm:items-start sm:text-left">
                   <h2 className="h2 text-stone-800">
                     <span className="-ml-3">Tanya,</span>
                     <br />
                     <span className="inline-block whitespace-nowrap">
                       the{" "}
-                      <span className="h2-italic bg-mustard-300/25 text-mustard-900 relative inline-block rounded">
+                      <span className="h2-italic text-mustard-900 relative inline-block rounded">
                         human
+                        <div className="from-mustard-300/30 to-mustard-300/20 absolute inset-y-0 -right-4 left-0 z-[-1] rounded bg-linear-to-r opacity-100 transition-all delay-250 duration-500 ease-in-out starting:right-full starting:opacity-0"></div>
                       </span>
                     </span>
                   </h2>
@@ -139,6 +178,19 @@ export default function Home() {
             </p>
             <div className="h-px w-16 bg-stone-400"></div>
           </div>
+          <a
+            target="_blank"
+            href="https://www.linkedin.com/in/tanya-the-human/"
+          >
+            <svg
+              className="mt-6 w-6 fill-stone-700 hover:fill-[#0a66c2]"
+              viewBox="0 0 20 19"
+              fill=""
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M4.43994 2.19729C4.43968 2.72772 4.22871 3.23632 3.85345 3.61121C3.47819 3.9861 2.96937 4.19655 2.43894 4.19629C1.90851 4.19602 1.39991 3.98506 1.02502 3.6098C0.650136 3.23454 0.439676 2.72572 0.439942 2.19529C0.440207 1.66486 0.651175 1.15625 1.02644 0.781368C1.4017 0.406483 1.91051 0.196024 2.44094 0.196289C2.97137 0.196555 3.47998 0.407522 3.85486 0.782783C4.22975 1.15804 4.44021 1.66686 4.43994 2.19729ZM4.49994 5.67729H0.499942V18.1973H4.49994V5.67729ZM10.8199 5.67729H6.83994V18.1973H10.7799V11.6273C10.7799 7.96729 15.5499 7.62729 15.5499 11.6273V18.1973H19.4999V10.2673C19.4999 4.09729 12.4399 4.32729 10.7799 7.35729L10.8199 5.67729Z" />
+            </svg>
+          </a>
         </div>
       </section>
     </>

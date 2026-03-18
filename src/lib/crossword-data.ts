@@ -127,7 +127,7 @@ const ACROSS_CLUES: ClueEntry[] = [
   {
     clueNumber: 15,
     answer: "PRODUCTDESIGNER",
-    clue: "Automator or layouts and drawer of rectangles",
+    clue: "Automator of layouts and drawer of rectangles",
   },
   {
     clueNumber: 16,
@@ -162,7 +162,11 @@ const ACROSS_CLUES: ClueEntry[] = [
 ];
 
 const DOWN_CLUES: ClueEntry[] = [
-  { clueNumber: 1, answer: "CURSOR", clue: "Tool I fought with to create what you see here" },
+  {
+    clueNumber: 1,
+    answer: "CURSOR",
+    clue: "Tool I fought with to create what you see here",
+  },
   { clueNumber: 3, answer: "AFRICA", clue: "See 4-across" },
   {
     clueNumber: 4,
@@ -205,7 +209,11 @@ const DOWN_CLUES: ClueEntry[] = [
     answer: "GRIDS",
     clue: "This puzzle's construction relies on this structure",
   },
-  { clueNumber: 19, answer: "SISTER", clue: "I'm a big one of these by 4 years" },
+  {
+    clueNumber: 19,
+    answer: "SISTER",
+    clue: "I'm a big one of these by 4 years",
+  },
   {
     clueNumber: 20,
     answer: "SEW",

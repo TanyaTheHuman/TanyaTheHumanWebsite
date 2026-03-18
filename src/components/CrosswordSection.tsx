@@ -235,11 +235,15 @@ export const CrosswordInteractive = forwardRef<
           [`${row},${col}`]: letter.toUpperCase(),
         };
         if (word) {
-          const wasComplete = getFilledWord(data, prev, word.clueNumber, dir) != null;
-          const nowComplete = getFilledWord(data, next, word.clueNumber, dir) != null;
+          const wasComplete =
+            getFilledWord(data, prev, word.clueNumber, dir) != null;
+          const nowComplete =
+            getFilledWord(data, next, word.clueNumber, dir) != null;
           if (!wasComplete && nowComplete) {
             const correct = isWordCorrect(data, next, word.clueNumber, dir);
-            completionSoundRef.current = correct ? "/success.mp3" : "/error.mp3";
+            completionSoundRef.current = correct
+              ? "/success.mp3"
+              : "/error.mp3";
           }
         }
         return next;
@@ -878,7 +882,7 @@ export const CrosswordInteractive = forwardRef<
         </div>
 
         {/* DEV ONLY: Show answers toggle and Fill grid - only visible in development mode */}
-        {process.env.NODE_ENV === "development" && (
+        {/* {process.env.NODE_ENV === "development" && (
           <div className="flex w-full max-w-[1200px] flex-wrap items-center gap-4 pt-0">
             <label className="flex cursor-pointer items-center gap-2 select-none">
               <div className="relative">
@@ -913,7 +917,7 @@ export const CrosswordInteractive = forwardRef<
               Fill grid (dev only)
             </button>
           </div>
-        )}
+        )} */}
       </section>
       {/* Mobile clue: fixed overlay when input focused, docks above keyboard with nav chevrons (only below 850px) */}
       {clueContent && (
