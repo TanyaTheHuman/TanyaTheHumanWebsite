@@ -179,7 +179,7 @@ export function CrosswordCell({
     return (
       <div
         id={`cell-${row}-${col}`}
-        className="bg-ink aspect-square size-[31px] shrink-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)] max-sm:size-[min(31px,max(16px,calc((100vw-52px)/17)))]"
+        className="bg-ink !h-[31px] !w-[31px] shrink-0 bg-[repeating-linear-gradient(-45deg,transparent,transparent_2px,rgba(87,83,78,0.15)_2px,rgba(87,83,78,0.15)_3px)] max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))]"
         aria-hidden
       />
     );
@@ -203,7 +203,7 @@ export function CrosswordCell({
       id={`cell-${row}-${col}`}
       href="#crossword"
       onClick={() => onSelect(row, col)}
-      className={`relative flex aspect-square size-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:size-[min(31px,max(16px,calc((100vw-52px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
+      className={`relative flex !h-[31px] !w-[31px] shrink-0 cursor-pointer items-center justify-center overflow-hidden font-serif font-medium text-inherit uppercase no-underline focus:outline-none max-sm:!h-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:!w-[min(31px,max(16px,calc((100vw-68px)/17)))] max-sm:touch-manipulation max-sm:transition-transform max-sm:duration-75 max-sm:[-webkit-tap-highlight-color:transparent] max-sm:active:scale-[0.92] ${bgClass}`}
       tabIndex={-1}
       aria-label={`Cell ${row + 1}, ${col + 1}${number ? `, clue ${number}` : ""}${letter ? `, ${letter}` : ""}`}
     >

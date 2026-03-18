@@ -110,7 +110,7 @@ export default function Home() {
                           block: "start",
                         });
                       }}
-                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 cursor-pointer rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "15-across")}
                       {"    "}
@@ -125,7 +125,7 @@ export default function Home() {
                           block: "start",
                         });
                       }}
-                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 cursor-pointer rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "23-down")}
                     </a>
@@ -139,7 +139,7 @@ export default function Home() {
                           block: "start",
                         });
                       }}
-                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 cursor-pointer rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "6-across")}
                     </a>
@@ -153,10 +153,11 @@ export default function Home() {
                           block: "start",
                         });
                       }}
-                      className="hover:bg-mustard-100 link focus:bg-mustard-100 rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
+                      className="hover:bg-mustard-100 link focus:bg-mustard-100 cursor-pointer rounded italic underline opacity-80 transition-all duration-200 hover:opacity-100 focus:outline-none"
                     >
                       {displayWord(filledWords, "25-across")}
                     </a>
+                    .
                   </p>
                 </div>
               </div>
