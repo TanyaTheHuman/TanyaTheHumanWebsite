@@ -202,6 +202,12 @@ export function CrosswordGrid({
         e.preventDefault();
         const wasFilled =
           !!userInputs[`${selectedCell.row},${selectedCell.col}`];
+
+        if (wasFilled) {
+          onClearCell(selectedCell.row, selectedCell.col);
+          return;
+        }
+
         const prevInWord = getNextCellInWord(
           data,
           selectedCell.row,
@@ -209,20 +215,6 @@ export function CrosswordGrid({
           direction,
           true,
         );
-        const nextInWord = getNextCellInWord(
-          data,
-          selectedCell.row,
-          selectedCell.col,
-          direction,
-          false,
-        );
-        const isFirstCell = !prevInWord;
-        const isLastCell = !nextInWord;
-
-        onClearCell(selectedCell.row, selectedCell.col);
-
-        if (isFirstCell) return;
-        if (isLastCell && wasFilled) return;
         if (prevInWord) {
           onClearCell(prevInWord.row, prevInWord.col);
           onSelectCell(prevInWord.row, prevInWord.col, direction);
@@ -257,11 +249,16 @@ export function CrosswordGrid({
         return;
       }
 
-      // Handle Backspace: first/last cell of word → clear and keep focus; middle → clear (if filled) and move to previous
       if (e.key === "Backspace") {
         e.preventDefault();
         const wasFilled =
           !!userInputs[`${selectedCell.row},${selectedCell.col}`];
+
+        if (wasFilled) {
+          onClearCell(selectedCell.row, selectedCell.col);
+          return;
+        }
+
         const prevInWord = getNextCellInWord(
           data,
           selectedCell.row,
@@ -269,27 +266,6 @@ export function CrosswordGrid({
           direction,
           true,
         );
-        const nextInWord = getNextCellInWord(
-          data,
-          selectedCell.row,
-          selectedCell.col,
-          direction,
-          false,
-        );
-        const isFirstCell = !prevInWord;
-        const isLastCell = !nextInWord;
-
-        onClearCell(selectedCell.row, selectedCell.col);
-
-        if (isFirstCell) {
-          // First cell of word: always keep focus
-          return;
-        }
-        if (isLastCell && wasFilled) {
-          // Last cell and was filled: clear and keep focus
-          return;
-        }
-        // Middle cell, or last cell empty: clear the previous cell and move focus to it
         if (prevInWord) {
           onClearCell(prevInWord.row, prevInWord.col);
           onSelectCell(prevInWord.row, prevInWord.col, direction);
