@@ -116,6 +116,42 @@ export function getNextCellInWord(
 }
 
 /**
+ * Get the next empty cell within the same word, skipping cells that already
+ * have a letter (e.g. from an intersecting completed word).
+ * Returns null if no empty cells remain after the current position.
+ *
+ * @param userInputs - Record of user inputs keyed by "row,col"
+ * @param reverse - If true, search backwards instead of forwards
+ */
+export function getNextEmptyCellInWord(
+  data: CrosswordData,
+  currentRow: number,
+  currentCol: number,
+  wordDirection: WordDirection,
+  userInputs: Record<string, string>,
+  reverse: boolean = false,
+): { row: number; col: number } | null {
+  const word = getWordContaining(data, currentRow, currentCol, wordDirection);
+  if (!word) return null;
+
+  const currentIndex = word.cells.findIndex(
+    (c) => c.row === currentRow && c.col === currentCol,
+  );
+  if (currentIndex === -1) return null;
+
+  const step = reverse ? -1 : 1;
+  for (let i = currentIndex + step; i >= 0 && i < word.cells.length; i += step) {
+    const cell = word.cells[i];
+    const key = `${cell.row},${cell.col}`;
+    if (!userInputs[key]) {
+      return { row: cell.row, col: cell.col };
+    }
+  }
+
+  return null;
+}
+
+/**
  * Find the first empty cell in the next word of the same direction.
  * Used when the user completes a word and needs to jump to the next one.
  *

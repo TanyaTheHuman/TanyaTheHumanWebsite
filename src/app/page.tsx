@@ -34,7 +34,7 @@ export default function Home() {
         aria-label="Hero"
       >
         <div className="flex h-svh w-dvw items-center justify-center px-14 py-8 max-sm:px-4 max-sm:py-4">
-          <div className="relative flex h-full w-full items-center border border-stone-700">
+          <div className="relative flex h-full w-full items-center border border-stone-400">
             <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-end gap-2 text-center sm:flex-row sm:items-center sm:text-left">
               <p className="caption bg-cream absolute inset-x-0 top-0 mx-auto w-fit -translate-y-1/2 px-4 py-2 text-center text-stone-600">
                 Designer of things
