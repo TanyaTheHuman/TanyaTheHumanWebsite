@@ -998,7 +998,7 @@ export const CrosswordInteractive = forwardRef<
                   <span className="min-w-[28px] shrink-0 text-right font-serif text-[20px] leading-normal font-bold tracking-[-0.4px] text-stone-800">
                     {selectedWord.clueNumber}
                   </span>
-                  <span className="w-full text-justify font-serif text-[18px] leading-normal font-normal tracking-[-0.32px] text-stone-800 [font-feature-settings:'dlig'_on,'hlig'_on]">
+                  <span className="w-full text-left font-serif text-[18px] leading-normal font-normal tracking-[-0.32px] text-stone-800 [font-feature-settings:'dlig'_on,'hlig'_on]">
                     {selectedWord.clue}
                   </span>
                 </>
