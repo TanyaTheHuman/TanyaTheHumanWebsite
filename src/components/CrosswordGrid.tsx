@@ -29,7 +29,8 @@ interface CrosswordGridProps {
   onClearCell: (row: number, col: number) => void;
   onMobileKeyboardOpen?: () => void;
   onMobileKeyboardClose?: () => void;
-  excludeFromBlurRef?: React.RefObject<HTMLElement | null>;
+  /** Taps inside these elements do not dismiss the mobile keyboard. */
+  excludeFromBlurRefs?: React.RefObject<HTMLElement | null>[];
   gridRef?: React.RefObject<HTMLDivElement | null>;
   isClearingAnimation?: boolean;
   clearStaggerMs?: number;
@@ -48,7 +49,7 @@ export function CrosswordGrid({
   onClearCell,
   onMobileKeyboardOpen,
   onMobileKeyboardClose,
-  excludeFromBlurRef,
+  excludeFromBlurRefs,
   gridRef: gridRefProp,
   isClearingAnimation = false,
   clearStaggerMs = 50,
@@ -138,10 +139,10 @@ export function CrosswordGrid({
     const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (!gridRef.current || !mobileInputRef.current) return;
       const target = e.target as Node;
-      if (
-        !gridRef.current.contains(target) &&
-        !excludeFromBlurRef?.current?.contains(target)
-      ) {
+      const isExcluded = excludeFromBlurRefs?.some((ref) =>
+        ref.current?.contains(target),
+      );
+      if (!gridRef.current.contains(target) && !isExcluded) {
         mobileInputRef.current.blur();
       }
     };
@@ -151,7 +152,7 @@ export function CrosswordGrid({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [excludeFromBlurRef]);
+  }, [excludeFromBlurRefs]);
 
   // Handle input from mobile keyboard (hidden input)
   const handleMobileInput = useCallback(
