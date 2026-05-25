@@ -167,7 +167,7 @@ const DOWN_CLUES: ClueEntry[] = [
     answer: "CURSOR",
     clue: "Tool I fought with to create what you see here",
   },
-  { clueNumber: 3, answer: "AFRICA", clue: "See 4-across" },
+  { clueNumber: 3, answer: "AFRICA", clue: "See 5-down" },
   {
     clueNumber: 4,
     answer: "NORWAY",
