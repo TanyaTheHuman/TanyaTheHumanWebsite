@@ -78,6 +78,7 @@ export const CrosswordInteractive = forwardRef<
   const acrossListRef = useRef<HTMLDivElement>(null);
   const downListRef = useRef<HTMLDivElement>(null);
   const clueBarRef = useRef<HTMLDivElement>(null);
+  const crosswordBlockRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const gridColumnRef = useRef<HTMLDivElement>(null);
   const crosswordRowRef = useRef<HTMLDivElement>(null);
@@ -594,6 +595,30 @@ export const CrosswordInteractive = forwardRef<
       </>
     ) : null;
 
+  const gridToolbarButtonClass =
+    "body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer touch-manipulation items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500";
+
+  const gridToolbar = (
+    <>
+      <button
+        type="button"
+        onClick={handleRevealWord}
+        disabled={!selection}
+        className={gridToolbarButtonClass}
+      >
+        Reveal word
+      </button>
+      <button
+        type="button"
+        onClick={() => setShowClearConfirm(true)}
+        disabled={Object.keys(userInputs).length === 0}
+        className={gridToolbarButtonClass}
+      >
+        Clear
+      </button>
+    </>
+  );
+
   return (
     <div className="group">
       <section className="flex w-full flex-col items-center pt-[120px] pb-[120px] max-sm:h-screen max-sm:justify-center sm:px-8">
@@ -618,7 +643,15 @@ export const CrosswordInteractive = forwardRef<
               </div>
             )}
 
-            <div className="relative inline-flex flex-col" id="crossword">
+            <div
+              ref={crosswordBlockRef}
+              className="relative inline-flex flex-col"
+              id="crossword"
+            >
+              {/* Mobile: toolbar above grid, stays tappable with keyboard open */}
+              <div className="mb-4 flex w-full items-center justify-center gap-4 max-[849px]:flex min-[850px]:hidden">
+                {gridToolbar}
+              </div>
               <CrosswordGrid
                 data={data}
                 selectedCell={
@@ -631,29 +664,15 @@ export const CrosswordInteractive = forwardRef<
                 onSelectCell={handleSelectCell}
                 onInputLetter={handleInputLetter}
                 onClearCell={handleClearCell}
-                excludeFromBlurRef={clueBarRef}
+                excludeFromBlurRefs={[clueBarRef, crosswordBlockRef]}
                 gridRef={gridRef}
                 isClearingAnimation={isClearingAnimation}
                 clearStaggerMs={CLEAR_STAGGER_MS}
                 clearFlipDurationMs={CLEAR_FLIP_DURATION_MS}
               />
-              <div className="absolute inset-x-0 bottom-0 flex translate-y-full items-center justify-center gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={handleRevealWord}
-                  disabled={!selection}
-                  className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
-                >
-                  Reveal word
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowClearConfirm(true)}
-                  disabled={Object.keys(userInputs).length === 0}
-                  className="body-default-bold text-ink focus:ring-mustard-300 focus:ring-offset-cream flex cursor-pointer items-center gap-[6px] border border-stone-500 bg-transparent px-[12px] py-[6px] text-base font-bold tracking-[-0.16px] [font-feature-settings:'dlig'_on] hover:border-stone-400 hover:bg-stone-300 hover:text-stone-700 focus:ring-1 focus:ring-offset-2 focus:outline-none disabled:cursor-default disabled:border-[0.5px] disabled:border-stone-400 disabled:text-stone-500 disabled:hover:border-stone-400 disabled:hover:bg-transparent disabled:hover:text-stone-500"
-                >
-                  Clear
-                </button>
+              {/* Desktop: toolbar below grid */}
+              <div className="absolute inset-x-0 bottom-0 hidden translate-y-full items-center justify-center gap-4 pt-4 min-[850px]:flex">
+                {gridToolbar}
               </div>
 
               {showClearConfirm && (
