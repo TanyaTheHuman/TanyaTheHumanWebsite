@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
+/* clip avoids horizontal bleed without breaking position:sticky (hidden does on Safari) */
 html,
 body {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 html {

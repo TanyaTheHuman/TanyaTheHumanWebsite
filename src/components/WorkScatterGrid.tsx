@@ -123,6 +123,13 @@ export function WorkScatterGrid() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const hoveredItem =
     WORK_ITEMS.find((item) => item.id === hoveredId) ?? null;
+  const tones = [
+    "bg-stone-50",
+    "bg-amber-50",
+    "bg-emerald-50",
+    "bg-sky-50",
+    "bg-rose-50",
+  ] as const;
 
   return (
     <ul
@@ -133,6 +140,7 @@ export function WorkScatterGrid() {
       {WORK_ITEMS.map((item) => {
         const isHovered = hoveredItem?.id === item.id;
         const isRevealed = hoveredItem != null && !isHovered;
+        const toneClassName = tones[Math.abs(item.scatter.zIndex) % tones.length];
 
         return (
           <li
@@ -158,7 +166,7 @@ export function WorkScatterGrid() {
               }
             }}
           >
-            <WorkCard title={item.title} />
+            <WorkCard title={item.title} toneClassName={toneClassName} />
           </li>
         );
       })}
