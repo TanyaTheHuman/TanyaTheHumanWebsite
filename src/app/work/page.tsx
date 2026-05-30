@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DevBreakpointMarker } from "@/components/DevBreakpointMarker";
 import { WorkScatterGrid } from "@/components/WorkScatterGrid";
-import { WorkScrollCarousel } from "@/components/WorkScrollCarousel";
+import { WorkMobileCarousel } from "@/components/WorkMobileCarousel";
 
 export const metadata: Metadata = {
   title: "Work — Tanya, the human",
@@ -13,9 +13,9 @@ export default function WorkPage() {
     <main className="work-page bg-cream text-ink min-h-screen overflow-x-clip">
       <DevBreakpointMarker />
 
-      {/* Phone: scroll-driven vertical carousel */}
+      {/* Phone: swipe (touch) or scroll (mouse) carousel */}
       <div className="md:hidden">
-        <WorkScrollCarousel />
+        <WorkMobileCarousel />
       </div>
 
       {/* Tablet + desktop: scattered pile */}
