@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function WorkPage() {
   return (
-    <main className="bg-cream text-ink min-h-screen md:overflow-x-clip">
+    <main className="work-page bg-cream text-ink min-h-screen overflow-x-clip">
       <DevBreakpointMarker />
 
       {/* Phone: scroll-driven vertical carousel */}

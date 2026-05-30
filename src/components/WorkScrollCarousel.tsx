@@ -2,46 +2,277 @@
 
 import { useEffect, useRef, useState } from "react";
 import { WorkCard } from "@/components/WorkCard";
-import { WORK_ITEMS } from "@/lib/work-items";
+import { WORK_ITEMS, type WorkItem } from "@/lib/work-items";
 
 const CARD_COUNT = WORK_ITEMS.length;
 const MAX_PEEK = Math.min(CARD_COUNT - 1, 4);
+/** Matches Tailwind px-8 — gutter from screen edge to card lane */
+const PILE_SIDE_PAD_PX = 32;
+/** Horizontal nudge room inside the lane (scatter identity stays proportional) */
+const SCATTER_X_ROOM_PX = 18;
+/** Slightly narrower than lane so tilted corners stay inside the gutter */
+const CARD_WIDTH_RATIO = 0.94;
+
+const SLIDE_MS = 440;
+const SLIDE_OUT_EASE = "cubic-bezier(0.55, 0, 0.75, 0.2)";
+const SLIDE_IN_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const BACK_GROW_MS = 480;
+const BACK_BOUNCE_EASE = "cubic-bezier(0.34, 1.45, 0.64, 1)";
+const BACK_SHRINK_EASE = "cubic-bezier(0.5, 0, 0.75, 0.2)";
+const STRAIGHTEN_MS = 260;
+const STRAIGHTEN_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+const TILT_EASE = STRAIGHTEN_EASE;
+
+const tones = [
+  "bg-stone-50",
+  "bg-amber-50",
+  "bg-emerald-50",
+  "bg-sky-50",
+  "bg-rose-50",
+] as const;
+
+type CardPose = {
+  x: number;
+  y: number;
+  scale: number;
+  rotateDeg: number;
+  opacity: number;
+};
+
+type CardIdentity = {
+  x: number;
+  y: number;
+  tilt: number;
+};
+
+type PileAnimation = {
+  cardId: string;
+  direction: "forward" | "reverse";
+  step: "front" | "left" | "back" | "right";
+};
+
+/** Depth: scale + opacity; x/y/tilt stay per-card identity */
+const scaleByDepth = [1, 0.95, 0.92, 0.88, 0.84];
+const opacityByDepth = [1, 0.9, 0.78, 0.62, 0.45];
+
+function parsePercent(value: string): number {
+  return parseFloat(value.replace("%", ""));
+}
+
+const MAX_ABS_SCATTER_X = Math.max(
+  ...WORK_ITEMS.map(
+    (item) => Math.abs((parsePercent(item.scatter.left) - 32) * 2.6),
+  ),
+);
+
+function getMaxScatterX(): number {
+  return SCATTER_X_ROOM_PX;
+}
+
+/** Fixed offset + slant per card, derived from Figma scatter */
+function getCardIdentity(item: WorkItem): CardIdentity {
+  const left = parsePercent(item.scatter.left);
+  const top = parsePercent(item.scatter.top);
+  const rawX = (left - 32) * 2.6;
+  const maxX = getMaxScatterX();
+
+  return {
+    x: (rawX / MAX_ABS_SCATTER_X) * maxX,
+    y: (top - 38) * 2.0,
+    tilt: item.scatter.rotateDeg * 0.45,
+  };
+}
+
+function getPilePose(item: WorkItem, ahead: number): CardPose {
+  const { x, y, tilt } = getCardIdentity(item);
+  const depth = Math.min(ahead, MAX_PEEK);
+  const isFront = depth === 0;
+
+  return {
+    x,
+    y,
+    scale: scaleByDepth[depth] ?? 0.84,
+    rotateDeg: isFront ? 0 : tilt,
+    opacity: opacityByDepth[depth] ?? 0.45,
+  };
+}
+
+function getOffScreenLeftPose(item: WorkItem): CardPose {
+  const { y, tilt } = getCardIdentity(item);
+  const x =
+    typeof window !== "undefined"
+      ? -Math.max(
+          (window.innerWidth - PILE_SIDE_PAD_PX * 2) * 0.95,
+          280,
+        )
+      : -320;
+  return {
+    x,
+    y,
+    scale: 0.94,
+    rotateDeg: tilt * 0.6,
+    opacity: 1,
+  };
+}
+
+function getOffScreenRightPose(item: WorkItem): CardPose {
+  const { y, tilt } = getCardIdentity(item);
+  const x =
+    typeof window !== "undefined"
+      ? Math.max(
+          (window.innerWidth - PILE_SIDE_PAD_PX * 2) * 0.95,
+          280,
+        )
+      : 320;
+  return {
+    x,
+    y,
+    scale: 0.94,
+    rotateDeg: tilt * 0.6,
+    opacity: 1,
+  };
+}
+
+/** Scatter offset + rotate + scale only — vertical centering is on the outer wrapper */
+function poseToTransform(pose: CardPose): string {
+  return `translate3d(${pose.x}px, ${pose.y}px, 0) rotate(${pose.rotateDeg}deg) scale(${pose.scale})`;
+}
 
 /**
- * Tall section + sticky viewport: page scroll drives card index (mobile only).
- * Each card gets one viewport-height of scroll while the stage stays pinned.
+ * Scroll picks the top card. Forward: top card exits left, lands on back.
+ * Reverse: back card shrinks, swipes in from the right on top.
  */
 export function WorkScrollCarousel() {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const tones = [
-    "bg-stone-50",
-    "bg-amber-50",
-    "bg-emerald-50",
-    "bg-sky-50",
-    "bg-rose-50",
-  ] as const;
+  const [pileTopIndex, setPileTopIndex] = useState(0);
+  const [animation, setAnimation] = useState<PileAnimation | null>(null);
+  const [displacedTopIndex, setDisplacedTopIndex] = useState<number | null>(
+    null,
+  );
+  const activeIndexRef = useRef(0);
+  const pileTopIndexRef = useRef(0);
+  const animCleanupRef = useRef<(() => void) | null>(null);
+
+  const clearAnimation = () => {
+    setAnimation(null);
+    setDisplacedTopIndex(null);
+  };
+
+  const startForwardAnimation = (
+    cardId: string,
+    onSlideComplete: () => void,
+  ) => {
+    animCleanupRef.current?.();
+    setDisplacedTopIndex(null);
+    setAnimation({ cardId, direction: "forward", step: "front" });
+
+    const timeouts: number[] = [];
+    const rafs: number[] = [];
+
+    rafs.push(
+      requestAnimationFrame(() => {
+        rafs.push(
+          requestAnimationFrame(() => {
+            setAnimation({ cardId, direction: "forward", step: "left" });
+          }),
+        );
+      }),
+    );
+
+    timeouts.push(
+      window.setTimeout(() => {
+        onSlideComplete();
+        setAnimation({ cardId, direction: "forward", step: "back" });
+      }, SLIDE_MS),
+    );
+
+    timeouts.push(
+      window.setTimeout(() => {
+        clearAnimation();
+      }, SLIDE_MS + BACK_GROW_MS),
+    );
+
+    animCleanupRef.current = () => {
+      timeouts.forEach((id) => window.clearTimeout(id));
+      rafs.forEach((id) => cancelAnimationFrame(id));
+    };
+  };
+
+  const startReverseAnimation = (
+    cardId: string,
+    onShrinkComplete: () => void,
+  ) => {
+    animCleanupRef.current?.();
+    setAnimation({ cardId, direction: "reverse", step: "back" });
+
+    const timeouts: number[] = [];
+
+    timeouts.push(
+      window.setTimeout(() => {
+        onShrinkComplete();
+        setAnimation({ cardId, direction: "reverse", step: "right" });
+      }, BACK_GROW_MS),
+    );
+
+    timeouts.push(
+      window.setTimeout(() => {
+        setAnimation({ cardId, direction: "reverse", step: "front" });
+      }, BACK_GROW_MS + SLIDE_MS),
+    );
+
+    timeouts.push(
+      window.setTimeout(() => {
+        clearAnimation();
+      }, BACK_GROW_MS + SLIDE_MS + STRAIGHTEN_MS),
+    );
+
+    animCleanupRef.current = () => {
+      timeouts.forEach((id) => window.clearTimeout(id));
+    };
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     let raf = 0;
-    let lastIndex = -1;
 
     const getViewportHeight = () =>
       window.visualViewport?.height ?? window.innerHeight;
 
     const setIndex = (index: number) => {
-      if (index === lastIndex) return;
-      lastIndex = index;
+      const prev = activeIndexRef.current;
+      if (index === prev) return;
+
+      const forward = index > prev;
+
+      activeIndexRef.current = index;
       setActiveIndex(index);
       sessionStorage.setItem("workCarouselIndex", String(index));
+
+      if (forward) {
+        // Keep pile order on the old top until the outgoing card has slid away
+        pileTopIndexRef.current = prev;
+        setPileTopIndex(prev);
+        setDisplacedTopIndex(null);
+        startForwardAnimation(WORK_ITEMS[prev].id, () => {
+          pileTopIndexRef.current = index;
+          setPileTopIndex(index);
+        });
+      } else {
+        pileTopIndexRef.current = prev;
+        setPileTopIndex(prev);
+        setDisplacedTopIndex(prev);
+        startReverseAnimation(WORK_ITEMS[index].id, () => {
+          pileTopIndexRef.current = index;
+          setPileTopIndex(index);
+        });
+      }
     };
 
     const updateIndex = () => {
       const rect = section.getBoundingClientRect();
-      // visualViewport matches the visible area when the mobile URL bar shows/hides
       const viewportHeight = getViewportHeight();
       const scrollableDistance = section.offsetHeight - viewportHeight;
 
@@ -73,7 +304,6 @@ export function WorkScrollCarousel() {
       raf = requestAnimationFrame(updateIndex);
     };
 
-    // Restore the last viewed card on refresh (without smooth scrolling).
     const saved = sessionStorage.getItem("workCarouselIndex");
     const savedIndex = saved ? Number.parseInt(saved, 10) : NaN;
     if (!Number.isNaN(savedIndex) && savedIndex > 0) {
@@ -88,6 +318,10 @@ export function WorkScrollCarousel() {
       el.style.scrollBehavior = "auto";
       window.scrollTo(0, targetY);
       el.style.scrollBehavior = previous;
+      activeIndexRef.current = savedIndex;
+      pileTopIndexRef.current = savedIndex;
+      setActiveIndex(savedIndex);
+      setPileTopIndex(savedIndex);
     }
 
     updateIndex();
@@ -98,6 +332,7 @@ export function WorkScrollCarousel() {
 
     return () => {
       cancelAnimationFrame(raf);
+      animCleanupRef.current?.();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       window.visualViewport?.removeEventListener("resize", onScroll);
@@ -113,89 +348,229 @@ export function WorkScrollCarousel() {
       aria-label="Work"
     >
       <div className="sticky top-0 flex h-dvh flex-col">
-        <div className="relative mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-8 pt-14">
-          <div className="relative flex min-h-0 flex-1 items-center justify-center">
-            {WORK_ITEMS.map((item, index) => {
-              // Circular pile model:
-              // when nearing the end, early cards loop back into "up next" slots.
-              const ahead = (index - activeIndex + CARD_COUNT) % CARD_COUNT;
-              const isPrevious = ahead === CARD_COUNT - 1;
-              const slot = isPrevious ? -1 : ahead;
-
-              // We render a stack window:
-              // - slot === 0 is the top/front card
-              // - slot 1..MAX_PEEK are peeking "up next" cards (can wrap around)
-              // - slot === -1 is the card we just scrolled past (brief fade out)
-              const shouldRender =
-                slot === -1 || (slot >= 0 && slot <= MAX_PEEK);
-              if (!shouldRender) return null;
-
-              const isActive = slot === 0;
-
-              // Visual stack math (kept in JS so it can be tuned like Figma constraints).
-              const clampedBehind = Math.max(0, slot);
-              const scatterTilt = item.scatter.rotateDeg * 0.45;
-
-              // Irregular offsets so the stack feels hand-scattered, not machine-neat.
-              const xBehindMap = [0, -18, 16, -14, 12];
-              // Let some upcoming cards peek above the front card for a rougher pile.
-              const yBehindMap = [0, -28, -6, 34, 72];
-              const scaleBehindMap = [1, 0.95, 0.92, 0.88, 0.84];
-
-              const y = slot < 0 ? 56 : yBehindMap[clampedBehind] ?? 102;
-              const x = slot < 0 ? -8 : xBehindMap[clampedBehind] ?? 0;
-              const scale =
-                slot < 0 ? 0.97 : scaleBehindMap[clampedBehind] ?? 0.82;
-              const opacity = (() => {
-                if (slot < 0) return 0;
-                if (slot >= 4) return 0.45;
-                if (slot === 3) return 0.62;
-                if (slot === 2) return 0.78;
-                if (slot === 1) return 0.9;
-                return 1;
-              })();
-              const rotateDeg =
-                slot < 0
-                  ? scatterTilt
-                  : clampedBehind === 0
-                    ? 0
-                    : scatterTilt;
-
-              // Higher zIndex for the top card; behind cards step down.
-              const zIndex = slot < 0 ? 9 : 10 - clampedBehind;
-
-              return (
-                <div
-                  key={item.id}
-                  className="absolute inset-x-8 top-1/2 transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-                  style={{
-                    // Keep center anchoring, but add irregular offsets and tilt.
-                    transform: `translate3d(${x}px, ${y}px, 0) translateY(-50%) rotate(${rotateDeg}deg) scale(${scale})`,
-                    opacity,
-                    zIndex,
-                  }}
-                  aria-hidden={!isActive}
-                >
-                  <div
-                    className={[
-                      isActive ? "pointer-events-auto" : "pointer-events-none",
-                      // Subtle depth cue: the top card is crisply defined; back cards recede.
-                      isActive
-                        ? "shadow-[0_1px_0_0_rgba(0,0,0,0.10)]"
-                        : "shadow-none",
-                    ].join(" ")}
-                  >
-                    <WorkCard
-                      title={item.title}
-                      toneClassName={tones[index % tones.length]}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+        <div className="relative mx-auto flex w-full max-w-[1200px] flex-1 flex-col pt-14">
+          <div
+            className={`relative flex min-h-0 flex-1 items-center justify-center ${
+              animation ? "overflow-x-visible" : "overflow-x-clip"
+            }`}
+          >
+            {WORK_ITEMS.map((item, index) => (
+              <PileCard
+                key={item.id}
+                item={item}
+                itemIndex={index}
+                activeIndex={activeIndex}
+                pileTopIndex={pileTopIndex}
+                animation={animation}
+                displacedTopIndex={displacedTopIndex}
+                toneClassName={tones[index % tones.length]}
+              />
+            ))}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function PileCard({
+  item,
+  itemIndex,
+  activeIndex,
+  pileTopIndex,
+  animation,
+  displacedTopIndex,
+  toneClassName,
+}: {
+  item: WorkItem;
+  itemIndex: number;
+  activeIndex: number;
+  pileTopIndex: number;
+  animation: PileAnimation | null;
+  displacedTopIndex: number | null;
+  toneClassName: string;
+}) {
+  const identity = getCardIdentity(item);
+  const isForwardExit =
+    animation?.direction === "forward" && animation.cardId === item.id;
+  const isReverseEnter =
+    animation?.direction === "reverse" && animation.cardId === item.id;
+  const isFeatured =
+    animation?.direction === "reverse" && animation.step === "back"
+      ? itemIndex === pileTopIndex
+      : itemIndex === activeIndex;
+  const [backGrown, setBackGrown] = useState(false);
+  const [backShrunk, setBackShrunk] = useState(false);
+  const [slideIn, setSlideIn] = useState(false);
+
+  useEffect(() => {
+    if (!isForwardExit || animation?.step !== "back") {
+      setBackGrown(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => setBackGrown(true));
+    return () => cancelAnimationFrame(id);
+  }, [isForwardExit, animation?.step, animation?.cardId]);
+
+  useEffect(() => {
+    if (!isReverseEnter || animation?.step !== "back") {
+      setBackShrunk(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => setBackShrunk(true));
+    return () => cancelAnimationFrame(id);
+  }, [isReverseEnter, animation?.step, animation?.cardId]);
+
+  useEffect(() => {
+    if (!isReverseEnter || animation?.step !== "right") {
+      setSlideIn(false);
+      return;
+    }
+    const id = requestAnimationFrame(() => setSlideIn(true));
+    return () => cancelAnimationFrame(id);
+  }, [isReverseEnter, animation?.step, animation?.cardId]);
+
+  const ahead = (itemIndex - pileTopIndex + CARD_COUNT) % CARD_COUNT;
+  const depth = Math.min(ahead, MAX_PEEK);
+  const isDisplacedTop =
+    displacedTopIndex === itemIndex &&
+    animation?.direction === "reverse" &&
+    (animation.step === "right" || animation.step === "front");
+
+  let pose = getPilePose(item, ahead);
+  let zIndex = Math.max(1, 10 - depth);
+  let transition = "none";
+
+  // Next card: keep depth scale + tilt; only straighten (and grow to full) after slide-out
+  if (
+    itemIndex === activeIndex &&
+    animation?.direction === "forward" &&
+    animation.step === "back" &&
+    !isForwardExit
+  ) {
+    pose = getPilePose(item, 0);
+    transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}`;
+  } else if (isDisplacedTop && animation) {
+    const { x, y, tilt } = identity;
+    const behindScale = scaleByDepth[1];
+    if (animation.step === "right") {
+      pose = {
+        x,
+        y,
+        scale: behindScale,
+        rotateDeg: 0,
+        opacity: opacityByDepth[1],
+      };
+      transition = "none";
+    } else {
+      pose = {
+        x,
+        y,
+        scale: behindScale,
+        rotateDeg: tilt,
+        opacity: opacityByDepth[1],
+      };
+      transition = `transform ${STRAIGHTEN_MS}ms ${TILT_EASE}`;
+    }
+  }
+
+  if (isForwardExit && animation) {
+    if (animation.step === "front") {
+      pose = getPilePose(item, 0);
+      zIndex = 50;
+    } else if (animation.step === "left") {
+      pose = getOffScreenLeftPose(item);
+      zIndex = 50;
+      transition = `transform ${SLIDE_MS}ms ${SLIDE_OUT_EASE}`;
+    } else {
+      const backScale = scaleByDepth[4];
+      const growFrom = backScale * 0.52;
+      pose = {
+        x: identity.x,
+        y: identity.y,
+        scale: backGrown ? backScale : growFrom,
+        rotateDeg: identity.tilt,
+        opacity: backGrown ? opacityByDepth[4] : 0.15,
+      };
+      zIndex = 5;
+      transition = backGrown
+        ? `transform ${BACK_GROW_MS}ms ${BACK_BOUNCE_EASE}, opacity ${BACK_GROW_MS * 0.55}ms ease-out`
+        : "none";
+    }
+  }
+
+  if (
+    transition === "none" &&
+    !isForwardExit &&
+    !isReverseEnter &&
+    !isDisplacedTop &&
+    !(
+      itemIndex === activeIndex &&
+      animation?.direction === "forward" &&
+      animation.step === "back"
+    )
+  ) {
+    transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}, opacity ${STRAIGHTEN_MS}ms ease`;
+  }
+
+  if (isReverseEnter && animation) {
+    if (animation.step === "back") {
+      const backScale = scaleByDepth[depth];
+      const shrinkTo = backScale * 0.52;
+      zIndex = Math.max(1, 10 - depth);
+      pose = {
+        x: identity.x,
+        y: identity.y,
+        scale: backShrunk ? shrinkTo : backScale,
+        rotateDeg: identity.tilt,
+        opacity: backShrunk ? 0.12 : opacityByDepth[depth],
+      };
+      transition = backShrunk
+        ? `transform ${BACK_GROW_MS}ms ${BACK_SHRINK_EASE}, opacity ${BACK_GROW_MS * 0.55}ms ease-in`
+        : "none";
+    } else if (animation.step === "right") {
+      zIndex = 50;
+      const frontTilted = {
+        ...getPilePose(item, 0),
+        rotateDeg: identity.tilt,
+      };
+      pose = slideIn ? frontTilted : getOffScreenRightPose(item);
+      transition = slideIn
+        ? `transform ${SLIDE_MS}ms ${SLIDE_IN_EASE}`
+        : "none";
+    } else {
+      zIndex = 50;
+      pose = getPilePose(item, 0);
+      transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}`;
+    }
+  }
+
+  return (
+    <div
+      className="absolute top-1/2 will-change-transform"
+      style={{
+        left: PILE_SIDE_PAD_PX,
+        right: PILE_SIDE_PAD_PX,
+        transform: "translateY(-50%)",
+        zIndex,
+      }}
+      aria-hidden={!isFeatured && !isForwardExit && !isReverseEnter}
+    >
+      <div
+        className={[
+          "mx-auto origin-center will-change-transform",
+          isFeatured ? "pointer-events-auto" : "pointer-events-none",
+          isFeatured ? "shadow-[0_1px_0_0_rgba(0,0,0,0.10)]" : "shadow-none",
+        ].join(" ")}
+        style={{
+          width: `${CARD_WIDTH_RATIO * 100}%`,
+          transform: poseToTransform(pose),
+          opacity: pose.opacity,
+          transition,
+        }}
+      >
+        <WorkCard title={item.title} toneClassName={toneClassName} />
+      </div>
+    </div>
   );
 }
