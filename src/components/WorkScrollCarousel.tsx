@@ -21,7 +21,6 @@ const BACK_BOUNCE_EASE = "cubic-bezier(0.34, 1.45, 0.64, 1)";
 const BACK_SHRINK_EASE = "cubic-bezier(0.5, 0, 0.75, 0.2)";
 const STRAIGHTEN_MS = 260;
 const STRAIGHTEN_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
-const TILT_EASE = STRAIGHTEN_EASE;
 
 const tones = [
   "bg-stone-50",
@@ -37,6 +36,7 @@ type CardPose = {
   scale: number;
   rotateDeg: number;
   opacity: number;
+  blurPx: number;
 };
 
 type CardIdentity = {
@@ -51,9 +51,13 @@ type PileAnimation = {
   step: "front" | "left" | "back" | "right";
 };
 
-/** Depth: scale + opacity; x/y/tilt stay per-card identity */
+/** Depth: scale + blur; cards stay opaque so they don't show through each other */
 const scaleByDepth = [1, 0.95, 0.92, 0.88, 0.84];
-const opacityByDepth = [1, 0.9, 0.78, 0.62, 0.45];
+const blurByDepth = [0, 1, 1.5, 3, 5];
+
+function blurForDepth(depth: number): number {
+  return blurByDepth[Math.min(depth, MAX_PEEK)] ?? 7;
+}
 
 function parsePercent(value: string): number {
   return parseFloat(value.replace("%", ""));
@@ -93,7 +97,8 @@ function getPilePose(item: WorkItem, ahead: number): CardPose {
     y,
     scale: scaleByDepth[depth] ?? 0.84,
     rotateDeg: isFront ? 0 : tilt,
-    opacity: opacityByDepth[depth] ?? 0.45,
+    opacity: 1,
+    blurPx: blurForDepth(depth),
   };
 }
 
@@ -112,6 +117,7 @@ function getOffScreenLeftPose(item: WorkItem): CardPose {
     scale: 0.94,
     rotateDeg: tilt * 0.6,
     opacity: 1,
+    blurPx: 0,
   };
 }
 
@@ -130,6 +136,7 @@ function getOffScreenRightPose(item: WorkItem): CardPose {
     scale: 0.94,
     rotateDeg: tilt * 0.6,
     opacity: 1,
+    blurPx: 0,
   };
 }
 
@@ -440,6 +447,7 @@ function PileCard({
   let pose = getPilePose(item, ahead);
   let zIndex = Math.max(1, 10 - depth);
   let transition = "none";
+  const motionTransition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}, filter ${STRAIGHTEN_MS}ms ease`;
 
   // Next card: keep depth scale + tilt; only straighten (and grow to full) after slide-out
   if (
@@ -449,17 +457,19 @@ function PileCard({
     !isForwardExit
   ) {
     pose = getPilePose(item, 0);
-    transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}`;
+    transition = motionTransition;
   } else if (isDisplacedTop && animation) {
     const { x, y, tilt } = identity;
     const behindScale = scaleByDepth[1];
+    const behindBlur = blurForDepth(1);
     if (animation.step === "right") {
       pose = {
         x,
         y,
         scale: behindScale,
         rotateDeg: 0,
-        opacity: opacityByDepth[1],
+        opacity: 1,
+        blurPx: behindBlur,
       };
       transition = "none";
     } else {
@@ -468,9 +478,10 @@ function PileCard({
         y,
         scale: behindScale,
         rotateDeg: tilt,
-        opacity: opacityByDepth[1],
+        opacity: 1,
+        blurPx: behindBlur,
       };
-      transition = `transform ${STRAIGHTEN_MS}ms ${TILT_EASE}`;
+      transition = motionTransition;
     }
   }
 
@@ -490,11 +501,12 @@ function PileCard({
         y: identity.y,
         scale: backGrown ? backScale : growFrom,
         rotateDeg: identity.tilt,
-        opacity: backGrown ? opacityByDepth[4] : 0.15,
+        opacity: backGrown ? 1 : 0.15,
+        blurPx: blurForDepth(4),
       };
       zIndex = 5;
       transition = backGrown
-        ? `transform ${BACK_GROW_MS}ms ${BACK_BOUNCE_EASE}, opacity ${BACK_GROW_MS * 0.55}ms ease-out`
+        ? `transform ${BACK_GROW_MS}ms ${BACK_BOUNCE_EASE}, filter ${BACK_GROW_MS}ms ease, opacity ${BACK_GROW_MS * 0.55}ms ease-out`
         : "none";
     }
   }
@@ -510,7 +522,7 @@ function PileCard({
       animation.step === "back"
     )
   ) {
-    transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}, opacity ${STRAIGHTEN_MS}ms ease`;
+    transition = motionTransition;
   }
 
   if (isReverseEnter && animation) {
@@ -523,10 +535,11 @@ function PileCard({
         y: identity.y,
         scale: backShrunk ? shrinkTo : backScale,
         rotateDeg: identity.tilt,
-        opacity: backShrunk ? 0.12 : opacityByDepth[depth],
+        opacity: backShrunk ? 0.12 : 1,
+        blurPx: blurForDepth(depth),
       };
       transition = backShrunk
-        ? `transform ${BACK_GROW_MS}ms ${BACK_SHRINK_EASE}, opacity ${BACK_GROW_MS * 0.55}ms ease-in`
+        ? `transform ${BACK_GROW_MS}ms ${BACK_SHRINK_EASE}, filter ${BACK_GROW_MS}ms ease, opacity ${BACK_GROW_MS * 0.55}ms ease-in`
         : "none";
     } else if (animation.step === "right") {
       zIndex = 50;
@@ -536,14 +549,17 @@ function PileCard({
       };
       pose = slideIn ? frontTilted : getOffScreenRightPose(item);
       transition = slideIn
-        ? `transform ${SLIDE_MS}ms ${SLIDE_IN_EASE}`
+        ? `transform ${SLIDE_MS}ms ${SLIDE_IN_EASE}, filter ${SLIDE_MS}ms ease`
         : "none";
     } else {
       zIndex = 50;
       pose = getPilePose(item, 0);
-      transition = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}`;
+      transition = motionTransition;
     }
   }
+
+  const filterStyle =
+    pose.blurPx > 0 ? `blur(${pose.blurPx}px)` : undefined;
 
   return (
     <div
@@ -566,6 +582,7 @@ function PileCard({
           width: `${CARD_WIDTH_RATIO * 100}%`,
           transform: poseToTransform(pose),
           opacity: pose.opacity,
+          filter: filterStyle,
           transition,
         }}
       >
