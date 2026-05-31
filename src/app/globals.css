@@ -10,6 +10,27 @@ html {
   scroll-behavior: smooth;
 }
 
+/* /work mobile: lock page scroll — pile advances via swipe, not document scroll */
+@media (max-width: 767px) {
+  body:has(.work-page) {
+    overflow-y: hidden;
+    height: 100svh;
+  }
+
+  .work-page {
+    height: 100svh;
+    max-height: 100svh;
+    overflow-x: clip;
+    overflow-y: hidden;
+    overscroll-behavior: none;
+  }
+
+  /* DevBreakpointMarker bar (~32px) — extra top inset in development */
+  body:has(.work-page):has([data-dev-breakpoint-marker]) [data-work-header] {
+    padding-top: max(3.5rem, calc(env(safe-area-inset-top, 0px) + 2rem));
+  }
+}
+
 #crossword {
   scroll-margin-top: 120px;
   scroll-padding-bottom: 80px;

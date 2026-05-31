@@ -5,7 +5,7 @@ import { WorkCard } from "@/components/WorkCard";
 import { useWorkEnterPhase } from "@/hooks/useWorkPileEnter";
 import { ENTER_BOUNCE_EASE } from "@/lib/work-pile-math";
 import { getScatterEnterOffset } from "@/lib/work-scatter-enter";
-import { WORK_ITEMS, type WorkItem, type WorkItemScatter } from "@/lib/work-items";
+import { WORK_ITEMS, getWorkCardLabel, type WorkItem, type WorkItemScatter } from "@/lib/work-items";
 
 /** Figma artboard 2888:70 — width / height */
 const SCATTER_ASPECT = 2462 / 1769;
@@ -209,7 +209,7 @@ export function WorkScatterGrid() {
               }
             }}
           >
-            <WorkCard title={item.title} toneClassName={toneClassName} />
+            <WorkCard label={getWorkCardLabel(item)} toneClassName={toneClassName} />
           </li>
         );
       })}

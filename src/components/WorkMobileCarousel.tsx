@@ -1,11 +1,12 @@
 "use client";
 
-import { useCoarsePointer } from "@/hooks/useCoarsePointer";
-import { WorkScrollCarousel } from "@/components/WorkScrollCarousel";
 import { WorkSwipeCarousel } from "@/components/WorkSwipeCarousel";
 
-/** Phone slot: swipe on touch, scroll on fine pointer (mouse/trackpad). */
+/** Mobile breakpoint: swipe pile for touch and mouse (no scroll-jacking). */
 export function WorkMobileCarousel() {
-  const coarse = useCoarsePointer();
-  return coarse ? <WorkSwipeCarousel /> : <WorkScrollCarousel />;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col overflow-x-clip overflow-y-visible">
+      <WorkSwipeCarousel />
+    </div>
+  );
 }

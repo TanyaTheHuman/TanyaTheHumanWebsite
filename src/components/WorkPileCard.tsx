@@ -32,7 +32,8 @@ import {
   type PileAnimation,
 } from "@/lib/work-pile-math";
 import type { PileEnterStep } from "@/hooks/useWorkPileEnter";
-import type { WorkItem } from "@/lib/work-items";
+import { useViewportSize } from "@/hooks/useViewportSize";
+import { getWorkCardLabel, type WorkItem } from "@/lib/work-items";
 
 export type DragOffset = { x: number; y: number } | null;
 
@@ -59,6 +60,7 @@ export function WorkPileCard({
   dragTransition?: string;
   enterStep?: PileEnterStep;
 }) {
+  const viewport = useViewportSize();
   const identity = getCardIdentity(item);
   const isForwardExit =
     animation?.direction === "forward" && animation.cardId === item.id;
@@ -217,6 +219,7 @@ export function WorkPileCard({
         pose = getOffScreenPose(
           item,
           animation.exitVector ?? { x: -1, y: 0 },
+          viewport,
         );
         zIndex = 50;
         transition = `transform ${slideMs}ms ${exitEase}`;
@@ -241,7 +244,9 @@ export function WorkPileCard({
 
     if (ahead === 0) {
       zIndex = 50;
-      pose = showStart ? getOffScreenRightPose(item) : getPilePose(item, 0);
+      pose = showStart
+        ? getOffScreenRightPose(item, viewport)
+        : getPilePose(item, 0);
       transition = isAnimatingNow
         ? `transform ${ENTER_SLIDE_MS}ms ${ENTER_SLIDE_EASE}, filter ${ENTER_SLIDE_MS}ms ease`
         : "none";
@@ -289,7 +294,7 @@ export function WorkPileCard({
         ...getPilePose(item, 0),
         rotateDeg: identity.tilt,
       };
-      pose = slideIn ? frontTilted : getOffScreenRightPose(item);
+      pose = slideIn ? frontTilted : getOffScreenRightPose(item, viewport);
       transition = slideIn
         ? `transform ${SLIDE_MS}ms ${SLIDE_IN_EASE}, filter ${SLIDE_MS}ms ease`
         : "none";
@@ -315,18 +320,13 @@ export function WorkPileCard({
 
   return (
     <div
-      className="absolute top-1/2 will-change-transform"
-      style={{
-        left: PILE_SIDE_PAD_PX,
-        right: PILE_SIDE_PAD_PX,
-        transform: "translateY(-50%)",
-        zIndex,
-      }}
+      className="absolute inset-0 flex items-start justify-center overflow-visible will-change-transform"
+      style={{ zIndex }}
       aria-hidden={!isFeatured && !isForwardExit && !isReverseEnter}
     >
       <div
         className={[
-          "mx-auto origin-center will-change-transform",
+          "mx-auto w-full origin-center will-change-transform",
           isFeatured ? "pointer-events-auto" : "pointer-events-none",
           isFeatured ? "shadow-[0_1px_0_0_rgba(0,0,0,0.10)]" : "shadow-none",
         ].join(" ")}
@@ -338,7 +338,7 @@ export function WorkPileCard({
           transition,
         }}
       >
-        <WorkCard title={item.title} toneClassName={toneClassName} />
+        <WorkCard label={getWorkCardLabel(item)} toneClassName={toneClassName} />
       </div>
     </div>
   );

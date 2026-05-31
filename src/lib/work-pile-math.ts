@@ -112,6 +112,23 @@ export function getCardIdentity(item: WorkItem): CardIdentity {
   };
 }
 
+/** Front card anchor sits at y=0; back cards keep scatter y (can peek above front). */
+function pileAnchorY(rawY: number, depth: number): number {
+  return depth === 0 ? 0 : rawY;
+}
+
+/** px from header block to front card top on /work mobile */
+export const PILE_HEADER_TO_FRONT_PX = 48;
+
+/** Room above the card lane so back-card scatter stays inside WorkPileStage. */
+export function getPileScatterTopInset(): number {
+  const minBackY = Math.min(
+    ...WORK_ITEMS.map((item) => getCardIdentity(item).y),
+  );
+  const tiltBleedPx = 14;
+  return Math.ceil(Math.max(0, -minBackY) + tiltBleedPx);
+}
+
 export function getPilePose(item: WorkItem, ahead: number): CardPose {
   const { x, y, tilt } = getCardIdentity(item);
   const depth = Math.min(ahead, MAX_PEEK);
@@ -119,7 +136,7 @@ export function getPilePose(item: WorkItem, ahead: number): CardPose {
 
   return {
     x,
-    y,
+    y: pileAnchorY(y, depth),
     scale: scaleByDepth[depth] ?? 0.84,
     rotateDeg: isFront ? 0 : tilt,
     opacity: 1,
@@ -140,7 +157,7 @@ export function getBackGrowStartPose(item: WorkItem, depth: number): CardPose {
 
   return {
     x,
-    y,
+    y: pileAnchorY(y, d),
     scale: backScale * 0.52,
     rotateDeg: tilt,
     opacity: 0.15,
@@ -148,24 +165,32 @@ export function getBackGrowStartPose(item: WorkItem, depth: number): CardPose {
   };
 }
 
-export function getOffScreenLeftPose(item: WorkItem): CardPose {
-  return getOffScreenPose(item, { x: -1, y: 0 });
+export type ViewportSize = { width: number; height: number };
+
+export function getOffScreenLeftPose(
+  item: WorkItem,
+  viewport?: ViewportSize,
+): CardPose {
+  return getOffScreenPose(item, { x: -1, y: 0 }, viewport);
 }
 
-export function getOffScreenRightPose(item: WorkItem): CardPose {
-  return getOffScreenPose(item, { x: 1, y: 0 });
+export function getOffScreenRightPose(
+  item: WorkItem,
+  viewport?: ViewportSize,
+): CardPose {
+  return getOffScreenPose(item, { x: 1, y: 0 }, viewport);
 }
 
-export function getOffScreenPose(item: WorkItem, vector: ExitVector): CardPose {
+export function getOffScreenPose(
+  item: WorkItem,
+  vector: ExitVector,
+  viewport?: ViewportSize,
+): CardPose {
   const { x: baseX, y: baseY, tilt } = getCardIdentity(item);
-  const horizontalReach =
-    typeof window !== "undefined"
-      ? Math.max((window.innerWidth - PILE_SIDE_PAD_PX * 2) * 0.95, 280)
-      : 320;
-  const verticalReach =
-    typeof window !== "undefined"
-      ? Math.max(window.innerHeight * 0.55, 360)
-      : 360;
+  const width = viewport?.width ?? 390;
+  const height = viewport?.height ?? 844;
+  const horizontalReach = Math.max((width - PILE_SIDE_PAD_PX * 2) * 0.95, 280);
+  const verticalReach = Math.max(height * 0.55, 360);
   const magnitude = Math.max(horizontalReach, verticalReach);
 
   return {

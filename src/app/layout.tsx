@@ -28,8 +28,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  // interactiveWidget: "resizes-visual",
-  // viewportFit: "cover",
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
