@@ -27,6 +27,9 @@ export const BACK_BOUNCE_EASE = "cubic-bezier(0.34, 1.45, 0.64, 1)";
 export const BACK_SHRINK_EASE = "cubic-bezier(0.5, 0, 0.75, 0.2)";
 export const STRAIGHTEN_MS = 260;
 export const STRAIGHTEN_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+/** Press-and-hold on the front card — scale bump before/during swipe drag */
+export const PILE_HOLD_SCALE = 1.05;
+export const PILE_HOLD_PRESS_MS = 200;
 
 export const WORK_PILE_TONES = [
   "bg-stone-50",
@@ -63,17 +66,28 @@ export type PileAnimation = {
   exitStartOffset?: ExitVector;
   /** Touch exit duration in ms; scroll carousel uses default SLIDE_MS. */
   exitSlideMs?: number;
-  /** Touch swipe exit — used to unblock interaction during back-of-pile grow. */
+  /** Touch swipe exit — pile stays interactive while outgoing card animates. */
   isSwipeExit?: boolean;
 };
 
-/** Swipe pile: only block input while the outgoing card is still exiting. */
+/** Swipe pile: never block — new front can be held while outgoing card exits or grows to back. */
 export function blocksSwipeInteraction(animation: PileAnimation | null): boolean {
   if (!animation) return false;
-  if (animation.isSwipeExit) {
-    return animation.direction === "forward" && animation.step === "left";
-  }
+  if (animation.isSwipeExit) return false;
   return true;
+}
+
+/** Whether the top card can be pressed/dragged while a pile animation is running. */
+export function allowsTopCardDrag(animation: PileAnimation | null): boolean {
+  if (!animation) return true;
+  if (
+    animation.isSwipeExit &&
+    animation.direction === "forward" &&
+    (animation.step === "left" || animation.step === "back")
+  ) {
+    return true;
+  }
+  return false;
 }
 
 /** Depth: scale + blur; cards stay opaque so they don't show through each other */

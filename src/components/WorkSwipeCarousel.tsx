@@ -18,7 +18,7 @@ import { WORK_ITEMS } from "@/lib/work-items";
 
 const DRAG_THRESHOLD_PX = 56;
 const VELOCITY_THRESHOLD = 0.35;
-const SNAP_BACK_TRANSITION = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}, filter ${STRAIGHTEN_MS}ms ease`;
+const SNAP_BACK_TRANSITION = `transform ${STRAIGHTEN_MS}ms ${STRAIGHTEN_EASE}, filter ${STRAIGHTEN_MS}ms ease, box-shadow ${STRAIGHTEN_MS}ms ease`;
 
 type DragState = {
   pointerId: number;

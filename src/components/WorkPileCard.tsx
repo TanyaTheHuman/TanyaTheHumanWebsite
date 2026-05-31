@@ -27,7 +27,10 @@ import {
   getOffScreenPose,
   getOffScreenRightPose,
   getPilePose,
+  allowsTopCardDrag,
   poseToTransform,
+  PILE_HOLD_PRESS_MS,
+  PILE_HOLD_SCALE,
   scaleByDepth,
   type PileAnimation,
 } from "@/lib/work-pile-math";
@@ -71,7 +74,10 @@ export function WorkPileCard({
       ? itemIndex === pileTopIndex
       : itemIndex === activeIndex;
   const isDraggingTop =
-    dragOffset !== null && itemIndex === activeIndex && animation === null;
+    dragOffset !== null &&
+    itemIndex === activeIndex &&
+    allowsTopCardDrag(animation);
+  const outgoingCardBlocksTouch = isForwardExit;
   const [backGrown, setBackGrown] = useState(false);
   const [backShrunk, setBackShrunk] = useState(false);
   const [slideIn, setSlideIn] = useState(false);
@@ -152,7 +158,7 @@ export function WorkPileCard({
       (isSwipeForward && animation.step === "left"));
 
   // Swipe: next card straightens on release while the outgoing card exits
-  if (isNextCardStraightening) {
+  if (isNextCardStraightening && !isDraggingTop) {
     const straightenMs =
       isSwipeForward && animation.exitSlideMs
         ? animation.exitSlideMs
@@ -308,19 +314,30 @@ export function WorkPileCard({
   if (isDraggingTop && dragOffset) {
     pose = {
       ...pose,
+      scale: pose.scale * PILE_HOLD_SCALE,
       x: pose.x + dragOffset.x,
       y: pose.y + dragOffset.y,
     };
     zIndex = 50;
-    transition = dragTransition ?? "none";
+    const holdPressTransition = `transform ${PILE_HOLD_PRESS_MS}ms ${STRAIGHTEN_EASE}, filter ${PILE_HOLD_PRESS_MS}ms ease, box-shadow ${PILE_HOLD_PRESS_MS}ms ease`;
+    const isHoldAtRest = dragOffset.x === 0 && dragOffset.y === 0;
+    transition =
+      dragTransition ?? (isHoldAtRest ? holdPressTransition : "none");
   }
 
   const filterStyle =
     pose.blurPx > 0 ? `blur(${pose.blurPx}px)` : undefined;
 
+  const holdShadow =
+    "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.22)]";
+  const restingFeaturedShadow = "shadow-[0_1px_0_0_rgba(0,0,0,0.10)]";
+
   return (
     <div
-      className="absolute inset-0 flex items-start justify-center overflow-visible will-change-transform"
+      className={[
+        "absolute inset-0 flex items-start justify-center overflow-visible will-change-transform",
+        outgoingCardBlocksTouch && !isDraggingTop ? "pointer-events-none" : "",
+      ].join(" ")}
       style={{ zIndex }}
       aria-hidden={!isFeatured && !isForwardExit && !isReverseEnter}
     >
@@ -328,7 +345,11 @@ export function WorkPileCard({
         className={[
           "mx-auto w-full origin-center will-change-transform",
           isFeatured ? "pointer-events-auto" : "pointer-events-none",
-          isFeatured ? "shadow-[0_1px_0_0_rgba(0,0,0,0.10)]" : "shadow-none",
+          isDraggingTop
+            ? holdShadow
+            : isFeatured
+              ? restingFeaturedShadow
+              : "shadow-none",
         ].join(" ")}
         style={{
           width: `${CARD_WIDTH_RATIO * 100}%`,
