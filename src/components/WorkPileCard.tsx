@@ -10,6 +10,10 @@ import {
   CARD_WIDTH_RATIO,
   MAX_PEEK,
   PILE_SIDE_PAD_PX,
+  ENTER_BACK_GROW_MS,
+  ENTER_GROW_EASE,
+  ENTER_SLIDE_EASE,
+  ENTER_SLIDE_MS,
   SLIDE_IN_EASE,
   SLIDE_MS,
   SLIDE_OUT_EASE,
@@ -17,6 +21,8 @@ import {
   STRAIGHTEN_MS,
   SWIPE_EXIT_EASE,
   blurForDepth,
+  getBackGrowEndPose,
+  getBackGrowStartPose,
   getCardIdentity,
   getOffScreenPose,
   getOffScreenRightPose,
@@ -25,6 +31,7 @@ import {
   scaleByDepth,
   type PileAnimation,
 } from "@/lib/work-pile-math";
+import type { PileEnterStep } from "@/hooks/useWorkPileEnter";
 import type { WorkItem } from "@/lib/work-items";
 
 export type DragOffset = { x: number; y: number } | null;
@@ -39,6 +46,7 @@ export function WorkPileCard({
   toneClassName,
   dragOffset = null,
   dragTransition,
+  enterStep = CARD_COUNT + 1,
 }: {
   item: WorkItem;
   itemIndex: number;
@@ -49,6 +57,7 @@ export function WorkPileCard({
   toneClassName: string;
   dragOffset?: DragOffset;
   dragTransition?: string;
+  enterStep?: PileEnterStep;
 }) {
   const identity = getCardIdentity(item);
   const isForwardExit =
@@ -65,6 +74,12 @@ export function WorkPileCard({
   const [backShrunk, setBackShrunk] = useState(false);
   const [slideIn, setSlideIn] = useState(false);
   const [exitLaunched, setExitLaunched] = useState(false);
+  const [myEnterAnimated, setMyEnterAnimated] = useState(false);
+
+  const ahead = (itemIndex - pileTopIndex + CARD_COUNT) % CARD_COUNT;
+  const myEnterStep = ahead + 1;
+  const isEnterSequence =
+    animation === null && enterStep <= CARD_COUNT;
 
   useEffect(() => {
     if (!isForwardExit || animation?.step !== "back") {
@@ -107,7 +122,15 @@ export function WorkPileCard({
     animation?.exitStartOffset,
   ]);
 
-  const ahead = (itemIndex - pileTopIndex + CARD_COUNT) % CARD_COUNT;
+  useEffect(() => {
+    if (enterStep !== myEnterStep) {
+      const id = requestAnimationFrame(() => setMyEnterAnimated(false));
+      return () => cancelAnimationFrame(id);
+    }
+    const id = requestAnimationFrame(() => setMyEnterAnimated(true));
+    return () => cancelAnimationFrame(id);
+  }, [enterStep, myEnterStep]);
+
   const depth = Math.min(ahead, MAX_PEEK);
   const isDisplacedTop =
     displacedTopIndex === itemIndex &&
@@ -199,19 +222,35 @@ export function WorkPileCard({
         transition = `transform ${slideMs}ms ${exitEase}`;
       }
     } else {
-      const backScale = scaleByDepth[4];
-      const growFrom = backScale * 0.52;
-      pose = {
-        x: identity.x,
-        y: identity.y,
-        scale: backGrown ? backScale : growFrom,
-        rotateDeg: identity.tilt,
-        opacity: backGrown ? 1 : 0.15,
-        blurPx: blurForDepth(4),
-      };
+      const backDepth = 4;
+      pose = backGrown
+        ? getBackGrowEndPose(item, backDepth)
+        : getBackGrowStartPose(item, backDepth);
       zIndex = 5;
       transition = backGrown
         ? `transform ${BACK_GROW_MS}ms ${BACK_BOUNCE_EASE}, filter ${BACK_GROW_MS}ms ease, opacity ${BACK_GROW_MS * 0.55}ms ease-out`
+        : "none";
+    }
+  }
+
+  if (isEnterSequence) {
+    const hasFinished = enterStep > myEnterStep;
+    const isAnimatingNow = enterStep === myEnterStep && myEnterAnimated;
+    const showStart =
+      enterStep === 0 || (!hasFinished && !isAnimatingNow);
+
+    if (ahead === 0) {
+      zIndex = 50;
+      pose = showStart ? getOffScreenRightPose(item) : getPilePose(item, 0);
+      transition = isAnimatingNow
+        ? `transform ${ENTER_SLIDE_MS}ms ${ENTER_SLIDE_EASE}, filter ${ENTER_SLIDE_MS}ms ease`
+        : "none";
+    } else {
+      pose = showStart
+        ? { ...getBackGrowStartPose(item, ahead), opacity: 0 }
+        : getBackGrowEndPose(item, ahead);
+      transition = isAnimatingNow
+        ? `transform ${ENTER_BACK_GROW_MS}ms ${ENTER_GROW_EASE}, filter ${ENTER_BACK_GROW_MS}ms ease, opacity ${ENTER_BACK_GROW_MS * 0.55}ms ease-out`
         : "none";
     }
   }
@@ -222,7 +261,8 @@ export function WorkPileCard({
     !isReverseEnter &&
     !isDisplacedTop &&
     !isDraggingTop &&
-    !isNextCardStraightening
+    !isNextCardStraightening &&
+    !isEnterSequence
   ) {
     transition = motionTransition;
   }

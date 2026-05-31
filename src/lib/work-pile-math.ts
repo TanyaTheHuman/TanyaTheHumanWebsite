@@ -15,6 +15,13 @@ export const SLIDE_OUT_EASE = "cubic-bezier(0.55, 0, 0.75, 0.2)";
 /** Touch exit — fast start so motion continues from the finger without a stall */
 export const SWIPE_EXIT_EASE = "cubic-bezier(0.25, 0.85, 0.2, 1)";
 export const SLIDE_IN_EASE = "cubic-bezier(0.22, 1, 0.36, 1)";
+/** Load enter — slower front slide; back cards grow in sequence */
+export const ENTER_SLIDE_MS = 680;
+export const ENTER_BACK_GROW_MS = 400;
+/** Subtle overshoot at settle — shared by pile + scatter load */
+export const ENTER_BOUNCE_EASE = "cubic-bezier(0.34, 1.28, 0.64, 1)";
+export const ENTER_SLIDE_EASE = ENTER_BOUNCE_EASE;
+export const ENTER_GROW_EASE = ENTER_BOUNCE_EASE;
 export const BACK_GROW_MS = 480;
 export const BACK_BOUNCE_EASE = "cubic-bezier(0.34, 1.45, 0.64, 1)";
 export const BACK_SHRINK_EASE = "cubic-bezier(0.5, 0, 0.75, 0.2)";
@@ -120,6 +127,27 @@ export function getPilePose(item: WorkItem, ahead: number): CardPose {
   };
 }
 
+/** Resting pile pose at depth — used when a card grows into the stack. */
+export function getBackGrowEndPose(item: WorkItem, depth: number): CardPose {
+  return getPilePose(item, depth);
+}
+
+/** Tiny faded pose before a card grows into its pile depth. */
+export function getBackGrowStartPose(item: WorkItem, depth: number): CardPose {
+  const { x, y, tilt } = getCardIdentity(item);
+  const d = Math.min(depth, MAX_PEEK);
+  const backScale = scaleByDepth[d] ?? 0.84;
+
+  return {
+    x,
+    y,
+    scale: backScale * 0.52,
+    rotateDeg: tilt,
+    opacity: 0.15,
+    blurPx: blurForDepth(d),
+  };
+}
+
 export function getOffScreenLeftPose(item: WorkItem): CardPose {
   return getOffScreenPose(item, { x: -1, y: 0 });
 }
@@ -190,3 +218,8 @@ export function poseToTransform(pose: CardPose): string {
 }
 
 export const WORK_CAROUSEL_INDEX_KEY = "workCarouselIndex";
+
+/** Front slide + each back card grow, one after another. */
+export function getPileEnterDurationMs(): number {
+  return ENTER_SLIDE_MS + (CARD_COUNT - 1) * ENTER_BACK_GROW_MS;
+}

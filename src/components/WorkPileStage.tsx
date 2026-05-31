@@ -1,18 +1,19 @@
 "use client";
 
 import { WORK_ITEMS } from "@/lib/work-items";
-import { WORK_PILE_TONES } from "@/lib/work-pile-math";
+import { WORK_PILE_TONES, CARD_COUNT, type PileAnimation } from "@/lib/work-pile-math";
 import {
   WorkPileCard,
   type DragOffset,
 } from "@/components/WorkPileCard";
-import type { PileAnimation } from "@/lib/work-pile-math";
+import type { PileEnterStep } from "@/hooks/useWorkPileEnter";
 
 type WorkPileStageProps = {
   activeIndex: number;
   pileTopIndex: number;
   animation: PileAnimation | null;
   displacedTopIndex: number | null;
+  enterStep?: PileEnterStep;
   dragOffset?: DragOffset;
   dragTransition?: string;
   stageClassName?: string;
@@ -27,6 +28,7 @@ export function WorkPileStage({
   pileTopIndex,
   animation,
   displacedTopIndex,
+  enterStep = CARD_COUNT + 1,
   dragOffset = null,
   dragTransition,
   stageClassName = "",
@@ -54,6 +56,7 @@ export function WorkPileStage({
           pileTopIndex={pileTopIndex}
           animation={animation}
           displacedTopIndex={displacedTopIndex}
+          enterStep={enterStep}
           toneClassName={WORK_PILE_TONES[index % WORK_PILE_TONES.length]}
           dragOffset={dragOffset}
           dragTransition={dragTransition}

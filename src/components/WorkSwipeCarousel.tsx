@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WorkPileStage } from "@/components/WorkPileStage";
 import { useWorkPileAnimation } from "@/hooks/useWorkPileAnimation";
+import { useWorkPileEnter } from "@/hooks/useWorkPileEnter";
 import {
   CARD_COUNT,
   STRAIGHTEN_EASE,
@@ -53,9 +54,11 @@ export function WorkSwipeCarousel() {
     startForwardAnimation,
   } = useWorkPileAnimation();
 
+  const { enterStep, isEntering } = useWorkPileEnter();
+
   useEffect(() => {
-    isAnimatingRef.current = blocksSwipeInteraction(animation);
-  }, [animation]);
+    isAnimatingRef.current = isEntering || blocksSwipeInteraction(animation);
+  }, [animation, isEntering]);
 
   const persistIndex = useCallback((index: number) => {
     sessionStorage.setItem(WORK_CAROUSEL_INDEX_KEY, String(index));
@@ -208,6 +211,7 @@ export function WorkSwipeCarousel() {
             pileTopIndex={pileTopIndex}
             animation={animation}
             displacedTopIndex={displacedTopIndex}
+            enterStep={enterStep}
             dragOffset={dragOffset}
             dragTransition={dragTransition}
             onPointerDown={onPointerDown}

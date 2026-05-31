@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { WorkPileStage } from "@/components/WorkPileStage";
 import { useWorkPileAnimation } from "@/hooks/useWorkPileAnimation";
+import { useWorkPileEnter } from "@/hooks/useWorkPileEnter";
 import {
   CARD_COUNT,
   WORK_CAROUSEL_INDEX_KEY,
@@ -28,6 +29,13 @@ export function WorkScrollCarousel() {
     startReverseAnimation,
   } = useWorkPileAnimation();
 
+  const { enterStep, isEntering } = useWorkPileEnter();
+  const isEnteringRef = useRef(true);
+
+  useEffect(() => {
+    isEnteringRef.current = isEntering;
+  }, [isEntering]);
+
   useEffect(() => {
     const section = sectionRef.current;
     if (!section) return;
@@ -38,6 +46,8 @@ export function WorkScrollCarousel() {
       window.visualViewport?.height ?? window.innerHeight;
 
     const setIndex = (index: number) => {
+      if (isEnteringRef.current) return;
+
       const prev = activeIndexRef.current;
       if (index === prev) return;
 
@@ -150,6 +160,7 @@ export function WorkScrollCarousel() {
             pileTopIndex={pileTopIndex}
             animation={animation}
             displacedTopIndex={displacedTopIndex}
+            enterStep={enterStep}
           />
         </div>
       </div>

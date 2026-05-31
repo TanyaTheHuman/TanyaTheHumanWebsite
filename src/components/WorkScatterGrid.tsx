@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { WorkCard } from "@/components/WorkCard";
+import { useWorkEnterPhase } from "@/hooks/useWorkPileEnter";
+import { ENTER_BOUNCE_EASE } from "@/lib/work-pile-math";
+import { getScatterEnterOffset } from "@/lib/work-scatter-enter";
 import { WORK_ITEMS, type WorkItem, type WorkItemScatter } from "@/lib/work-items";
 
 /** Figma artboard 2888:70 — width / height */
@@ -87,20 +90,32 @@ function getClearanceOffset(hovered: Box, other: Box, padding: number): {
 function getCardTransform(
   item: WorkItem,
   hoveredItem: WorkItem | null,
+  enterOffset: { dx: number; dy: number } | null,
 ): string {
   const { rotateDeg } = item.scatter;
+  let dx = enterOffset?.dx ?? 0;
+  let dy = enterOffset?.dy ?? 0;
 
   if (!hoveredItem) {
-    return `rotate(${rotateDeg}deg)`;
+    if (dx === 0 && dy === 0) {
+      return `rotate(${rotateDeg}deg)`;
+    }
+    return `translate(${dx}%, ${dy}%) rotate(${rotateDeg}deg)`;
   }
 
   if (hoveredItem.id === item.id) {
-    return "rotate(0deg)";
+    if (dx === 0 && dy === 0) {
+      return "rotate(0deg)";
+    }
+    return `translate(${dx}%, ${dy}%) rotate(0deg)`;
   }
 
   // Cards below the hovered one cannot obscure it — leave them in place
   if (item.scatter.zIndex < hoveredItem.scatter.zIndex) {
-    return `rotate(${rotateDeg}deg)`;
+    if (dx === 0 && dy === 0) {
+      return `rotate(${rotateDeg}deg)`;
+    }
+    return `translate(${dx}%, ${dy}%) rotate(${rotateDeg}deg)`;
   }
 
   const hoveredBox = getCardBox(hoveredItem.scatter);
@@ -108,21 +123,29 @@ function getCardTransform(
   const otherBox = getCardBox(item.scatter);
 
   if (boxesOverlap(hoveredReveal, otherBox)) {
-    const { dx, dy } = getClearanceOffset(
+    const clearance = getClearanceOffset(
       hoveredBox,
       otherBox,
       CLEARANCE_PADDING,
     );
-    return `translate(${dx}%, ${dy}%) rotate(${rotateDeg}deg)`;
+    dx += clearance.dx;
+    dy += clearance.dy;
   }
 
-  return `rotate(${rotateDeg}deg)`;
+  if (dx === 0 && dy === 0) {
+    return `rotate(${rotateDeg}deg)`;
+  }
+
+  return `translate(${dx}%, ${dy}%) rotate(${rotateDeg}deg)`;
 }
 
 export function WorkScatterGrid() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const { enterPhase } = useWorkEnterPhase(HOVER_DURATION_MS);
+  const isEntering = enterPhase !== "done";
   const hoveredItem =
     WORK_ITEMS.find((item) => item.id === hoveredId) ?? null;
+  const effectiveHovered = isEntering ? null : hoveredItem;
   const tones = [
     "bg-stone-50",
     "bg-amber-50",
@@ -131,16 +154,27 @@ export function WorkScatterGrid() {
     "bg-rose-50",
   ] as const;
 
+  const motionTransition = `transform ${HOVER_DURATION_MS}ms ${HOVER_EASE}, box-shadow ${HOVER_DURATION_MS}ms ${HOVER_EASE}, opacity ${HOVER_DURATION_MS}ms ${HOVER_EASE}`;
+  const enterTransition = `transform ${HOVER_DURATION_MS}ms ${ENTER_BOUNCE_EASE}, box-shadow ${HOVER_DURATION_MS}ms ${ENTER_BOUNCE_EASE}, opacity ${HOVER_DURATION_MS}ms ease-out`;
+
   return (
     <ul
       className="relative m-0 w-full min-h-[min(72vw,560px)] list-none overflow-visible p-0 sm:min-h-0"
       style={{ aspectRatio: SCATTER_ASPECT }}
-      onMouseLeave={() => setHoveredId(null)}
+      onMouseLeave={() => {
+        if (!isEntering) setHoveredId(null);
+      }}
     >
       {WORK_ITEMS.map((item) => {
-        const isHovered = hoveredItem?.id === item.id;
-        const isRevealed = hoveredItem != null && !isHovered;
+        const isHovered = effectiveHovered?.id === item.id;
+        const isRevealed = effectiveHovered != null && !isHovered;
         const toneClassName = tones[Math.abs(item.scatter.zIndex) % tones.length];
+        const enterOffset =
+          enterPhase === "pending"
+            ? getScatterEnterOffset(item)
+            : enterPhase === "active"
+              ? { dx: 0, dy: 0 }
+              : null;
 
         return (
           <li
@@ -153,13 +187,22 @@ export function WorkScatterGrid() {
               top: item.scatter.top,
               width: item.scatter.width,
               zIndex: item.scatter.zIndex,
-              transform: getCardTransform(item, hoveredItem),
-              transition: `transform ${HOVER_DURATION_MS}ms ${HOVER_EASE}, box-shadow ${HOVER_DURATION_MS}ms ${HOVER_EASE}, opacity ${HOVER_DURATION_MS}ms ${HOVER_EASE}`,
+              transform: getCardTransform(item, effectiveHovered, enterOffset),
+              transition:
+                enterPhase === "pending"
+                  ? "none"
+                  : isEntering
+                    ? enterTransition
+                    : motionTransition,
               opacity: isRevealed ? 0.92 : 1,
             }}
             tabIndex={0}
-            onMouseEnter={() => setHoveredId(item.id)}
-            onFocus={() => setHoveredId(item.id)}
+            onMouseEnter={() => {
+              if (!isEntering) setHoveredId(item.id);
+            }}
+            onFocus={() => {
+              if (!isEntering) setHoveredId(item.id);
+            }}
             onBlur={(e) => {
               if (!e.currentTarget.contains(e.relatedTarget as Node)) {
                 setHoveredId(null);
